@@ -1,10 +1,41 @@
 # Percussion Module — ROS 2 Workspace
 
-ROS 2 (Jazzy) workspace for a robotic percussion/scaffolding fixation system. A UR10e arm detects ArUco markers via an Intel RealSense camera and moves to them.
+ROS 2 (Jazzy) workspace for the percussion Module of the PERI UP Genio mobile platform system. 
+
+The percussion module detects a wedgelock position based on ArUco markers via an Intel RealSense camera and moves to them with the ur10e robot arm via RTDE. 
+
+### To be implemented: 
+
+1. robot arm moves towards the ledger in 1D until contact, low-level check for inductive sensor. Note ledger position. Move tool upwards of ledger, repeat move until contact downwards. Move over ledger pin.
+2. Initiate `hammerTask`. Low-level controller performs hammer action (x number of strikes) then returns `HAMMER_FINISHED`. 
+
+**Aditional features**:
+
+3. **Repeatable/more robust sequences**: No marker detected -> rotate camera to different position -> try again
+4. **Hammer top decks**: move tool to top position, potential inductive check. Hammer top deck into position (might require robot platform moving).
 
 ---
 
 ## Setup & Usage
+
+### Dependencies
+
+**System libraries** (install via apt):
+```bash
+sudo apt install librealsense2-dev librealsense2-utils
+```
+
+**ROS 2 packages** (install via apt):
+```bash
+sudo apt install ros-jazzy-ur ros-jazzy-ur-robot-driver ros-jazzy-tf2-ros
+```
+
+**Python packages** (install via pip):
+```bash
+pip install ur_rtde pyrealsense2 opencv-python numpy --break-system-packages
+```
+
+
 
 ### 1. Start the UR robot driver
 
@@ -44,7 +75,14 @@ ros2 service call /start_task std_srvs/srv/Trigger
 
 ## Architecture
 
+The following diagram shows the general workflow of the percussion module. 
+
+![ROS task flow sequence](ros_task_flow_sequence.png)
+
 Three nodes are started by the launch file, along with two static TF publishers (`world→base_link`, `tool0→camera_frame`).
+
+
+
 
 ```
 /start_task (Trigger)
@@ -79,9 +117,9 @@ percussion_motion_node        ← RTDE → UR10e
 
 ### Currently known issues
 
-- **`perception_motion`**: 
+- **perception_motion**: 
       - The robot currently moves using rtde, but to the wrong position -- problem with marker pose transform camera -> TCP pose
- -    Add `MOVE_HOME`
+ -    Implement `MOVE_HOME`
 
 - **Marker selection**: always picks `detections[0]`. Should select by lowest marker ID or sequentially from the last struck marker. (Current plan unknown)
 
