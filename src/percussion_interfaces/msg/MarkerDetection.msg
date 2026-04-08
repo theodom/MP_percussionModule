@@ -1,0 +1,2 @@
+int32 marker_id
+percussion_interfaces/Pose6D pose

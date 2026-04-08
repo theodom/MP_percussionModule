@@ -1,0 +1,12 @@
+# Goal
+string motion_type
+Pose6D marker_pose
+float64[6] approach_offset
+---
+# Result
+bool success
+string message
+Pose6D final_tcp_pose
+---
+# Feedback
+string current_phase

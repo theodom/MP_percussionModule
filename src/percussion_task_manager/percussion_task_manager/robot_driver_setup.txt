@@ -1,0 +1,14 @@
+Run Polyscope URSim (simulatie teach pendant)
+ros2 run ur_client_library start_ursim.sh -m ur10e
+
+Run Robot driver with rviz 
+ros2 launch ur_robot_driver ur_control.launch.py ur_type:=ur10e  robot_ip:=192.168.56.101 launch_rviz:=true
+
+// Einde
+
+OF: Run robot driver met moveit!
+1. 
+ros2 launch ur_robot_driver ur_control.launch.py ur_type:=ur10e  robot_ip:=192.168.56.101 launch_rviz:=false
+
+2.
+ros2 launch ur_moveit_config ur_moveit.launch.py ur_type:=ur10e launch_rviz:=true
