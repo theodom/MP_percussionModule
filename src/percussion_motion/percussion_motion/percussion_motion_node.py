@@ -49,7 +49,9 @@ from rtde_control import RTDEControlInterface as RTDEControl
 from rtde_receive import RTDEReceiveInterface as RTDEReceive
 
 from percussion_motion import rtde_motions as motions
-from percussion_motion.rtde_motions import MoveStatus, MoveResult, move_to_pose, apply_offset
+from percussion_motion.rtde_motions import (
+    MoveStatus, MoveResult, move_to_pose, apply_offset, compute_face_marker_rvec
+)
 
 
 # ---------------------------------------------------------------------------
@@ -218,12 +220,17 @@ class PercussionMotionNode(Node):
         # ---- MOVE_TO_MARKER ----------------------------------------
         if motion_type == MotionType.MOVE_TO_MARKER:
             current_tcp = list(self._rtde_r.getActualTCPPose())
-            delta_pose = [marker_pose[0], marker_pose[1], marker_pose[2] ,0,0,0]
-            marker_base = apply_offset(self._rtde_c, current_tcp, delta_pose)
+
+            # Full 6DOF: get marker pose (position + orientation) in base frame
+            marker_base = list(self._rtde_c.poseTrans(current_tcp, marker_pose))
+
+            # Compute face-to-face orientation with upright constraint
+            rvec_desired = compute_face_marker_rvec(marker_base[3:])
+            marker_base[3:] = rvec_desired
+
+            # Apply standoff (-10 cm along base X)
             marker_base[0] -= 0.10
-            #goal_pose = apply_offset(self._rtde_c, marker_base, marker_offset)
-            
-            
+
             send_feedback('APPROACHING', f'Goal pose: {marker_base}')
             result = move_to_pose(self._rtde_c, self._rtde_r, marker_base,
                                   velocity=self._def_vel, acceleration=self._def_acc)

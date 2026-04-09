@@ -67,6 +67,36 @@ def apply_offset(
 # Motion primitives
 # ---------------------------------------------------------------------------
 
+def compute_face_marker_rvec(marker_rvec_base: List[float]) -> List[float]:
+    """
+    Given the marker's Rodrigues vector in the robot base frame, return the desired
+    TCP Rodrigues vector [rx, ry, rz] so that the TCP Z-axis faces the marker surface
+    while the tool stays upright (no roll drift around the approach axis).
+
+    Parameters
+    ----------
+    marker_rvec_base : [rx, ry, rz]  Rodrigues vector of the marker in base frame
+    """
+    import cv2
+    R_marker, _ = cv2.Rodrigues(np.array(marker_rvec_base, dtype=np.float64))
+    marker_z = R_marker[:, 2]                          # outward normal of marker face
+
+    z_tcp = -marker_z / np.linalg.norm(marker_z)      # TCP Z points INTO the marker
+
+    world_up = np.array([0.0, 0.0, 1.0])
+    if abs(np.dot(z_tcp, world_up)) > 0.99:            # degenerate: marker faces straight up/down
+        world_up = np.array([1.0, 0.0, 0.0])
+
+    x_tcp = np.cross(world_up, z_tcp)
+    x_tcp /= np.linalg.norm(x_tcp)
+    y_tcp = np.cross(z_tcp, x_tcp)
+    y_tcp /= np.linalg.norm(y_tcp)
+
+    R_desired = np.column_stack([x_tcp, y_tcp, z_tcp])
+    rvec, _ = cv2.Rodrigues(R_desired)
+    return rvec.flatten().tolist()
+
+
 def move_to_pose(
     rtde_c: RTDEControl,
     rtde_r: RTDEReceive,
