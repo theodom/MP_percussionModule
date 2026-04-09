@@ -89,3 +89,38 @@ theo@theo-mbp:~/MP_software/ros_ws$ ros2 launch percussion_task_manager task_sys
 [ERROR] [task_manager_node-2]: process has died [pid 31266, exit code 1, cmd '/home/theo/MP_software/ros_ws/install/percussion_task_manager/lib/percussion_task_manager/task_manager_node --ros-args -r __node:=task_manager --params-file /tmp/launch_params_u8unxlzf'].
 [ERROR] [capture_service_node-1]: process has died [pid 31265, exit code 1, cmd '/home/theo/MP_software/ros_ws/install/percussion_perception/lib/percussion_perception/capture_service_node markerSize --ros-args -r __node:=capture_service_node'].
 [ERROR] [percussion_motion_node-3]: process has died [pid 31267, exit code 1, cmd '/home/theo/MP_software/ros_ws/install/percussion_motion/lib/percussion_motion/percussion_motion_node --ros-args -r __node:=percussion_motion --params-file /tmp/launch_params_118thfo6'].
+
+
+----
+
+
+goal pose from ROS:
+
+[percussion_motion_node-3] [INFO] [1775723917.991571638] [percussion_motion]: Extra: Goal pose: 
+
+[1.0046423010210002, 0.4579113038882417, 0.39520837393009733, 2.10128612146784, 0.8063889762897277, 1.436134559242163]
+
+goal pose from python:
+
+[0.6084195787932754, 0.4433210463110045, 0.5002199769509807, 2.250778723535634, 0.6770521796604875, 1.5951905388779501]
+
+
+
+Starting location for scan
+[0.29186579136409574, 0.47226998870666675, 0.5783724530654746, 2.187013377206076, 0.8961363673044236, 1.5556166005167786]
+
+-> python:
+marker: [-0.00929897  0.01957045  0.44747324 -1.87205013  1.98830977  0.1783102 ]
+marker tcp: [ 0.00929929  0.1070284   0.40296872  2.15064179  2.02538453 -0.60484291]
+goal: [0.6003618834849719, 0.4387106344402697, 0.5011425486731281, 2.1870108794914755, 0.8961740671303948, 1.5555580888277831]
+
+-> ROS:
+marker: [-0.01643583  0.03499941  0.78975511 -1.91120548  2.01507545  0.15320778]
+marker tcp: x=0.0159, y=0.0875, z=0.7489
+goal: [0.9162561496026479, 0.49317367448418814, 0.3696314329514929, 2.1870069330029613, 0.8961595073183825, 1.5555915665321463]
+
+-> ROS na updated marker size:
+ marker: [-0.01030386  0.02829504  0.45367806 -1.86436714  2.00803549  0.16059539]
+marker tcp: x=0.0103, y=0.0995, z=0.4092
+[0.6039408943390095, 0.44570645516235463, 0.49530238738171795, 2.187017254935435, 0.8961514457807854, 1.5556434841047593]
+

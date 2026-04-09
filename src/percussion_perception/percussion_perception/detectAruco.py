@@ -27,7 +27,7 @@ import numpy as np
 dictionary = aruco.getPredefinedDictionary(aruco.DICT_4X4_50)
 detector = aruco.ArucoDetector(dictionary, aruco.DetectorParameters())
 
-marker_size = 0.07  # your measured marker size in meters
+marker_size = 0.0398  # your measured marker size in meters
 
 marker_points_3d = np.array([
     [-marker_size/2,  marker_size/2, 0],

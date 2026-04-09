@@ -206,10 +206,14 @@ class PercussionMotionNode(Node):
 
         feedback = ExecuteMotion.Feedback()
 
-        def send_feedback(phase: str) -> None:
+        def send_feedback(phase: str, text: str = None) -> None:
             feedback.current_phase = phase
             goal_handle.publish_feedback(feedback)
-            self.get_logger().info(f'  [{motion_type}] phase: {phase}')
+            if text is None:
+                self.get_logger().info(f'  [{motion_type}] phase: {phase}')
+            else:
+                self.get_logger().info(f'  [{motion_type}] phase: {phase}')
+                self.get_logger().info(f'Extra: {text}')
 
         # ---- MOVE_TO_MARKER ----------------------------------------
         if motion_type == MotionType.MOVE_TO_MARKER:
@@ -220,7 +224,7 @@ class PercussionMotionNode(Node):
             #goal_pose = apply_offset(self._rtde_c, marker_base, marker_offset)
             
             
-            send_feedback('APPROACHING')
+            send_feedback('APPROACHING', f'Goal pose: {marker_base}')
             result = move_to_pose(self._rtde_c, self._rtde_r, marker_base,
                                   velocity=self._def_vel, acceleration=self._def_acc)
             if result.status != MoveStatus.SUCCESS:

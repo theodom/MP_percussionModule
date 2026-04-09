@@ -46,6 +46,8 @@ class CaptureServiceNode(Node):
 
                 for det, id_ in pairs:
                     
+                    self.get_logger().info(f'marker: {det}')
+                    
                     det_gripper = Ar.cam2Gripper(det)
                     
 
