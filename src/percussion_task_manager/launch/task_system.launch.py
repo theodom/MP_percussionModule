@@ -9,7 +9,7 @@ def generate_launch_description() -> LaunchDescription:
             executable='capture_service_node',
             name='capture_service_node',
             output='screen',
-            arguments=[
+            parameters=[
                 {'markerSize': 0.0398}
             ],
         ),

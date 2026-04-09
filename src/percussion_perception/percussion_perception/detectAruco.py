@@ -126,7 +126,7 @@ def getMatrices(profile):
 
     return intrinsics, mtx, dist, align
 
-def detectMarker(pipeline, profile, markerSize=0.07, verbose = False):
+def detectMarker(pipeline, profile, markerSize=0.0398, verbose = False):
 
     intrinsics, mtx, dist, align = getMatrices(profile)
     frames  = pipeline.wait_for_frames()
@@ -136,6 +136,12 @@ def detectMarker(pipeline, profile, markerSize=0.07, verbose = False):
     depth_frame = aligned.get_depth_frame()
     if not color_frame or not depth_frame:
         return []
+
+    pts = np.array([
+        [-markerSize/2,  markerSize/2, 0],
+        [ markerSize/2,  markerSize/2, 0],
+        [ markerSize/2, -markerSize/2, 0],
+        [-markerSize/2, -markerSize/2, 0]], dtype=np.float32)
 
     color_image = np.asanyarray(color_frame.get_data())
     corners, ids, _ = detector.detectMarkers(color_image)
@@ -154,7 +160,7 @@ def detectMarker(pipeline, profile, markerSize=0.07, verbose = False):
 
             # Orientation from solvePnP
             _, rvec, tvec = cv2.solvePnP(
-                marker_points_3d, corner[0], mtx, dist,
+                pts, corner[0], mtx, dist,
                 flags=cv2.SOLVEPNP_IPPE_SQUARE)
             rvecs.append(rvec)
             tvecs.append(tvec)
