@@ -224,8 +224,15 @@ class PercussionMotionNode(Node):
             # Full 6DOF: get marker pose (position + orientation) in base frame
             marker_base = list(self._rtde_c.poseTrans(current_tcp, marker_pose))
 
+            # World Z expressed in base_link frame, accounting for the 45° roll mount
+            # (world → base_link: roll=0.785398 rad around X)
+            # R_x(45°)^T * [0,0,1] = [0, sin(45°), cos(45°)]
+            _s = np.sin(np.deg2rad(-45.0))
+            _c = np.cos(np.deg2rad(-45.0))
+            world_up_in_base = [0.0, _s, _c]
+
             # Compute face-to-face orientation with upright constraint
-            rvec_desired = compute_face_marker_rvec(marker_base[3:])
+            rvec_desired = compute_face_marker_rvec(marker_base[3:], world_up_in_base)
             marker_base[3:] = rvec_desired
 
             # Apply standoff (-10 cm along base X)

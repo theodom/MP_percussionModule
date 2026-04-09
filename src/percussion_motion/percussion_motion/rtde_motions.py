@@ -67,7 +67,10 @@ def apply_offset(
 # Motion primitives
 # ---------------------------------------------------------------------------
 
-def compute_face_marker_rvec(marker_rvec_base: List[float]) -> List[float]:
+def compute_face_marker_rvec(
+    marker_rvec_base: List[float],
+    world_up_in_base: Optional[List[float]] = None,
+) -> List[float]:
     """
     Given the marker's Rodrigues vector in the robot base frame, return the desired
     TCP Rodrigues vector [rx, ry, rz] so that the TCP Z-axis faces the marker surface
@@ -75,7 +78,11 @@ def compute_face_marker_rvec(marker_rvec_base: List[float]) -> List[float]:
 
     Parameters
     ----------
-    marker_rvec_base : [rx, ry, rz]  Rodrigues vector of the marker in base frame
+    marker_rvec_base  : [rx, ry, rz]  Rodrigues vector of the marker in base frame
+    world_up_in_base  : world "up" direction expressed in base frame coordinates.
+                        Defaults to [0, 0, 1] (base Z). Pass a different vector when
+                        the robot base is mounted at an angle relative to the world
+                        (e.g. 45° roll → [0, sin(45°), cos(45°)]).
     """
     import cv2
     R_marker, _ = cv2.Rodrigues(np.array(marker_rvec_base, dtype=np.float64))
@@ -83,8 +90,11 @@ def compute_face_marker_rvec(marker_rvec_base: List[float]) -> List[float]:
 
     z_tcp = -marker_z / np.linalg.norm(marker_z)      # TCP Z points INTO the marker
 
-    world_up = np.array([0.0, 0.0, 1.0])
-    if abs(np.dot(z_tcp, world_up)) > 0.99:            # degenerate: marker faces straight up/down
+    world_up = np.array(world_up_in_base, dtype=np.float64) if world_up_in_base is not None \
+        else np.array([0.0, 0.0, 1.0])
+    world_up /= np.linalg.norm(world_up)
+
+    if abs(np.dot(z_tcp, world_up)) > 0.99:            # degenerate: marker faces along world_up
         world_up = np.array([1.0, 0.0, 0.0])
 
     x_tcp = np.cross(world_up, z_tcp)
