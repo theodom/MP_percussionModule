@@ -118,8 +118,9 @@ percussion_motion_node        ← RTDE → UR10e
 ### Currently known issues
 
 - **perception_motion**: 
-      - The robot currently moves using rtde, but to the wrong position -- problem with marker pose transform camera -> TCP pose
- -    Implement `MOVE_HOME`
+  - ~~The robot currently moves using rtde, but to the wrong position -- problem with marker pose transform camera -> TCP pose~~
+      
+  -    Implement `MOVE_HOME`
 
 - **Marker selection**: always picks `detections[0]`. Should select by lowest marker ID or sequentially from the last struck marker. (Current plan unknown)
 
