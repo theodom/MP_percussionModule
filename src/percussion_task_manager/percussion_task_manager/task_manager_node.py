@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional
+from typing import Optional, List
 
 import rclpy
 from rclpy.node import Node
@@ -9,15 +9,23 @@ from std_msgs.msg import String
 from std_srvs.srv import Trigger
 from percussion_interfaces.srv import TriggerCapture
 from percussion_interfaces.action import ExecuteMotion
+from percussion_interfaces.msg import Pose6D
 
 
 class TaskState(str, Enum):
-    IDLE           = 'IDLE'
-    CAPTURING      = 'CAPTURING'
-    POSE_ACQUIRED  = 'POSE_ACQUIRED'
-    MOVE_TO_MARKER = 'MOVE_TO_MARKER'
-    DONE           = 'DONE'
-    ERROR          = 'ERROR'
+    IDLE          = 'IDLE'
+    CAPTURING     = 'CAPTURING'
+    POSE_ACQUIRED = 'POSE_ACQUIRED'
+    MOVING_TO_WEDGELOCK     = 'MOVING_TO_WEDGELOCK'
+    DONE          = 'DONE'
+    ERROR         = 'ERROR'
+
+
+def _make_pose6d(x=0.0, y=0.0, z=0.0, rx=0.0, ry=0.0, rz=0.0) -> Pose6D:
+    p = Pose6D()
+    p.x, p.y, p.z = x, y, z
+    p.rx, p.ry, p.rz = rx, ry, rz
+    return p
 
 
 class TaskManagerNode(Node):
@@ -32,16 +40,74 @@ class TaskManagerNode(Node):
         self._target_frame   = self.get_parameter('target_frame').get_parameter_value().string_value
         self._capture_timeout = self.get_parameter('capture_timeout_sec').get_parameter_value().double_value
 
-        self._start_srv      = self.create_service(Trigger, '/start_task', self.start_task_callback)
-        self._state_pub      = self.create_publisher(String, '/task_manager/state', 10)
+        self._start_srv     = self.create_service(Trigger, '/start_task', self.start_task_callback)
+        self._state_pub     = self.create_publisher(String, '/task_manager/state', 10)
         self._capture_client: Client = self.create_client(TriggerCapture, capture_service_name)
-        self._motion_client  = ActionClient(self, ExecuteMotion, '/execute_motion')
+        self._motion_client = ActionClient(self, ExecuteMotion, '/execute_motion')
 
         self._current_state = TaskState.IDLE
         self._pending_capture_call = None
+        self._sequence: List[dict] = []
 
         self.publish_state(self._current_state)
         self.get_logger().info('Task manager node started.')
+
+    # ------------------------------------------------------------------
+    # Sequence definition
+    # ------------------------------------------------------------------
+
+    def _build_sequence(self, marker_pose: Pose6D) -> List[dict]:
+        """
+        Define the full motion sequence for one percussion task.
+        Each step is a dict with keys: motion_type, marker_pose, approach_offset.
+        Edit here to add, remove, or reorder steps.
+        """
+        return [
+            {
+                'motion_type':    'MOVE_TO_MARKER',
+                'marker_pose':    marker_pose,
+                'approach_offset': [-0.20, 0.0, 0.0, 0.0, 0.0, 0.0],  # 10 cm standoff in base X
+            },
+            {
+                'motion_type':    'MOVE_TO_CONTACT',
+                'marker_pose':    _make_pose6d(),
+                'approach_offset': [0.01, 0.0, 0.0, 0.0, 0.0, 0.0],   # approach +Z TCP, contact in -Z
+            },
+            {
+                'motion_type':    'RELATIVE_MOVE',
+                'marker_pose':    _make_pose6d(),
+                'approach_offset': [0, 0, -0.05, 0, 0.0, 0.0],    # rotate ~5.7° around TCP X
+            },
+            {
+                'motion_type':    'RELATIVE_MOVE',
+                'marker_pose':    _make_pose6d(),
+                'approach_offset': [0.0, 0.12, 0, 0, 0.0, 0.0],    # rotate ~5.7° around TCP X
+            },
+            {
+                'motion_type':    'RELATIVE_MOVE',
+                'marker_pose':    _make_pose6d(),
+                'approach_offset': [0.0, 0.0, 0.0, 0.0, 0.785, 0.0],   # move up in TCP Z
+            },
+        #    {
+        #        'motion_type':    'MOVE_TO_CONTACT',
+        #        'marker_pose':    _make_pose6d(),
+        #        'approach_offset': [0.0, -0.05, 0.0, 0.0, 0.0, 0.0],  # approach -Y TCP, contact in +Y
+        #    },
+        #    {
+        #        'motion_type':    'RELATIVE_MOVE',
+        #        'marker_pose':    _make_pose6d(),
+        #        'approach_offset': [0.0, 0.0, 0.05, 0.0, 0.0, 0.0],   # relative move (adjust as needed)
+        #    },
+        #    {
+        #        'motion_type':    'MOVE_TO_CONTACT',
+        #        'marker_pose':    _make_pose6d(),
+        #        'approach_offset': [0.05, 0.0, 0.0, 0.0, 0.0, 0.0],   # approach +X TCP, contact in -X
+        #    },
+        ]
+
+    # ------------------------------------------------------------------
+    # State
+    # ------------------------------------------------------------------
 
     def publish_state(self, state: TaskState) -> None:
         self._current_state = state
@@ -49,6 +115,10 @@ class TaskManagerNode(Node):
         msg.data = state.value
         self._state_pub.publish(msg)
         self.get_logger().info(f'State -> {state.value}')
+
+    # ------------------------------------------------------------------
+    # /start_task service
+    # ------------------------------------------------------------------
 
     def start_task_callback(self, request: Trigger.Request, response: Trigger.Response) -> Trigger.Response:
         del request
@@ -68,6 +138,10 @@ class TaskManagerNode(Node):
         response.success = True
         response.message = 'Task accepted; capture request sent.'
         return response
+
+    # ------------------------------------------------------------------
+    # Capture callback
+    # ------------------------------------------------------------------
 
     def _on_capture_done(self, future) -> None:
         try:
@@ -90,7 +164,6 @@ class TaskManagerNode(Node):
         if len(result.detections) == 0:
             self.publish_state(TaskState.IDLE)
             self.get_logger().warning('No markers detected.')
-            # TO DO: rotate camera -> try again.
             return
 
         for det in result.detections:
@@ -99,28 +172,44 @@ class TaskManagerNode(Node):
                 % (det.marker_id, det.pose.x, det.pose.y, det.pose.z)
             )
 
-        # evt. vervangen door laagste marker ID, of opvolgend van laatst geklopte marker id,...
-        selected = result.detections[0]  # Marker pose in base frame
-
+        selected = result.detections[0]
         self.get_logger().info(
             'Selected marker: id=%d : x=%.4f, y=%.4f, z=%.4f'
             % (selected.marker_id, selected.pose.x, selected.pose.y, selected.pose.z)
         )
-        self.publish_state(TaskState.POSE_ACQUIRED)
-        self._send_motion_goal(selected.pose)
 
-    def _send_motion_goal(self, pose) -> None:
+        self.publish_state(TaskState.POSE_ACQUIRED)
+        self._sequence = self._build_sequence(selected.pose)
+        self._execute_next_step()
+
+    # ------------------------------------------------------------------
+    # Sequence execution
+    # ------------------------------------------------------------------
+
+    def _execute_next_step(self) -> None:
+        if not self._sequence:
+            self.publish_state(TaskState.DONE)
+            return
+
+        step = self._sequence.pop(0)
+        self.get_logger().info(
+            f'MOVING_TO_WEDGELOCK step: {step["motion_type"]} '
+            f'({len(self._sequence)} steps remaining)'
+        )
+        self._send_motion_goal(step)
+
+    def _send_motion_goal(self, step: dict) -> None:
         if not self._motion_client.server_is_ready():
             self.get_logger().error('Motion action server not available.')
             self.publish_state(TaskState.ERROR)
             return
 
         goal = ExecuteMotion.Goal()
-        goal.motion_type     = 'MOVE_TO_MARKER'
-        goal.marker_pose     = pose
-        goal.approach_offset = [-0.10, 0.0, 0.0, 0.0, 0.0, 0.0]  # -10 cm in TCP x
+        goal.motion_type     = step['motion_type']
+        goal.marker_pose     = step['marker_pose']
+        goal.approach_offset = step['approach_offset']
 
-        self.publish_state(TaskState.MOVE_TO_MARKER)
+        self.publish_state(TaskState.MOVING_TO_WEDGELOCK)
         send_future = self._motion_client.send_goal_async(goal)
         send_future.add_done_callback(self._on_motion_goal_accepted)
 
@@ -135,10 +224,11 @@ class TaskManagerNode(Node):
     def _on_motion_result(self, future) -> None:
         result = future.result().result
         if result.success:
-            self.get_logger().info('Motion complete.')
-            self.publish_state(TaskState.DONE)
+            self.get_logger().info('Step complete.')
+            self._execute_next_step()
         else:
-            self.get_logger().error(f'Motion failed: {result.message}')
+            self.get_logger().error(f'Step failed: {result.message}')
+            self._sequence.clear()
             self.publish_state(TaskState.ERROR)
 
 

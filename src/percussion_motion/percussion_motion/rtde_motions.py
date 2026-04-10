@@ -19,6 +19,7 @@ from enum import Enum
 from typing import List, Optional
 
 import numpy as np
+import cv2
 from rtde_control import RTDEControlInterface as RTDEControl
 from rtde_receive import RTDEReceiveInterface as RTDEReceive
 
@@ -84,7 +85,6 @@ def compute_face_marker_rvec(
                         the robot base is mounted at an angle relative to the world
                         (e.g. 45° roll → [0, sin(45°), cos(45°)]).
     """
-    import cv2
     R_marker, _ = cv2.Rodrigues(np.array(marker_rvec_base, dtype=np.float64))
     marker_z = R_marker[:, 2]                          # outward normal of marker face
 
@@ -124,8 +124,6 @@ def move_to_pose(
     """
     try:
         rtde_c.moveJ_IK(target_pose, velocity, acceleration, blend)
-        rtde_c.stopJ(0.5)
-        time.sleep(0.5)
         final = _current_tcp(rtde_r)
         return MoveResult(MoveStatus.SUCCESS, 'Reached target pose.', final)
     except Exception as exc:
@@ -155,6 +153,7 @@ def move_until_contact(
     """
     try:
         # Preferred: built-in contact detection (UR firmware ≥ 5.9)
+        
         success = rtde_c.moveUntilContact(direction)
         final = _current_tcp(rtde_r)
         if success:
@@ -163,22 +162,19 @@ def move_until_contact(
             return MoveResult(MoveStatus.ABORTED, 'moveUntilContact returned False.', final)
 
     except AttributeError:
-        # Fallback: slow moveL + poll TCP force
-        current = _current_tcp(rtde_r)
-        step = [v * tool_speed * 0.1 for v in direction]   # 100 ms increment
-        deadline = time.time() + timeout_sec
-        while time.time() < deadline:
-            current = [current[i] + step[i] for i in range(6)]
-            rtde_c.moveL(current, tool_speed, tool_speed * 2, asynchronous=True)
-            time.sleep(0.1)
-            forces = rtde_r.getActualTCPForce()
-            if np.linalg.norm(forces[:3]) > force_threshold:
-                rtde_c.stopL(2.0)
-                final = _current_tcp(rtde_r)
-                return MoveResult(MoveStatus.SUCCESS, 'Contact detected (fallback).', final)
-        rtde_c.stopL(2.0)
         return MoveResult(MoveStatus.ABORTED, 'Contact timeout.', _current_tcp(rtde_r))
 
     except Exception as exc:
         return MoveResult(MoveStatus.FAILED, f'move_until_contact failed: {exc}')
 
+def move_relative_world(
+    rtde_c: RTDEControl,
+    rtde_r: RTDEReceive,
+    relative_pose: list[float],
+) -> MoveResult:
+    
+    start = _current_tcp(rtde_r)
+    target_pose = apply_offset(rtde_c, start, relative_pose)
+    move_to_pose(rtde_c, rtde_r, target_pose)
+
+    return MoveResult(MoveStatus.SUCCESS, 'relative motion completed', final)

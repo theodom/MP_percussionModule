@@ -19,7 +19,7 @@ The node exposes one ROS 2 action server:
 The action goal carries:
   - motion_type      : string  (see MotionType enum)
   - marker_pose      : percussion_interfaces/Pose6D  (in robot base frame)
-  - approach_offset  : float64[6]  offset in TCP frame applied before the final move
+  - pose_offset  : float64[6]  pose_offset in TCP frame applied before the final move
 
 Extending for new motion types
 -------------------------------
@@ -50,7 +50,7 @@ from rtde_receive import RTDEReceiveInterface as RTDEReceive
 
 from percussion_motion import rtde_motions as motions
 from percussion_motion.rtde_motions import (
-    MoveStatus, MoveResult, move_to_pose, apply_offset, compute_face_marker_rvec
+    MoveStatus, MoveResult, move_to_pose, apply_offset as apply_pose_offset, compute_face_marker_rvec
 )
 
 
@@ -74,10 +74,10 @@ def _list_to_pose6d(lst: List[float]) -> Pose6D:
 # ---------------------------------------------------------------------------
 
 class MotionType(str, Enum):
-    MOVE_TO_MARKER  = 'MOVE_TO_MARKER'   # approach via offset, then move to marker
-    MOVE_TO_CONTACT = 'MOVE_TO_CONTACT'  # approach via offset, then search for contact
+    MOVE_TO_MARKER  = 'MOVE_TO_MARKER'   # approach via pose_offset, then move to marker
+    MOVE_TO_CONTACT = 'MOVE_TO_CONTACT'  # approach via pose_offset, then search for contact
     RETURN_HOME     = 'RETURN_HOME'      # go back to home joint configuration
-    RELATIVE_MOVE   = 'RELATIVE_MOVE'    # apply offset to current TCP pose
+    RELATIVE_MOVE   = 'RELATIVE_MOVE'    # apply pose_offset to current TCP pose
 
 
 # ---------------------------------------------------------------------------
@@ -94,7 +94,7 @@ class PercussionMotionNode(Node):
         self.declare_parameter('home_pose',        [4.4230, -3.1917, 2.3805, -2.0078, -2.4501, -1.9730])
         self.declare_parameter('default_velocity', 0.2)
         self.declare_parameter('default_accel',    0.2)
-        self.declare_parameter('contact_force',    5.0)
+        self.declare_parameter('contact_force',    1.0)
         self.declare_parameter('contact_timeout',  5.0)
 
         robot_ip          = self.get_parameter('robot_ip').get_parameter_value().string_value
@@ -158,12 +158,12 @@ class PercussionMotionNode(Node):
         goal            = goal_handle.request
         motion_type     = goal.motion_type
         marker_pose     = _pose6d_to_list(goal.marker_pose)
-        approach_offset = list(goal.approach_offset)  # float64[6], in TCP frame
+        pose_offset = list(goal.approach_offset)  # float64[6], in TCP frame
 
         self.get_logger().info(
             f'Executing motion: {motion_type} | '
             f'target=({marker_pose[0]:.4f}, {marker_pose[1]:.4f}, {marker_pose[2]:.4f}) | '
-            f'offset=({approach_offset[0]:.3f}, {approach_offset[1]:.3f}, {approach_offset[2]:.3f})'
+            f'pose_offset=({pose_offset[0]:.3f}, {pose_offset[1]:.3f}, {pose_offset[2]:.3f})'
         )
         self._publish_state(motion_type)
 
@@ -171,7 +171,7 @@ class PercussionMotionNode(Node):
 
         try:
             move_result = self._execute_motion_sequence(
-                goal_handle, motion_type, marker_pose, approach_offset
+                goal_handle, motion_type, marker_pose, pose_offset
             )
             result.success        = move_result.status == MoveStatus.SUCCESS
             result.message        = move_result.message
@@ -203,7 +203,7 @@ class PercussionMotionNode(Node):
         goal_handle: ServerGoalHandle,
         motion_type: str,
         marker_pose: List[float],
-        approach_offset: List[float],
+        pose_offset: List[float],
     ) -> MoveResult:
 
         feedback = ExecuteMotion.Feedback()
@@ -226,7 +226,7 @@ class PercussionMotionNode(Node):
 
             # World Z expressed in base_link frame, accounting for the 45° roll mount
             # (world → base_link: roll=0.785398 rad around X)
-            # R_x(45°)^T * [0,0,1] = [0, sin(45°), cos(45°)]
+            # R_x(-45°)^T * [0,0,1] = [0, sin(-45°), cos(-45°)]
             _s = np.sin(np.deg2rad(-45.0))
             _c = np.cos(np.deg2rad(-45.0))
             world_up_in_base = [0.0, _s, _c]
@@ -254,28 +254,30 @@ class PercussionMotionNode(Node):
         # ---- MOVE_TO_CONTACT ----------------------------------------
         elif motion_type == MotionType.MOVE_TO_CONTACT:
             current_tcp = list(self._rtde_r.getActualTCPPose())
-            marker_base = apply_offset(self._rtde_c, current_tcp, marker_pose)
+            marker_base = apply_pose_offset(self._rtde_c, current_tcp, marker_pose)
             send_feedback('APPROACHING')
             approach_pose = list(marker_base)
-            approach_pose[0] += approach_offset[0]
-            approach_pose[1] += approach_offset[1]
-            approach_pose[2] += approach_offset[2]
+            approach_pose[0] += pose_offset[0]
+            approach_pose[1] += pose_offset[1]
+            approach_pose[2] += pose_offset[2]
             result = move_to_pose(self._rtde_c, self._rtde_r, approach_pose,
                                   velocity=self._def_vel, acceleration=self._def_acc)
             if result.status != MoveStatus.SUCCESS:
                 return result
 
-            # Contact direction: toward the marker (opposite of the approach offset)
-            offset_vec = np.array(approach_offset[:3])
-            norm = np.linalg.norm(offset_vec)
-            direction = (list(-offset_vec / norm) + [0.0, 0.0, 0.0]) if norm > 1e-6 \
-                        else [0.0, 0.0, -1.0, 0.0, 0.0, 0.0]
+            # Contact direction: toward the marker (opposite of the approach pose_offset)
+            pose_offset_vec = np.array(pose_offset[:3])
+            norm = np.linalg.norm(pose_offset_vec)
+            #direction = (list(-pose_offset_vec / norm) + [0.0, 0.0, 0.0]) if norm > 1e-6 \
+            #            else [0.0, 0.0, -1.0, 0.0, 0.0, 0.0]
+            direction = pose_offset
+            self.get_logger().info(f'Moving to contact in direction: {direction}')
 
             send_feedback('SEARCHING_CONTACT')
             result = motions.move_until_contact(
                 self._rtde_c, self._rtde_r,
                 direction=direction,
-                force_threshold=self._contact_frc,
+                force_threshold=2,
                 timeout_sec=self._contact_tmt,
             )
             if result.status == MoveStatus.SUCCESS:
@@ -295,11 +297,10 @@ class PercussionMotionNode(Node):
         elif motion_type == MotionType.RELATIVE_MOVE:
             send_feedback('MOVING')
             current_tcp = list(self._rtde_r.getActualTCPPose())
-            target = list(current_tcp)
-            target[0] += approach_offset[0]
-            target[1] += approach_offset[1]
-            target[2] += approach_offset[2]
-            return move_to_pose(self._rtde_c, self._rtde_r, target,
+            
+            target_pose = apply_pose_offset(self._rtde_c, current_tcp, pose_offset)
+
+            return move_to_pose(self._rtde_c, self._rtde_r, target_pose,
                                 velocity=self._def_vel, acceleration=self._def_acc)
 
         else:
