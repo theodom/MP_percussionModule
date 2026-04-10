@@ -1,0 +1,95 @@
+theo@theo-mbp:~/MP_percussionModule$ ros2 launch percussion_task_manager task_system.launch.py 
+[INFO] [launch]: All log files can be found below /home/theo/.ros/log/2026-04-10-10-37-25-927627-theo-mbp-640905
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [capture_service_node-1]: process started with pid [640908]
+[INFO] [task_manager_node-2]: process started with pid [640909]
+[INFO] [percussion_motion_node-3]: process started with pid [640910]
+[INFO] [static_transform_publisher-4]: process started with pid [640911]
+[INFO] [static_transform_publisher-5]: process started with pid [640912]
+[static_transform_publisher-5] [WARN] [1775810246.068840561] []: Old-style arguments are deprecated; see --help for new-style arguments
+[static_transform_publisher-4] [WARN] [1775810246.076432564] []: Old-style arguments are deprecated; see --help for new-style arguments
+[static_transform_publisher-5] [INFO] [1775810246.111287860] [world_to_base_link_broadcaster]: Spinning until stopped - publishing transform
+[static_transform_publisher-5] translation: ('0.000000', '0.000000', '0.000000')
+[static_transform_publisher-5] rotation: ('0.382683', '0.000000', '0.000000', '0.923880')
+[static_transform_publisher-5] from 'world' to 'base_link'
+[static_transform_publisher-4] [INFO] [1775810246.115140584] [tool0_to_camera_broadcaster]: Spinning until stopped - publishing transform
+[static_transform_publisher-4] translation: ('0.000000', '-0.127750', '0.044510')
+[static_transform_publisher-4] rotation: ('0.000000', '0.000000', '1.000000', '0.000796')
+[static_transform_publisher-4] from 'tool0' to 'camera_frame'
+[capture_service_node-1] [INFO] [1775810246.856986699] [capture_service_node]: Capture service node ready.
+[task_manager_node-2] [INFO] [1775810246.857547166] [task_manager]: State -> IDLE
+[task_manager_node-2] [INFO] [1775810246.858510587] [task_manager]: Task manager node started.
+[percussion_motion_node-3] [INFO] [1775810246.941502858] [percussion_motion]: Connecting to robot at 169.254.0.22 …
+[percussion_motion_node-3] [INFO] [1775810247.646733516] [percussion_motion]: RTDE connection established.
+[percussion_motion_node-3] [INFO] [1775810247.647623630] [percussion_motion]: Percussion motion node ready.
+[task_manager_node-2] [INFO] [1775810253.739870341] [task_manager]: State -> CAPTURING
+[capture_service_node-1] [INFO] [1775810253.741460718] [capture_service_node]: Received capture request: timeout=0
+[capture_service_node-1] [INFO] [1775810254.963076731] [capture_service_node]: marker: [ 0.00759573 -0.09721664  0.6980784   2.5462418  -1.48298137 -0.086083  ]
+[task_manager_node-2] [INFO] [1775810255.058570900] [task_manager]: Detected marker:  id=0 : x=-0.0076, y=0.2250, z=0.6536
+[task_manager_node-2] [INFO] [1775810255.059229056] [task_manager]: Selected marker: id=0 : x=-0.0076, y=0.2250, z=0.6536
+[task_manager_node-2] [INFO] [1775810255.059877688] [task_manager]: State -> POSE_ACQUIRED
+[task_manager_node-2] [INFO] [1775810255.060580652] [task_manager]: MOVING_TO_WEDGELOCK step: MOVE_TO_MARKER (9 steps remaining)
+[task_manager_node-2] [INFO] [1775810255.061409541] [task_manager]: State -> MOVING_TO_WEDGELOCK
+[percussion_motion_node-3] [INFO] [1775810255.063299995] [percussion_motion]: Accepting goal: MOVE_TO_MARKER
+[percussion_motion_node-3] [INFO] [1775810255.064816202] [percussion_motion]: Executing motion: MOVE_TO_MARKER | target=(-0.0076, 0.2250, 0.6536) | pose_offset=(-0.100, 0.000, 0.000)
+[percussion_motion_node-3] [INFO] [1775810255.069456963] [percussion_motion]:   [MOVE_TO_MARKER] phase: APPROACHING
+[percussion_motion_node-3] [INFO] [1775810255.070209949] [percussion_motion]: Extra: Goal pose: [0.6486689611518036, 0.43627513650902505, 0.4969905134766607, 2.355775209557895, 0.652771655356077, 1.1188791686932409]
+[percussion_motion_node-3] [INFO] [1775810260.440553713] [percussion_motion]:   [MOVE_TO_MARKER] phase: MOVING_TO_MARKER
+[percussion_motion_node-3] [INFO] [1775810260.449758793] [percussion_motion]:   [MOVE_TO_MARKER] phase: MARKER_REACHED
+[task_manager_node-2] [INFO] [1775810260.456465804] [task_manager]: Step complete.
+[task_manager_node-2] [INFO] [1775810260.457457535] [task_manager]: MOVING_TO_WEDGELOCK step: MOVE_TO_CONTACT (8 steps remaining)
+[task_manager_node-2] [INFO] [1775810260.458934257] [task_manager]: State -> MOVING_TO_WEDGELOCK
+[percussion_motion_node-3] [INFO] [1775810260.462369527] [percussion_motion]: Accepting goal: MOVE_TO_CONTACT
+[percussion_motion_node-3] [INFO] [1775810260.466313281] [percussion_motion]: Executing motion: MOVE_TO_CONTACT | target=(0.0000, 0.0000, 0.0000) | pose_offset=(0.010, 0.000, 0.000)
+[percussion_motion_node-3] [INFO] [1775810260.472732328] [percussion_motion]:   [MOVE_TO_CONTACT] phase: APPROACHING
+[percussion_motion_node-3] [INFO] [1775810261.029139467] [percussion_motion]: Moving to contact in direction: [0.01, 0.0, 0.0, 0.0, 0.0, 0.0]
+[percussion_motion_node-3] [INFO] [1775810261.029773275] [percussion_motion]:   [MOVE_TO_CONTACT] phase: SEARCHING_CONTACT
+[percussion_motion_node-3] [INFO] [1775810265.324350642] [percussion_motion]:   [MOVE_TO_CONTACT] phase: CONTACT_MADE
+[task_manager_node-2] [INFO] [1775810265.330405305] [task_manager]: Step complete.
+[task_manager_node-2] [INFO] [1775810265.332824671] [task_manager]: MOVING_TO_WEDGELOCK step: RELATIVE_MOVE (7 steps remaining)
+[task_manager_node-2] [INFO] [1775810265.335947446] [task_manager]: State -> MOVING_TO_WEDGELOCK
+[percussion_motion_node-3] [INFO] [1775810265.340836198] [percussion_motion]: Accepting goal: RELATIVE_MOVE
+[percussion_motion_node-3] [INFO] [1775810265.345356963] [percussion_motion]: Executing motion: RELATIVE_MOVE | target=(0.0000, 0.0000, 0.0000) | pose_offset=(0.000, 0.120, -0.050)
+[percussion_motion_node-3] [INFO] [1775810265.347433101] [percussion_motion]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-2] [INFO] [1775810267.153145306] [task_manager]: Step complete.
+[task_manager_node-2] [INFO] [1775810267.155203821] [task_manager]: MOVING_TO_WEDGELOCK step: RELATIVE_MOVE (6 steps remaining)
+[task_manager_node-2] [INFO] [1775810267.157885793] [task_manager]: State -> MOVING_TO_WEDGELOCK
+[percussion_motion_node-3] [INFO] [1775810267.162660629] [percussion_motion]: Accepting goal: RELATIVE_MOVE
+[percussion_motion_node-3] [INFO] [1775810267.167135920] [percussion_motion]: Executing motion: RELATIVE_MOVE | target=(0.0000, 0.0000, 0.0000) | pose_offset=(0.000, 0.000, 0.000)
+[percussion_motion_node-3] [INFO] [1775810267.169835239] [percussion_motion]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-2] [INFO] [1775810273.879427554] [task_manager]: Step complete.
+[task_manager_node-2] [INFO] [1775810273.881237944] [task_manager]: MOVING_TO_WEDGELOCK step: RELATIVE_MOVE (5 steps remaining)
+[task_manager_node-2] [INFO] [1775810273.884022133] [task_manager]: State -> MOVING_TO_WEDGELOCK
+[percussion_motion_node-3] [INFO] [1775810273.889504300] [percussion_motion]: Accepting goal: RELATIVE_MOVE
+[percussion_motion_node-3] [INFO] [1775810273.894950326] [percussion_motion]: Executing motion: RELATIVE_MOVE | target=(0.0000, 0.0000, 0.0000) | pose_offset=(0.080, 0.000, 0.000)
+[percussion_motion_node-3] [INFO] [1775810273.897234146] [percussion_motion]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-2] [INFO] [1775810275.684645617] [task_manager]: Step complete.
+[task_manager_node-2] [INFO] [1775810275.686769633] [task_manager]: MOVING_TO_WEDGELOCK step: MOVE_TO_CONTACT (4 steps remaining)
+[task_manager_node-2] [INFO] [1775810275.690768568] [task_manager]: State -> MOVING_TO_WEDGELOCK
+[percussion_motion_node-3] [INFO] [1775810275.695630905] [percussion_motion]: Accepting goal: MOVE_TO_CONTACT
+[percussion_motion_node-3] [INFO] [1775810275.701325829] [percussion_motion]: Executing motion: MOVE_TO_CONTACT | target=(0.0000, 0.0000, 0.0000) | pose_offset=(0.000, 0.007, -0.007)
+[percussion_motion_node-3] [INFO] [1775810275.708251915] [percussion_motion]:   [MOVE_TO_CONTACT] phase: APPROACHING
+[percussion_motion_node-3] [INFO] [1775810276.153471599] [percussion_motion]: Moving to contact in direction: [0.0, 0.00707, -0.00707, 0.0, 0.0, 0.0]
+[percussion_motion_node-3] [INFO] [1775810276.154237908] [percussion_motion]:   [MOVE_TO_CONTACT] phase: SEARCHING_CONTACT
+[percussion_motion_node-3] [INFO] [1775810277.779696324] [percussion_motion]:   [MOVE_TO_CONTACT] phase: CONTACT_MADE
+[task_manager_node-2] [INFO] [1775810277.782456571] [task_manager]: Step complete.
+[task_manager_node-2] [INFO] [1775810277.782973685] [task_manager]: MOVING_TO_WEDGELOCK step: RELATIVE_MOVE (3 steps remaining)
+[task_manager_node-2] [INFO] [1775810277.783781923] [task_manager]: State -> MOVING_TO_WEDGELOCK
+[percussion_motion_node-3] [INFO] [1775810277.784945500] [percussion_motion]: Accepting goal: RELATIVE_MOVE
+[percussion_motion_node-3] [INFO] [1775810277.786047029] [percussion_motion]: Executing motion: RELATIVE_MOVE | target=(0.0000, 0.0000, 0.0000) | pose_offset=(0.000, 0.000, 0.060)
+[percussion_motion_node-3] [INFO] [1775810277.786603212] [percussion_motion]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-2] [INFO] [1775810279.355091537] [task_manager]: Step complete.
+[task_manager_node-2] [INFO] [1775810279.355871355] [task_manager]: MOVING_TO_WEDGELOCK step: RELATIVE_MOVE (2 steps remaining)
+[task_manager_node-2] [INFO] [1775810279.356673351] [task_manager]: State -> MOVING_TO_WEDGELOCK
+[percussion_motion_node-3] [INFO] [1775810279.357989183] [percussion_motion]: Accepting goal: RELATIVE_MOVE
+[percussion_motion_node-3] [INFO] [1775810279.359125094] [percussion_motion]: Executing motion: RELATIVE_MOVE | target=(0.0000, 0.0000, 0.0000) | pose_offset=(0.000, 0.000, 0.100)
+[percussion_motion_node-3] [INFO] [1775810279.359704155] [percussion_motion]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-2] [INFO] [1775810279.847769837] [task_manager]: Step complete.
+[task_manager_node-2] [INFO] [1775810279.848349459] [task_manager]: MOVING_TO_WEDGELOCK step: MOVE_TO_CONTACT (1 steps remaining)
+[task_manager_node-2] [INFO] [1775810279.849566975] [task_manager]: State -> MOVING_TO_WEDGELOCK
+[percussion_motion_node-3] [INFO] [1775810279.850805389] [percussion_motion]: Accepting goal: MOVE_TO_CONTACT
+[percussion_motion_node-3] [INFO] [1775810279.852282139] [percussion_motion]: Executing motion: MOVE_TO_CONTACT | target=(0.0000, 0.0000, 0.0000) | pose_offset=(0.000, -0.007, -0.007)
+[percussion_motion_node-3] RTDEControlInterface: RTDE control script is not running!
+[percussion_motion_node-3] [ERROR] [1775810279.853122077] [percussion_motion]: Unhandled exception in motion execution: poseTrans() function did not succeed!
+[task_manager_node-2] [ERROR] [1775810279.855886958] [task_manager]: Step failed: poseTrans() function did not succeed!
+[task_manager_node-2] [INFO] [1775810279.856569047] [task_manager]: State -> ERROR

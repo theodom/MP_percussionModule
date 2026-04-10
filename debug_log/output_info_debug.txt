@@ -130,3 +130,8 @@ marker tcp: x=0.0103, y=0.0995, z=0.4092
 
 hard coded "straight" orientation:
 1.8248156962754702, 0.7145587594575658, 1.744658002900351
+
+
+Hondsdolheid:
+marker:  id=0 : x=-0.0286, y=0.1850, z=0.7201
+

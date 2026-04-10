@@ -1,0 +1,50 @@
+theo@theo-mbp:~/MP_percussionModule$ ros2 launch percussion_task_manager task_system.launch.py 
+[INFO] [launch]: All log files can be found below /home/theo/.ros/log/2026-04-10-11-01-42-571894-theo-mbp-659571
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [capture_service_node-1]: process started with pid [659574]
+[INFO] [task_manager_node-2]: process started with pid [659575]
+[INFO] [percussion_motion_node-3]: process started with pid [659576]
+[INFO] [static_transform_publisher-4]: process started with pid [659577]
+[INFO] [static_transform_publisher-5]: process started with pid [659578]
+[static_transform_publisher-4] [WARN] [1775811702.704354296] []: Old-style arguments are deprecated; see --help for new-style arguments
+[static_transform_publisher-5] [WARN] [1775811702.707976348] []: Old-style arguments are deprecated; see --help for new-style arguments
+[static_transform_publisher-4] [INFO] [1775811702.729894118] [tool0_to_camera_broadcaster]: Spinning until stopped - publishing transform
+[static_transform_publisher-4] translation: ('0.000000', '-0.127750', '0.044510')
+[static_transform_publisher-4] rotation: ('0.000000', '0.000000', '1.000000', '0.000796')
+[static_transform_publisher-4] from 'tool0' to 'camera_frame'
+[static_transform_publisher-5] [INFO] [1775811702.742814297] [world_to_base_link_broadcaster]: Spinning until stopped - publishing transform
+[static_transform_publisher-5] translation: ('0.000000', '0.000000', '0.000000')
+[static_transform_publisher-5] rotation: ('0.382683', '0.000000', '0.000000', '0.923880')
+[static_transform_publisher-5] from 'world' to 'base_link'
+[capture_service_node-1] [INFO] [1775811703.463401288] [capture_service_node]: Capture service node ready.
+[task_manager_node-2] [INFO] [1775811703.548646721] [task_manager]: State -> IDLE
+[task_manager_node-2] [INFO] [1775811703.549253404] [task_manager]: Task manager node started.
+[percussion_motion_node-3] [INFO] [1775811703.601675788] [percussion_motion]: Connecting to robot at 169.254.0.22 …
+[percussion_motion_node-3] [INFO] [1775811704.772813871] [percussion_motion]: RTDE connection established.
+[percussion_motion_node-3] [INFO] [1775811704.773862952] [percussion_motion]: Percussion motion node ready.
+[task_manager_node-2] [INFO] [1775811713.582733856] [task_manager]: State -> CAPTURING
+[capture_service_node-1] [INFO] [1775811713.583871808] [capture_service_node]: Received capture request: timeout=0
+[capture_service_node-1] [INFO] [1775811714.801621536] [capture_service_node]: marker: [ 3.27772891e-02  1.02475056e-03  9.60218710e-01  2.06105112e+00
+[capture_service_node-1]  -1.78866632e+00  4.59175186e-01]
+[task_manager_node-2] [INFO] [1775811714.896537338] [task_manager]: Detected marker:  id=0 : x=-0.0328, y=0.1267, z=0.9157
+[task_manager_node-2] [INFO] [1775811714.897104713] [task_manager]: Selected marker: id=0 : x=-0.0328, y=0.1267, z=0.9157
+[task_manager_node-2] [INFO] [1775811714.897594448] [task_manager]: State -> POSE_ACQUIRED
+[task_manager_node-2] [INFO] [1775811714.898235027] [task_manager]: MOVING_TO_WEDGELOCK step: MOVE_TO_MARKER (9 steps remaining)
+[task_manager_node-2] [INFO] [1775811714.898931873] [task_manager]: State -> MOVING_TO_WEDGELOCK
+[percussion_motion_node-3] [INFO] [1775811714.900561170] [percussion_motion]: Accepting goal: MOVE_TO_MARKER
+[percussion_motion_node-3] [INFO] [1775811714.902113488] [percussion_motion]: Executing motion: MOVE_TO_MARKER | target=(-0.0328, 0.1267, 0.9157) | pose_offset=(-0.100, 0.000, 0.000)
+[percussion_motion_node-3] [INFO] [1775811714.907933214] [percussion_motion]:   [MOVE_TO_MARKER] phase: APPROACHING
+[percussion_motion_node-3] [INFO] [1775811714.908789841] [percussion_motion]: Extra: Goal pose: [0.7071288426278108, 0.44914195998892187, 0.46316108219284313, -2.1049458880593375, -1.6406471981029231, -1.2372040693724256]
+[percussion_motion_node-3] [INFO] [1775811721.189115269] [percussion_motion]:   [MOVE_TO_MARKER] phase: MOVING_TO_MARKER
+[percussion_motion_node-3] RTDEControlInterface: RTDE control script is not running!
+[percussion_motion_node-3] [INFO] [1775811721.190498916] [percussion_motion]:   [MOVE_TO_MARKER] phase: MARKER_REACHED
+[task_manager_node-2] [INFO] [1775811721.194129400] [task_manager]: Step complete.
+[task_manager_node-2] [INFO] [1775811721.195125520] [task_manager]: MOVING_TO_WEDGELOCK step: MOVE_TO_CONTACT (8 steps remaining)
+[task_manager_node-2] [INFO] [1775811721.196137060] [task_manager]: State -> MOVING_TO_WEDGELOCK
+[percussion_motion_node-3] [INFO] [1775811721.197764034] [percussion_motion]: Accepting goal: MOVE_TO_CONTACT
+[percussion_motion_node-3] [INFO] [1775811721.201550291] [percussion_motion]: Executing motion: MOVE_TO_CONTACT | target=(0.0000, 0.0000, 0.0000) | pose_offset=(0.010, 0.000, 0.000)
+[percussion_motion_node-3] RTDEControlInterface: RTDE control script is not running!
+[percussion_motion_node-3] [ERROR] [1775811721.203719280] [percussion_motion]: Unhandled exception in motion execution: poseTrans() function did not succeed!
+[task_manager_node-2] [ERROR] [1775811721.209655270] [task_manager]: Step failed: poseTrans() function did not succeed!
+[task_manager_node-2] [INFO] [1775811721.211962837] [task_manager]: State -> ERROR
+

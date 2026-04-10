@@ -172,9 +172,10 @@ def move_relative_world(
     rtde_r: RTDEReceive,
     relative_pose: list[float],
 ) -> MoveResult:
-    
+    """
+    Apply a full 6DOF offset (position + rotation) relative to the current TCP pose.
+    The offset is expressed in the TCP frame, composed via poseTrans so rotation is applied.
+    """
     start = _current_tcp(rtde_r)
-    target_pose = apply_offset(rtde_c, start, relative_pose)
-    move_to_pose(rtde_c, rtde_r, target_pose)
-
-    return MoveResult(MoveStatus.SUCCESS, 'relative motion completed', final)
+    target_pose = list(rtde_c.poseTrans(start, relative_pose))
+    return move_to_pose(rtde_c, rtde_r, target_pose)

@@ -13,12 +13,13 @@ from percussion_interfaces.msg import Pose6D
 
 
 class TaskState(str, Enum):
-    IDLE          = 'IDLE'
-    CAPTURING     = 'CAPTURING'
-    POSE_ACQUIRED = 'POSE_ACQUIRED'
-    MOVING_TO_WEDGELOCK     = 'MOVING_TO_WEDGELOCK'
-    DONE          = 'DONE'
-    ERROR         = 'ERROR'
+    IDLE                = 'IDLE'
+    CAPTURING           = 'CAPTURING'
+    POSE_ACQUIRED       = 'POSE_ACQUIRED'
+    MOVING_TO_WEDGELOCK = 'MOVING_TO_WEDGELOCK'
+    RETURNING           = 'RETURNING'
+    DONE                = 'DONE'
+    ERROR               = 'ERROR'
 
 
 def _make_pose6d(x=0.0, y=0.0, z=0.0, rx=0.0, ry=0.0, rz=0.0) -> Pose6D:
@@ -47,6 +48,7 @@ class TaskManagerNode(Node):
 
         self._current_state = TaskState.IDLE
         self._pending_capture_call = None
+        self._returning = False
         self._sequence: List[dict] = []
 
         self.publish_state(self._current_state)
@@ -64,45 +66,73 @@ class TaskManagerNode(Node):
         """
         return [
             {
-                'motion_type':    'MOVE_TO_MARKER',
+                'motion_type':    'MOVE_TO_MARKER', # 10 cm standoff in base X
                 'marker_pose':    marker_pose,
-                'approach_offset': [-0.20, 0.0, 0.0, 0.0, 0.0, 0.0],  # 10 cm standoff in base X
+                'approach_offset': [-0.07, 0.0, 0.0, 0.0, 0.0, 0.0],  # Base Frame
             },
             {
-                'motion_type':    'MOVE_TO_CONTACT',
+                'motion_type':    'MOVE_TO_CONTACT', # Touch Ledger facing marker
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.01, 0.0, 0.0, 0.0, 0.0, 0.0],   # approach +Z TCP, contact in -Z
+                'approach_offset': [0.010, 0.0, 0.0, 0.0, 0.0, 0.0],   # Base frame
             },
             {
-                'motion_type':    'RELATIVE_MOVE',
+                'motion_type':    'RELATIVE_MOVE', # move backwards from Ledger + UP
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0, 0, -0.05, 0, 0.0, 0.0],    # rotate ~5.7° around TCP X
+                'approach_offset': [0, 0.12, -0.05, 0, 0.0, 0.0], # TCP frame
             },
             {
-                'motion_type':    'RELATIVE_MOVE',
+                'motion_type':    'RELATIVE_MOVE', # Rotate Tool to face wedgelock
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, 0.12, 0, 0, 0.0, 0.0],    # rotate ~5.7° around TCP X
+                'approach_offset': [0.0, 0.0, 0.0, 0.0, -1.4600, 0.0],   # TCP frame
             },
             {
-                'motion_type':    'RELATIVE_MOVE',
+                'motion_type':    'RELATIVE_MOVE', # Move towards wedgelock (sideways) for contact 2D
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, 0.0, 0.0, 0.0, 0.785, 0.0],   # move up in TCP Z
+                'approach_offset': [0.080, 0, 0, 0, 0.0, 0.0],  # TCP frame
             },
-        #    {
-        #        'motion_type':    'MOVE_TO_CONTACT',
-        #        'marker_pose':    _make_pose6d(),
-        #        'approach_offset': [0.0, -0.05, 0.0, 0.0, 0.0, 0.0],  # approach -Y TCP, contact in +Y
-        #    },
-        #    {
-        #        'motion_type':    'RELATIVE_MOVE',
-        #        'marker_pose':    _make_pose6d(),
-        #        'approach_offset': [0.0, 0.0, 0.05, 0.0, 0.0, 0.0],   # relative move (adjust as needed)
-        #    },
-        #    {
-        #        'motion_type':    'MOVE_TO_CONTACT',
-        #        'marker_pose':    _make_pose6d(),
-        #        'approach_offset': [0.05, 0.0, 0.0, 0.0, 0.0, 0.0],   # approach +X TCP, contact in -X
-        #    },
+            {
+                'motion_type': 'MOVE_TO_CONTACT', # Touch ledger top down
+                'marker_pose': _make_pose6d(),
+                'approach_offset': [0.0, 0.00707, -0.00707, 0.0, 0.0, 0.0], # Base Frame
+            },
+            {
+                'motion_type':    'RELATIVE_MOVE', # MOVE up for clearance
+                'marker_pose':    _make_pose6d(),
+                'approach_offset': [0,0.06, 0, 0.0, 0.0, 0.0], # TCP frame
+            },
+            {
+                'motion_type':    'RELATIVE_MOVE', # MOVE closer to pole 
+                'marker_pose':    _make_pose6d(),
+                'approach_offset': [0.025, 0.0, 0.10, 0.0, 0.0, 0.0], # TCP frame
+            },
+            {
+                'motion_type':    'MOVE_TO_CONTACT', # Touch bar sideways
+                'marker_pose':    _make_pose6d(),
+                'approach_offset': [0.0, -0.00707, -0.00707, 0.0, 0.0, 0.0], # Base Frame            
+            },
+            {
+                'motion_type':    'RELATIVE_MOVE', # Move into striking position
+                'marker_pose':    _make_pose6d(),
+                'approach_offset': [0.0, 0.0, -0.00300, 0.0, 0.0, 0.0],   # TCP frame
+            },
+        ]
+
+    def _build_return_sequence(self) -> List[dict]:
+        """
+        Sequence executed automatically after the main task completes.
+        Edit here to adjust the return/retract motion before going home.
+        """
+        return [
+            {
+                'motion_type':    'RELATIVE_MOVE', # Retract from wedgelock
+                'marker_pose':    _make_pose6d(),
+                'approach_offset': [0.0, 0.05, -0.10, 0.0, 0.0, 0.0], # TCP frame
+            },
+            {
+                'motion_type':    'RETURN_HOME',
+                'marker_pose':    _make_pose6d(),
+                'approach_offset': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            },
         ]
 
     # ------------------------------------------------------------------
@@ -180,6 +210,7 @@ class TaskManagerNode(Node):
 
         self.publish_state(TaskState.POSE_ACQUIRED)
         self._sequence = self._build_sequence(selected.pose)
+        self._returning = False
         self._execute_next_step()
 
     # ------------------------------------------------------------------
@@ -188,12 +219,20 @@ class TaskManagerNode(Node):
 
     def _execute_next_step(self) -> None:
         if not self._sequence:
-            self.publish_state(TaskState.DONE)
-            return
+            if not self._returning:
+                # Main sequence done — start return sequence
+                self._returning = True
+                self._sequence = self._build_return_sequence()
+                self.publish_state(TaskState.DONE)
+            else:
+                # Return sequence done — back to idle
+                self.publish_state(TaskState.IDLE)
+                return
 
         step = self._sequence.pop(0)
+        phase = 'RETURNING' if self._returning else 'MOVING_TO_WEDGELOCK'
         self.get_logger().info(
-            f'MOVING_TO_WEDGELOCK step: {step["motion_type"]} '
+            f'{phase} step: {step["motion_type"]} '
             f'({len(self._sequence)} steps remaining)'
         )
         self._send_motion_goal(step)
@@ -209,7 +248,8 @@ class TaskManagerNode(Node):
         goal.marker_pose     = step['marker_pose']
         goal.approach_offset = step['approach_offset']
 
-        self.publish_state(TaskState.MOVING_TO_WEDGELOCK)
+        state = TaskState.RETURNING if self._returning else TaskState.MOVING_TO_WEDGELOCK
+        self.publish_state(state)
         send_future = self._motion_client.send_goal_async(goal)
         send_future.add_done_callback(self._on_motion_goal_accepted)
 
