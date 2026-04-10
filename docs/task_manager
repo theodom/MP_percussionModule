@@ -81,3 +81,33 @@ Logic is equal to `_build_sequence`, but containing different Dictionaries/motio
 | ERROR | Something went wrong and program was aborted. See log for more specific information. |
 
 
+### start_task_callback
+
+**Parameters**:
+
+- Request: Trigger.Request
+- Response: Trigger.Response
+
+**Return**:
+ - response: Trigger
+
+Checks that the task manager is in a suitable state. Triggers the capture service and changes TaskState to CAPTURING. 
+
+the start_callback also creates the link to the 'done_callback' upon service finish.
+
+### `_on_done_callback` 
+
+**Parameters**:
+
+/
+
+**Return**:
+
+/
+
+Checks for Service result. If Success it checks if no markers were detected and changes state to IDLE 
+
+> Possible improvement: request robot move/rotation and try again.
+
+
+
