@@ -25,4 +25,59 @@
 - `capture_timeout_sec`: Timeout in seconds for camera service, currently unimplemented, possibly redundant
 
 
-** 
+**Setup services/topics**:
+- `/start_task`: Service which triggers the system start: Callback calls the capture service.
+- `/task_manager/state`: Publilisher for the current task state. IDLE/CAPTURING/...
+-`_motion_client`: Create service client for the camera capture service.
+-
+
+### `_build_sequence`: 
+**parameters**: 
+ - marker_pose: Pose6D with marker coordinates in base_link frame.
+
+**Return**: 
+- List of Dicts containing motion type and movement instructions. 
+
+
+| Key | Value | info |
+| --- | ---   | ---  |
+|`motion_type`| MOVE_TO_MARKER / RELATIVE_MOVE / MOVE_TO_CONTACT | type of motion corresponding to available types in percussion_motion package|
+| `marker_pose` | `percussion_interfaces/ msg/Pose6D` | 6D TCP pose. Marker position in baseframe for MOVE_TO_MARKER type. otherwise 6 x 0. |
+| `approach_offset` | List of 6 floats. | relevant movement information for each move type. Offset for MOVE_TO_MARKER, direction + speed for MOVE_TO_CONTACT. relative final TCP Position for RELATIVE_MOVE.
+
+
+> **Notice**: Entire build sequence concept/logic should be reworked to be more generalised. Including dictionary naming and content. 
+
+### `_build_return_sequence`
+
+**parameters**:
+
+/
+
+**Return**
+- List of Dicts containing motion type and movement instructions. 
+
+Logic is equal to `_build_sequence`, but containing different Dictionaries/motions. To be reworked and generalised along with said function.
+
+### `publish_state`:
+
+**Parameters:
+
+- state: Enum TaskState containing current system state.
+
+**Return:
+
+/
+
+| Value | info |
+| ---   | ---  |
+| IDLE | default state  at (successful) startup. No process going on and ready to receive request |
+| CAPTURING | Perception service in progress. |
+| POSE_ACQUIRED | Capture service completed. Task manager will decide which marker to select. |
+| MOVING_TO_WEDGELOCK | Motion sequence from starting position to 'at wedgelock' in progress. Including moving to marker, 'homeing' and positioning on wedgelock. |
+| ... | more states to be added as they are implemented
+| DONE | Hammering task (low level) completed. Ready to move back to home position|
+| RETURNING | Robot is moving away from wedgelock, and towards it's 'HOME' position. |
+| ERROR | Something went wrong and program was aborted. See log for more specific information. |
+
+

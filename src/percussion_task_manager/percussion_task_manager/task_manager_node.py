@@ -17,8 +17,8 @@ class TaskState(str, Enum):
     CAPTURING           = 'CAPTURING'
     POSE_ACQUIRED       = 'POSE_ACQUIRED'
     MOVING_TO_WEDGELOCK = 'MOVING_TO_WEDGELOCK'
-    RETURNING           = 'RETURNING'
     DONE                = 'DONE'
+    RETURNING           = 'RETURNING'
     ERROR               = 'ERROR'
 
 
@@ -33,6 +33,7 @@ class TaskManagerNode(Node):
     def __init__(self) -> None:
         super().__init__('task_manager')
 
+        # Parameters 
         self.declare_parameter('capture_service_name', '/trigger_capture')
         self.declare_parameter('target_frame', 'base')
         self.declare_parameter('capture_timeout_sec', 5.0)
@@ -41,6 +42,7 @@ class TaskManagerNode(Node):
         self._target_frame   = self.get_parameter('target_frame').get_parameter_value().string_value
         self._capture_timeout = self.get_parameter('capture_timeout_sec').get_parameter_value().double_value
 
+        # Services/Topics
         self._start_srv     = self.create_service(Trigger, '/start_task', self.start_task_callback)
         self._state_pub     = self.create_publisher(String, '/task_manager/state', 10)
         self._capture_client: Client = self.create_client(TriggerCapture, capture_service_name)
