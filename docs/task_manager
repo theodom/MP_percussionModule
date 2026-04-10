@@ -1,0 +1,28 @@
+# Task manager package:
+
+## Components
+
+- Launchfile: `task_system.`launch.py
+- Task Manager node: `task_manager_node.py`
+
+## Goals
+
+- Accept hammering task request
+- Orchestrate subsystems:
+    - Request capture service
+    - Decide on marker to select
+    - Initiate movement sequences.
+    - Request Hammer task
+
+## Task_manager_node
+
+### `init`:
+
+**Declare Paramters**: 
+
+- `capture_service_name`: Name of the service which handles camera image capture
+- `target_frame`: unused
+- `capture_timeout_sec`: Timeout in seconds for camera service, currently unimplemented, possibly redundant
+
+
+** 

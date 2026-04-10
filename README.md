@@ -2,17 +2,21 @@
 
 ROS 2 (Jazzy) workspace for the percussion Module of the PERI UP Genio mobile platform system. 
 
-The percussion module detects a wedgelock position based on ArUco markers via an Intel RealSense camera and moves to them with the ur10e robot arm via RTDE. 
+1. The percussion module detects a wedgelock position based on ArUco markers via an Intel RealSense camera and moves to them with the ur10e robot arm via RTDE. 
+
+2. robot arm moves towards the ledger in 1D until contact, Move tool upwards of ledger, repeat move until contact downwards. Move over ledger pin. Then move until contact in 3rd dimension. Wedgelock position is now known.
 
 ### To be implemented: 
 
-1. robot arm moves towards the ledger in 1D until contact, low-level check for inductive sensor. Note ledger position. Move tool upwards of ledger, repeat move until contact downwards. Move over ledger pin.
-2. Initiate `hammerTask`. Low-level controller performs hammer action (x number of strikes) then returns `HAMMER_FINISHED`. 
+3. Initiate `hammerTask`. Low-level controller performs hammer action (x number of strikes) then returns `HAMMER_FINISHED`. 
+
+
 
 **Aditional features**:
 
-3. **Repeatable/more robust sequences**: No marker detected -> rotate camera to different position -> try again
-4. **Hammer top decks**: move tool to top position, potential inductive check. Hammer top deck into position (might require robot platform moving).
+- **Repeatable/more robust sequences**: No marker detected -> rotate camera to different position -> try again
+
+- **Hammer top decks**: move tool to top position, potential inductive check. Hammer top deck into position (might require robot platform moving).
 
 ---
 
@@ -39,25 +43,28 @@ pip install ur_rtde pyrealsense2 opencv-python numpy --break-system-packages
 
 ### 1. Start the UR robot driver
 
-The `ur_robot_driver` must be running before launching this system. It is a separate ROS 2 stack and is **not** included in this workspace.
-
-**Simulation (URSim):**
-```bash
-# Terminal 1 — start the simulated teach pendant
-ros2 run ur_client_library start_ursim.sh -m ur10e
-```
-
-```bash
-# (optional) Terminal 2 — start the driver (connects to URSim at 192.168.56.101)
-ros2 launch ur_robot_driver ur_control.launch.py \
-    ur_type:=ur10e robot_ip:=192.168.56.101 launch_rviz:=true
-```
+~~The `ur_robot_driver` must be running before launching this system. It is a separate ROS 2 stack and is **not** included in this workspace.~~
+The `ur_robot_driver` is not currently used within this system.
 
 **Real robot** (IP `169.254.0.22`, link-local):
 ```bash
 ros2 launch ur_robot_driver ur_control.launch.py \
     ur_type:=ur10e robot_ip:=169.254.0.22 launch_rviz:=false
 ```
+
+**Simulation (URSim):**
+
+```bash
+# Terminal 1 — start the simulated teach pendant
+ros2 run ur_client_library start_ursim.sh -m ur10e
+```
+
+```bash
+# Terminal 2 — start the driver (connects to URSim at 192.168.56.101)
+ros2 launch ur_robot_driver ur_control.launch.py \
+    ur_type:=ur10e robot_ip:=192.168.56.101 launch_rviz:=true
+```
+
 
 ### 2. Launch the percussionModule task manager
 
@@ -76,10 +83,12 @@ ros2 service call /start_task std_srvs/srv/Trigger
 ## Architecture
 
 The following diagram shows the general workflow of the percussion module. 
+ 
+(may not be entirely up to date)
 
 ![ROS task flow sequence](ros_task_flow_sequence.png)
 
-Three nodes are started by the launch file, along with two static TF publishers (`world→base_link`, `tool0→camera_frame`).
+Three nodes are started by the launch file, along with two static TF publishers (`world` -> `base_link` and `tool0` -> `camera_frame`).
 
 
 
@@ -99,6 +108,10 @@ task_manager_node
       │  /execute_motion (ExecuteMotion action)
       ▼
 percussion_motion_node        ← RTDE → UR10e
+
+to add: motion success -> task_manager_node -> startHammering -> Arduino node -> ...
+
+
 ```
 
 | Node | Package | Role |
@@ -117,14 +130,16 @@ percussion_motion_node        ← RTDE → UR10e
 
 ### Currently known issues
 
+- **Task manager**: launch parameters are not being passed downstream -> implement LaunchArgument
+
 - **perception_motion**: 
   - ~~The robot currently moves using rtde, but to the wrong position -- problem with marker pose transform camera -> TCP pose~~
       
   -    Implement `MOVE_HOME`
 
-- **Marker selection**: always picks `detections[0]`. Should select by lowest marker ID or sequentially from the last struck marker. (Current plan unknown)
+- **Marker selection**: always picks `detections[0]`. Should be replaced with more intelligent decision making. (Wedgelock memory?)
 
-- **`capture_service_stub.py`**: should be removed.
+- ~~**`capture_service_stub.py`**: should be removed.~~
 
 - **Shutdown warning**: all three nodes emit `rcl_shutdown already called` — deduplicate `rclpy.shutdown()` calls in launch.
 

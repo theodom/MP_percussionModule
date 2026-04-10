@@ -21,7 +21,6 @@ setup(
     entry_points={
         'console_scripts': [
             'task_manager_node = percussion_task_manager.task_manager_node:main',
-            'capture_service_stub = percussion_task_manager.capture_service_stub:main',
         ],
     },
 )
