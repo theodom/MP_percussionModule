@@ -1,3 +1,3 @@
-theme: just-the-docs   # or: minima, jekyll-docs-theme
-title: MP: percussion module
+theme: minimal-mistakes   # or: minima, jekyll-docs-theme
+title: "MP: percussion module"
 description: Documentation
