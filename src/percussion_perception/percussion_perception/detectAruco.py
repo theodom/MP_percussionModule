@@ -3,23 +3,7 @@ import cv2
 import cv2.aruco as aruco
 import numpy as np
 
-# # --- Setup RealSense ---
-# pipeline = rs.pipeline()
-# config = rs.config()
-# config.enable_stream(rs.stream.color, 1280, 720, rs.format.bgr8, 30)
-# config.enable_stream(rs.stream.depth, 1280, 720, rs.format.z16, 30)
-# profile = pipeline.start(config)
-# 
-# align = rs.align(rs.stream.color)
-# 
-# # --- Get intrinsics directly from the camera (no chessboard needed) ---
-# intrinsics = profile.get_stream(rs.stream.color) \
-#                     .as_video_stream_profile().get_intrinsics()
-# 
-# mtx = np.array([[intrinsics.fx, 0,             intrinsics.ppx],
-#                 [0,             intrinsics.fy, intrinsics.ppy],
-#                 [0,             0,             1            ]])
-# dist = np.array(intrinsics.coeffs)
+
 
 
 

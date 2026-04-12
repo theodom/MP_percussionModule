@@ -2,8 +2,8 @@
 
 ## Components
 
-- Capture service node: `capture_service_node.py`
-- ArUco detection module: `detectAruco.py`
+- Capture service node: [`capture_service_node.py`](capture_service_node)
+- ArUco detection module: [`detectAruco.py`](detectAruco)
 
 ## Goals
 
@@ -12,14 +12,14 @@
 - Detect ArUco markers in the color image
 - Compute the 3D pose of each detected marker in the camera frame
 - Transform detected poses from camera frame to gripper/TCP frame
-- Return all detections as `percussion_interfaces/MarkerDetection[]` to the caller.
+- Return all detections as [`percussion_interfaces/MarkerDetection[]`](../interfaces/msg/MarkerDetection.md) to the caller.
 
 > Notice: Structure of Service response with List of custom messages of custom messages could maybe be simplified to list of Pose6D + list of markerID's (int)?
 
 
 ## capture_service_node
 
-Single-service ROS 2 node. Exposes `/trigger_capture` and delegates all camera and detection logic to `detectAruco.py`. Stateless between calls — no persistent camera connection is maintained.
+Single-service ROS 2 node. Exposes `/trigger_capture` and delegates all camera and detection logic to [`detectAruco.py`](./detectAruco.md). Stateless between calls — no persistent camera connection is maintained.
 
 **Parameters**:
 

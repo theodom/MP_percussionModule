@@ -96,17 +96,17 @@ Three nodes are started by the launch file, along with two static TF publishers 
 ```
 /start_task (Trigger)
       │ 
-      ▼
+      v
 task_manager_node
       │  /trigger_capture (TriggerCapture srv)
-      ▼
+      v
 capture_service_node          ← RealSense + ArUco detection
       │
       │ MarkerDetection[] (pose in gripper frame)
-      ▼
+      v
 task_manager_node
       │  /execute_motion (ExecuteMotion action)
-      ▼
+      v
 percussion_motion_node        ← RTDE → UR10e
 
 to add: motion success -> task_manager_node -> startHammering -> Arduino node -> ...
@@ -129,6 +129,7 @@ to add: motion success -> task_manager_node -> startHammering -> Arduino node ->
 ## TO DO
 
 ### Currently known issues
+
 
 - **Task manager**: launch parameters are not being passed downstream -> implement LaunchArgument
 
@@ -155,5 +156,6 @@ to add: motion success -> task_manager_node -> startHammering -> Arduino node ->
 - **Move until contact**
       - Implement move until contact: requires bridge between rtde, Arduino serial and ROS
 
+- **interfaces**: Possibly simplify Pose6D and MarkerDetection into 1 Pose message with extra fields. (header?)
 
 

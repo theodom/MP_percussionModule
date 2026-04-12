@@ -28,8 +28,6 @@ class CaptureServiceNode(Node):
 
         try:
             pipeline, prof = Ar.initialise_camera()
-            detections, ids = Ar.detectMarker(pipeline, prof, markerSize=self._markerSize)
-            pipeline.stop()
 
         except Exception as e:
             response.success = False
@@ -37,6 +35,16 @@ class CaptureServiceNode(Node):
             response.message = f'Failed connecting camera: {e}'
             return response
 
+        try:
+            detections, ids = Ar.detectMarker(pipeline, prof, markerSize=self._markerSize)
+            pipeline.stop()
+
+        except Exception as e:
+            response.success = False
+            response.detections = []
+            response.message = f'Failed during marker detection: {e}'
+            return response
+        
         try: 
             if len(detections) > 0:
 
@@ -68,7 +76,7 @@ class CaptureServiceNode(Node):
 
                     response.detections.append(msg)
                 response.success = True
-                response.frame = "camera_frame"
+                response.frame = "tool0"
                 response.message = 'Successfully detected markers'
             else:
                 response.success = False
