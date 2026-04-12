@@ -2,21 +2,21 @@
 
 ## Overview
 
-Single launchfile part of Task manager, wich starts `task_manger_node` and all underlying nodes, as well as other auxiliary components.
+Single launchfile part of [Task manager](./task_manager.md) package, wich starts [`task_manger_node`](./task_manager_node.md) and all underlying nodes, as well as other auxiliary components.
 It exposes a set of parameters changeable at launch, such as `robot_ip`, `default_vel` for the robot motion, etc.
 
 
 ## Components
 
-- **task_manager_node**: High level orchestrator node.
+- [**task_manager_node**](./task_manager_node.md): High level orchestrator node.
     - **parameters**
     - `capture_timeout_sec`: float value for the capture service timeout.
 
-- **capture_service_node**: Service server for the vision system. 
+- [**capture_service_node**](../Perception/capture_service_node.md): Service server for the vision system. 
     - **parameters**
     - `marker_size`: float value for the physical size of the to be detected ArUco markers. 
 
-- **percussion_motion_node**: Action server for the robot motion system.
+- [**percussion_motion_node**](../Motion/percussion_motion_node.md): Action server for the robot motion system.
     - **parameters**
     - `robot_ip`: string for the IP address of the ur10e Robot arm.       
     - `default_velocity`: float value for the default robot velocity in m/s.

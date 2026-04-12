@@ -1,4 +1,4 @@
-# Perception package:
+# Perception package
 
 ## Components
 
@@ -17,7 +17,7 @@
 > Notice: Structure of Service response with List of custom messages of custom messages could maybe be simplified to list of Pose6D + list of markerID's (int)?
 
 
-## capture_service_node
+### capture_service_node
 
 Single-service ROS 2 node. Exposes [`/trigger_capture`](../interfaces/srv/TriggerCapture.md) and delegates all camera and detection logic to [`detectAruco.py`](./detectAruco.md). Stateless between calls — no persistent camera connection is maintained.
 
@@ -33,7 +33,7 @@ Single-service ROS 2 node. Exposes [`/trigger_capture`](../interfaces/srv/Trigge
 >>To be implemented or removed. So far timeout has never been an issue.
 
 
-## detectAruco
+### detectAruco
 
 Pure-Python module (no ROS). Contains all camera and vision logic. Called directly by `capture_service_node`.
 
