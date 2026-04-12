@@ -2,8 +2,8 @@
 
 ## Components
 
-- Launchfile: `task_system.`launch.py
-- Task Manager node: [`task_manager_node.py`](task_manager_node)
+- Launchfile: [`task_system.launch`](./task_system_launch.md)
+- Task Manager node: [`task_manager_node`](task_manager_node)
 
 ## Goals
 

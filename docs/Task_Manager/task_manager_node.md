@@ -26,7 +26,7 @@
 | Key | Value | info |
 | --- | ---   | ---  |
 |`motion_type`| MOVE_TO_MARKER / RELATIVE_MOVE / MOVE_TO_CONTACT | type of motion corresponding to available types in percussion_motion package|
-| `marker_pose` | `percussion_interfaces/ msg/Pose6D` | 6D TCP pose. Marker position in baseframe for MOVE_TO_MARKER type. otherwise 6 x 0. |
+| `marker_pose` | `percussion_interfaces/ msg/Pose6D` | 6D TCP pose. Marker position in gripper frame for MOVE_TO_MARKER type. otherwise 6 x 0. |
 | `approach_offset` | List of 6 floats. | relevant movement information for each move type. Offset for MOVE_TO_MARKER, direction + speed for MOVE_TO_CONTACT. relative final TCP Position for RELATIVE_MOVE.
 
 

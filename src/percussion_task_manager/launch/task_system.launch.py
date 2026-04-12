@@ -23,21 +23,21 @@ def generate_launch_description() -> LaunchDescription:
 
     nodes = [
         Node(
-            package='percussion_perception',
-            executable='capture_service_node',
-            name='capture_service_node',
-            output='screen',
-            parameters=[{
-                'markerSize': LaunchConfiguration('marker_size'),
-            }],
-        ),
-        Node(
             package='percussion_task_manager',
             executable='task_manager_node',
             name='task_manager',
             output='screen',
             parameters=[{
                 'capture_timeout_sec': LaunchConfiguration('capture_timeout_sec'),
+            }],
+        ),
+        Node(
+            package='percussion_perception',
+            executable='capture_service_node',
+            name='capture_service_node',
+            output='screen',
+            parameters=[{
+                'markerSize': LaunchConfiguration('markerSize'),
             }],
         ),
         Node(
