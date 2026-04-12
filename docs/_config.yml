@@ -1,3 +1,7 @@
 remote_theme: mmistakes/minimal-mistakes
 title: "MP: percussion module"
 description: Documentation
+baseurl: "/MP_percussionModule"
+
+plugins:
+  - jekyll-include-cache
