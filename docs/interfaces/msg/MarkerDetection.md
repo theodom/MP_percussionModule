@@ -2,7 +2,7 @@
 
 ## Overview
 
-
+Simple message type to add extra information to a 6D marker pose, such as the marker ID. This may turn out to be unneccesary.
 
 ## Content
 

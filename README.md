@@ -128,10 +128,14 @@ to add: motion success -> task_manager_node -> startHammering -> Arduino node ->
 
 ## TO DO
 
+- update README/docs
+
 ### Currently known issues
 
 
-- **Task manager**: launch parameters are not being passed downstream -> implement LaunchArgument
+- **Task manager**: 
+  - ~~launch parameters are not being passed downstream -> implement LaunchArgument~~
+  - `capture_timeout_sec` not being passed to service.
 
 - **perception_motion**: 
   - ~~The robot currently moves using rtde, but to the wrong position -- problem with marker pose transform camera -> TCP pose~~
