@@ -10,9 +10,6 @@ def generate_launch_description() -> LaunchDescription:
         # --- Perception ---
         DeclareLaunchArgument('marker_size',        default_value='0.0398',      description='ArUco marker side length in metres'),
 
-        # --- Task manager ---
-        DeclareLaunchArgument('capture_timeout_sec', default_value='10.0',       description='Capture service timeout in seconds'),
-
         # --- Motion ---
         DeclareLaunchArgument('robot_ip',           default_value='169.254.0.22', description='UR10e RTDE IP address'),
         DeclareLaunchArgument('default_velocity',   default_value='0.2',          description='Default joint velocity (m/s)'),
@@ -27,9 +24,7 @@ def generate_launch_description() -> LaunchDescription:
             executable='task_manager_node',
             name='task_manager',
             output='screen',
-            parameters=[{
-                'capture_timeout_sec': LaunchConfiguration('capture_timeout_sec'),
-            }],
+            parameters=[],
         ),
         Node(
             package='percussion_perception',
@@ -37,7 +32,7 @@ def generate_launch_description() -> LaunchDescription:
             name='capture_service_node',
             output='screen',
             parameters=[{
-                'markerSize': LaunchConfiguration('markerSize'),
+                'markerSize': LaunchConfiguration('marker_size'),
             }],
         ),
         Node(

@@ -6,6 +6,7 @@ from percussion_interfaces.msg import MarkerDetection
 from percussion_interfaces.msg import Pose6D
 
 import percussion_perception.detectAruco as Ar
+import time
 
 
 class CaptureServiceNode(Node):
@@ -28,7 +29,6 @@ class CaptureServiceNode(Node):
 
         try:
             pipeline, prof = Ar.initialise_camera()
-
         except Exception as e:
             response.success = False
             response.detections = []

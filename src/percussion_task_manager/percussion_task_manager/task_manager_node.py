@@ -17,6 +17,7 @@ class TaskState(str, Enum):
     CAPTURING           = 'CAPTURING'
     POSE_ACQUIRED       = 'POSE_ACQUIRED'
     MOVING_TO_WEDGELOCK = 'MOVING_TO_WEDGELOCK'
+    HAMMERING           = 'HAMMERING'
     DONE                = 'DONE'
     RETURNING           = 'RETURNING'
     ERROR               = 'ERROR'
@@ -36,11 +37,9 @@ class TaskManagerNode(Node):
         # Parameters 
         self.declare_parameter('capture_service_name', '/trigger_capture')
         self.declare_parameter('target_frame', 'base')
-        self.declare_parameter('capture_timeout_sec', 5.0)
 
         capture_service_name = self.get_parameter('capture_service_name').get_parameter_value().string_value
         self._target_frame   = self.get_parameter('target_frame').get_parameter_value().string_value
-        self._capture_timeout = self.get_parameter('capture_timeout_sec').get_parameter_value().double_value
 
         # Services/Topics
         self._start_srv     = self.create_service(Trigger, '/start_task', self.start_task_callback)
@@ -210,6 +209,7 @@ class TaskManagerNode(Node):
             % (selected.marker_id, selected.pose.x, selected.pose.y, selected.pose.z)
         )
 
+
         self.publish_state(TaskState.POSE_ACQUIRED)
         self._sequence = self._build_sequence(selected.pose)
         self._returning = False
@@ -221,10 +221,13 @@ class TaskManagerNode(Node):
 
     def _execute_next_step(self) -> None:
         if not self._sequence:
+            self.get_logger().info(f'if not self.sequence')
             if not self._returning:
                 # Main sequence done — start return sequence
                 self._returning = True
                 self._sequence = self._build_return_sequence()
+                self.publish_state(TaskState.HAMMERING)
+                self.get_logger().info(f'Hammer sequence . . . ')
                 self.publish_state(TaskState.DONE)
             else:
                 # Return sequence done — back to idle
