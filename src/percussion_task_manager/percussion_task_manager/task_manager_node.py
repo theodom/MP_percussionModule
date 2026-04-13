@@ -14,6 +14,7 @@ from percussion_interfaces.msg import Pose6D
 
 class TaskState(str, Enum):
     IDLE                = 'IDLE'
+    TASK_REQUESTED      = 'TASK_REQUESTED'
     CAPTURING           = 'CAPTURING'
     POSE_ACQUIRED       = 'POSE_ACQUIRED'
     MOVING_TO_WEDGELOCK = 'MOVING_TO_WEDGELOCK'
@@ -84,7 +85,7 @@ class TaskManagerNode(Node):
             {
                 'motion_type':    'RELATIVE_MOVE', # Rotate Tool to face wedgelock
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, 0.0, 0.0, 0.0, -1.4600, 0.0],   # TCP frame
+                'approach_offset': [0.0, 0.0, 0.0, 0.0, -1.5701, 0.0],   # TCP frame
             },
             {
                 'motion_type':    'RELATIVE_MOVE', # Move towards wedgelock (sideways) for contact 2D
@@ -128,6 +129,11 @@ class TaskManagerNode(Node):
                 'motion_type':    'RELATIVE_MOVE', # Retract from wedgelock
                 'marker_pose':    _make_pose6d(),
                 'approach_offset': [0.0, 0.05, -0.10, 0.0, 0.0, 0.0], # TCP frame
+            },
+            {
+                'motion_type':    'RELATIVE_MOVE', # Rotate Tool to unface wedgelock
+                'marker_pose':    _make_pose6d(),
+                'approach_offset': [0.0, 0.0, 0.0, 0.0, 1.5701, 0.0],   # TCP frame
             },
             {
                 'motion_type':    'RETURN_HOME',
@@ -211,6 +217,10 @@ class TaskManagerNode(Node):
 
 
         self.publish_state(TaskState.POSE_ACQUIRED)
+
+        # Rework to be more general motion.
+
+
         self._sequence = self._build_sequence(selected.pose)
         self._returning = False
         self._execute_next_step()

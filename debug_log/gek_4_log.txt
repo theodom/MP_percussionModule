@@ -1,0 +1,89 @@
+theo@theo-mbp:~/MP_percussionModule$ ros2 launch percussion_task_manager task_system.launch.py
+[INFO] [launch]: All log files can be found below /home/theo/.ros/log/2026-04-13-14-18-49-222348-theo-mbp-216244
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [task_manager_node-1]: process started with pid [216247]
+[INFO] [capture_service_node-2]: process started with pid [216248]
+[INFO] [percussion_motion_node-3]: process started with pid [216249]
+[INFO] [static_transform_publisher-4]: process started with pid [216250]
+[INFO] [static_transform_publisher-5]: process started with pid [216251]
+[static_transform_publisher-4] [WARN] [1776082729.351168962] []: Old-style arguments are deprecated; see --help for new-style arguments
+[static_transform_publisher-5] [WARN] [1776082729.364113050] []: Old-style arguments are deprecated; see --help for new-style arguments
+[static_transform_publisher-4] [INFO] [1776082729.373503425] [tool0_to_camera_broadcaster]: Spinning until stopped - publishing transform
+[static_transform_publisher-4] translation: ('0.000000', '-0.127750', '0.044510')
+[static_transform_publisher-4] rotation: ('0.000000', '0.000000', '1.000000', '0.000796')
+[static_transform_publisher-4] from 'tool0' to 'camera_frame'
+[static_transform_publisher-5] [INFO] [1776082729.397191784] [world_to_base_link_broadcaster]: Spinning until stopped - publishing transform
+[static_transform_publisher-5] translation: ('0.000000', '0.000000', '0.000000')
+[static_transform_publisher-5] rotation: ('0.382683', '0.000000', '0.000000', '0.923880')
+[static_transform_publisher-5] from 'world' to 'base_link'
+[capture_service_node-2] [INFO] [1776082730.131493528] [capture_service_node]: Capture service node ready.
+[task_manager_node-1] [INFO] [1776082730.169589571] [task_manager]: State -> IDLE
+[task_manager_node-1] [INFO] [1776082730.170123248] [task_manager]: Task manager node started.
+[percussion_motion_node-3] [INFO] [1776082730.185615986] [percussion_motion]: Connecting to robot at 169.254.0.22 …
+[percussion_motion_node-3] [INFO] [1776082731.435700080] [percussion_motion]: RTDE connection established.
+[percussion_motion_node-3] [INFO] [1776082731.436518808] [percussion_motion]: Percussion motion node ready.
+[capture_service_node-2] [INFO] [1776082733.799123416] [capture_service_node]: Received capture request: timeout=0
+[capture_service_node-2] [INFO] [1776082734.923426319] [capture_service_node]: marker: [ 0.05052327 -0.03257366  0.81069843  2.1190085  -1.55334818  0.18555894]
+[percussion_motion_node-3] [INFO] [1776082735.026028265] [percussion_motion]: Accepting goal: MOVE_TO_MARKER
+[percussion_motion_node-3] [INFO] [1776082735.027409080] [percussion_motion]: Executing motion: MOVE_TO_MARKER | target=(-0.0505, 0.1603, 0.7662) | pose_offset=(-0.070, 0.000, 0.000)
+[percussion_motion_node-3] [INFO] [1776082735.034892191] [percussion_motion]:   [MOVE_TO_MARKER] phase: APPROACHING
+[percussion_motion_node-3] [INFO] [1776082735.035554180] [percussion_motion]: Extra: Goal pose: [0.6476854894683122, 0.4278166778123527, 0.4973828792403554, -2.820067099786316, -0.9080005670663817, -0.8511557198054827]
+[percussion_motion_node-3] [INFO] [1776082740.639911858] [percussion_motion]:   [MOVE_TO_MARKER] phase: MOVING_TO_MARKER
+[percussion_motion_node-3] RTDEControlInterface: RTDE control script is not running!
+[percussion_motion_node-3] [INFO] [1776082740.642741009] [percussion_motion]:   [MOVE_TO_MARKER] phase: MARKER_REACHED
+[percussion_motion_node-3] [INFO] [1776082740.660900837] [percussion_motion]: Accepting goal: MOVE_TO_CONTACT
+[percussion_motion_node-3] [INFO] [1776082740.664967892] [percussion_motion]: Executing motion: MOVE_TO_CONTACT | target=(0.0000, 0.0000, 0.0000) | pose_offset=(0.010, 0.000, 0.000)
+[percussion_motion_node-3] RTDEControlInterface: RTDE control script is not running!
+[percussion_motion_node-3] [ERROR] [1776082740.667763034] [percussion_motion]: Unhandled exception in motion execution: poseTrans() function did not succeed!
+^C[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)
+[static_transform_publisher-5] [INFO] [1776082748.015084667] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[static_transform_publisher-4] [INFO] [1776082748.015399885] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[percussion_motion_node-3] [INFO] [1776082748.017729254] [percussion_motion]: Shutting down — stopping robot script.
+[percussion_motion_node-3] Failed to publish log message to rosout: publisher's context is invalid, at ./src/rcl/publisher.c:423
+[percussion_motion_node-3] RTDEControlInterface: RTDE control script is not running!
+[capture_service_node-2] entering camera init
+[capture_service_node-2] exiting camera init
+[task_manager_node-1] Traceback (most recent call last):
+[task_manager_node-1]   File "/home/theo/MP_percussionModule/install/percussion_task_manager/lib/percussion_task_manager/task_manager_node", line 33, in <module>
+[task_manager_node-1]     sys.exit(load_entry_point('percussion-task-manager==0.0.1', 'console_scripts', 'task_manager_node')())
+[task_manager_node-1]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[task_manager_node-1]   File "/home/theo/MP_percussionModule/install/percussion_task_manager/lib/python3.12/site-packages/percussion_task_manager/task_manager_node.py", line 294, in main
+[task_manager_node-1]     rclpy.shutdown()
+[task_manager_node-1]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/__init__.py", line 134, in shutdown
+[task_manager_node-1]     _shutdown(context=context)
+[task_manager_node-1]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/utilities.py", line 82, in shutdown
+[task_manager_node-1]     context.shutdown()
+[task_manager_node-1]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/context.py", line 129, in shutdown
+[task_manager_node-1]     self.__context.shutdown()
+[task_manager_node-1] rclpy._rclpy_pybind11.RCLError: failed to shutdown: rcl_shutdown already called on the given context, at ./src/rcl/init.c:333
+[percussion_motion_node-3] Traceback (most recent call last):
+[percussion_motion_node-3]   File "/home/theo/MP_percussionModule/install/percussion_motion/lib/percussion_motion/percussion_motion_node", line 33, in <module>
+[percussion_motion_node-3]     sys.exit(load_entry_point('percussion-motion==0.0.0', 'console_scripts', 'percussion_motion_node')())
+[percussion_motion_node-3]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[percussion_motion_node-3]   File "/home/theo/MP_percussionModule/install/percussion_motion/lib/python3.12/site-packages/percussion_motion/percussion_motion_node.py", line 333, in main
+[percussion_motion_node-3]     rclpy.shutdown()
+[percussion_motion_node-3]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/__init__.py", line 134, in shutdown
+[percussion_motion_node-3]     _shutdown(context=context)
+[percussion_motion_node-3]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/utilities.py", line 82, in shutdown
+[percussion_motion_node-3]     context.shutdown()
+[percussion_motion_node-3]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/context.py", line 129, in shutdown
+[percussion_motion_node-3]     self.__context.shutdown()
+[percussion_motion_node-3] rclpy._rclpy_pybind11.RCLError: failed to shutdown: rcl_shutdown already called on the given context, at ./src/rcl/init.c:333
+[capture_service_node-2] Traceback (most recent call last):
+[capture_service_node-2]   File "/home/theo/MP_percussionModule/install/percussion_perception/lib/percussion_perception/capture_service_node", line 33, in <module>
+[capture_service_node-2]     sys.exit(load_entry_point('percussion-perception==0.0.1', 'console_scripts', 'capture_service_node')())
+[capture_service_node-2]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[capture_service_node-2]   File "/home/theo/MP_percussionModule/install/percussion_perception/lib/python3.12/site-packages/percussion_perception/capture_service_node.py", line 104, in main
+[capture_service_node-2]     rclpy.shutdown()
+[capture_service_node-2]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/__init__.py", line 134, in shutdown
+[capture_service_node-2]     _shutdown(context=context)
+[capture_service_node-2]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/utilities.py", line 82, in shutdown
+[capture_service_node-2]     context.shutdown()
+[capture_service_node-2]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/context.py", line 129, in shutdown
+[capture_service_node-2]     self.__context.shutdown()
+[capture_service_node-2] rclpy._rclpy_pybind11.RCLError: failed to shutdown: rcl_shutdown already called on the given context, at ./src/rcl/init.c:333
+[INFO] [static_transform_publisher-4]: process has finished cleanly [pid 216250]
+[INFO] [static_transform_publisher-5]: process has finished cleanly [pid 216251]
+[ERROR] [task_manager_node-1]: process has died [pid 216247, exit code 1, cmd '/home/theo/MP_percussionModule/install/percussion_task_manager/lib/percussion_task_manager/task_manager_node --ros-args -r __node:=task_manager'].
+[ERROR] [capture_service_node-2]: process has died [pid 216248, exit code 1, cmd '/home/theo/MP_percussionModule/install/percussion_perception/lib/percussion_perception/capture_service_node --ros-args -r __node:=capture_service_node --params-file /tmp/launch_params_8vpkjt2r'].
+[ERROR] [percussion_motion_node-3]: process has died [pid 216249, exit code 1, cmd '/home/theo/MP_percussionModule/install/percussion_motion/lib/percussion_motion/percussion_motion_node --ros-args
