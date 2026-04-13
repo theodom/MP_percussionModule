@@ -18,6 +18,7 @@ class TaskState(str, Enum):
     CAPTURING           = 'CAPTURING'
     POSE_ACQUIRED       = 'POSE_ACQUIRED'
     MOVING_TO_WEDGELOCK = 'MOVING_TO_WEDGELOCK'
+    AT_MARKER           = 'AT_MARKER'
     HAMMERING           = 'HAMMERING'
     DONE                = 'DONE'
     RETURNING           = 'RETURNING'
@@ -45,9 +46,11 @@ class TaskManagerNode(Node):
         # Services/Topics
         self._start_srv     = self.create_service(Trigger, '/start_task', self.start_task_callback)
         self._state_pub     = self.create_publisher(String, '/task_manager/state', 10)
+        self._state_sub     = self.create_subscription(String, '/task_manager/state', self._on_state_changed, 10)
         self._capture_client: Client = self.create_client(TriggerCapture, capture_service_name)
         self._motion_client = ActionClient(self, ExecuteMotion, '/execute_motion')
 
+        self._selected_marker: Optional[Pose6D] = None
         self._current_state = TaskState.IDLE
         self._pending_capture_call = None
         self._returning = False
@@ -70,7 +73,7 @@ class TaskManagerNode(Node):
             {
                 'motion_type':    'MOVE_TO_MARKER', # 10 cm standoff in base X
                 'marker_pose':    marker_pose,
-                'approach_offset': [-0.07, 0.0, 0.0, 0.0, 0.0, 0.0],  # Base Frame
+                'approach_offset': [-0.020, 0.0, 0.0, 0.0, 0.0, 0.0],  # Base Frame
             },
             {
                 'motion_type':    'MOVE_TO_CONTACT', # Touch Ledger facing marker
@@ -105,7 +108,7 @@ class TaskManagerNode(Node):
             {
                 'motion_type':    'RELATIVE_MOVE', # MOVE closer to pole 
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.025, 0.0, 0.10, 0.0, 0.0, 0.0], # TCP frame
+                'approach_offset': [0.030, 0.0, 0.10, 0.0, 0.0, 0.0], # TCP frame
             },
             {
                 'motion_type':    'MOVE_TO_CONTACT', # Touch bar sideways
@@ -115,7 +118,7 @@ class TaskManagerNode(Node):
             {
                 'motion_type':    'RELATIVE_MOVE', # Move into striking position
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, 0.0, -0.00300, 0.0, 0.0, 0.0],   # TCP frame
+                'approach_offset': [0.0, 0.0, -0.00200, 0.0, 0.0, 0.0],   # TCP frame
             },
         ]
 
@@ -131,20 +134,65 @@ class TaskManagerNode(Node):
                 'approach_offset': [0.0, 0.05, -0.10, 0.0, 0.0, 0.0], # TCP frame
             },
             {
-                'motion_type':    'RELATIVE_MOVE', # Rotate Tool to unface wedgelock
+                'motion_type':    'RELATIVE_MOVE', # Retract from wedgelock
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, 0.0, 0.0, 0.0, 1.5701, 0.0],   # TCP frame
+                'approach_offset': [0.0, 0.0, 0.0, 0.0, 1.57, 0.0], # TCP frame
             },
-            {
-                'motion_type':    'RETURN_HOME',
-                'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            },
+            #{
+            #    'motion_type':    'RETURN_HOME',
+            #    'marker_pose':    _make_pose6d(),
+            #    'approach_offset': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            #},
         ]
 
     # ------------------------------------------------------------------
     # State
     # ------------------------------------------------------------------
+
+    def _on_state_changed(self, _msg: String) -> None:
+        state = _msg.data
+
+        match state:
+            case TaskState.TASK_REQUESTED: 
+                self.run_capture_service()
+            
+            case TaskState.CAPTURING:
+
+                pass
+            case TaskState.POSE_ACQUIRED:
+                # marker_pose = self._selected_marker 
+                if self._selected_marker is None:
+                    self.get_logger().error('POSE_ACQUIRED but no marker available')
+                    self.publish_state(TaskState.ERROR)
+                    return
+
+                self._sequence = self._build_sequence(self._selected_marker)
+                self.get_logger().info(f'sequence: {self._sequence}')
+                self._returning = False
+                self._execute_next_step()
+                self.publish_state(TaskState.MOVING_TO_WEDGELOCK)
+            case TaskState.AT_MARKER:
+                # Check low level readiness
+                # Request hammering action
+                self.publish_state(TaskState.HAMMERING)
+                pass
+            case TaskState.HAMMERING:
+                # wait for result from arduino
+                self.get_logger().info(f'sequence: {self._sequence}')
+                self.publish_state(TaskState.DONE)
+            case TaskState.DONE:
+                self._sequence = self._build_return_sequence()
+                self._returning = True
+                self.get_logger().info(f'sequence: {self._sequence}')
+                self._execute_next_step()
+                self.publish_state(TaskState.RETURNING)
+                pass
+            case _:
+                pass
+
+    
+
+
 
     def publish_state(self, state: TaskState) -> None:
         self._current_state = state
@@ -159,22 +207,25 @@ class TaskManagerNode(Node):
 
     def start_task_callback(self, request: Trigger.Request, response: Trigger.Response) -> Trigger.Response:
         del request
+        self.publish_state(TaskState.TASK_REQUESTED)
+        response.success = True
+        response.message = 'Task requested.'
+        return response
+    
+    # ------------------------------------------------------------------
+    # Start capture service
+    # ------------------------------------------------------------------
 
-        if self._current_state not in [TaskState.IDLE, TaskState.DONE, TaskState.ERROR]:
-            response.success = False
-            response.message = f'Task manager busy, current state: {self._current_state.value}'
-            return response
-
+    def run_capture_service(self):
         if not self._capture_client.service_is_ready():
             self.get_logger().warn('Capture service not reported ready yet; sending request anyway.')
 
-        self.publish_state(TaskState.CAPTURING)
+        self._selected_marker = None
         self._pending_capture_call = self._capture_client.call_async(TriggerCapture.Request())
         self._pending_capture_call.add_done_callback(self._on_capture_done)
+        self.publish_state(TaskState.CAPTURING)
 
-        response.success = True
-        response.message = 'Task accepted; capture request sent.'
-        return response
+
 
     # ------------------------------------------------------------------
     # Capture callback
@@ -216,14 +267,18 @@ class TaskManagerNode(Node):
         )
 
 
+        self._selected_marker = selected.pose
+
+
         self.publish_state(TaskState.POSE_ACQUIRED)
 
+        
         # Rework to be more general motion.
 
 
-        self._sequence = self._build_sequence(selected.pose)
-        self._returning = False
-        self._execute_next_step()
+        #self._sequence = self._build_sequence(selected.pose)
+        #self._returning = False
+        #self._execute_next_step()
 
     # ------------------------------------------------------------------
     # Sequence execution
@@ -233,12 +288,14 @@ class TaskManagerNode(Node):
         if not self._sequence:
             self.get_logger().info(f'if not self.sequence')
             if not self._returning:
+                self.publish_state(TaskState.AT_MARKER)
                 # Main sequence done — start return sequence
-                self._returning = True
-                self._sequence = self._build_return_sequence()
-                self.publish_state(TaskState.HAMMERING)
-                self.get_logger().info(f'Hammer sequence . . . ')
-                self.publish_state(TaskState.DONE)
+                # self._returning = True
+                # self._sequence = self._build_return_sequence()
+                # self.publish_state(TaskState.HAMMERING)
+                # self.get_logger().info(f'Hammer sequence . . . ')
+                # self.publish_state(TaskState.DONE)
+                pass 
             else:
                 # Return sequence done — back to idle
                 self.publish_state(TaskState.IDLE)
@@ -253,6 +310,11 @@ class TaskManagerNode(Node):
         self._send_motion_goal(step)
 
     def _send_motion_goal(self, step: dict) -> None:
+        if step['marker_pose'] is None:
+            self.get_logger().error('Attempting to send goal with None marker_pose')
+            self.publish_state(TaskState.ERROR)
+            return
+
         if not self._motion_client.server_is_ready():
             self.get_logger().error('Motion action server not available.')
             self.publish_state(TaskState.ERROR)
@@ -263,8 +325,8 @@ class TaskManagerNode(Node):
         goal.marker_pose     = step['marker_pose']
         goal.approach_offset = step['approach_offset']
 
-        state = TaskState.RETURNING if self._returning else TaskState.MOVING_TO_WEDGELOCK
-        self.publish_state(state)
+        #state = TaskState.RETURNING if self._returning else TaskState.MOVING_TO_WEDGELOCK
+        #self.publish_state(state)
         send_future = self._motion_client.send_goal_async(goal)
         send_future.add_done_callback(self._on_motion_goal_accepted)
 
