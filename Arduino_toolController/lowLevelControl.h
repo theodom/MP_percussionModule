@@ -22,10 +22,9 @@ struct parsedMessage {
 };
 
 struct messageToParse {
-  OUT_MSG_TYPE type;
-  bool ind_a;
-  bool ind_b;
-  bool EMState;
+  String type;
+  String state;
+  String msg;
 };
 
 parsedMessage readROSSerial();

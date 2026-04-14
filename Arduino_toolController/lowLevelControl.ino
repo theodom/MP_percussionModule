@@ -23,18 +23,28 @@ parsedMessage readROSSerial() {
   result.data  = (second == -1) ? raw.substring(first + 1) : raw.substring(first + 1, second);
   result.extra = (second == -1) ? "" : raw.substring(second + 1);
 
-  int typeInt = typeStr.toInt();
-  // toInt() returns 0 on failure — verify it was actually "0" if that's the result
-  if (typeInt == 0 && typeStr != "0") return result;
+  // Match string MSG_TYPE to enum value
+  if (typeStr == "RETRACT_EM") {
+    result.type = RETRACT_EM;
+  } else if (typeStr == "HAMMER_REQ") {
+    result.type = HAMMER_REQ;
+  } else if (typeStr == "IND_VALUES") {
+    result.type = IND_VALUES;
+  } else {
+    return result;
+  }
 
-  result.type  = (IN_MSG_TYPE)typeInt;
   result.valid = true;
   return result;
 }
 
 int writeROSSerial(messageToParse message) {
-
-
+  Serial.print(message.type);
+  Serial.print("|");
+  Serial.print(message.state);
+  Serial.print("|");
+  Serial.print(message.msg);
+  Serial.print("\n");
   return 0;
 }
 
