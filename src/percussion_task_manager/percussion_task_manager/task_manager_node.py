@@ -53,7 +53,7 @@ class TaskManagerNode(Node):
         self._selected_marker: Optional[Pose6D] = None
         self._current_state = TaskState.IDLE
         self._pending_capture_call = None
-        self._returning = False
+        self._on_sequence_done = None
         self._sequence: List[dict] = []
 
         self.publish_state(self._current_state)
@@ -138,11 +138,11 @@ class TaskManagerNode(Node):
                 'marker_pose':    _make_pose6d(),
                 'approach_offset': [0.0, 0.0, 0.0, 0.0, 1.57, 0.0], # TCP frame
             },
-            #{
-            #    'motion_type':    'RETURN_HOME',
-            #    'marker_pose':    _make_pose6d(),
-            #    'approach_offset': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            #},
+            {
+                'motion_type':    'RETURN_HOME',
+                'marker_pose':    _make_pose6d(),
+                'approach_offset': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            },
         ]
 
     # ------------------------------------------------------------------
@@ -160,34 +160,36 @@ class TaskManagerNode(Node):
 
                 pass
             case TaskState.POSE_ACQUIRED:
-                # marker_pose = self._selected_marker 
+                # ENKEL VOOR THUIS TESTEN... ANDERS NIET GEBRUIKEN!
+                # self._selected_marker = _make_pose6d(0.6597723446915864, 0.4272507575618981, 0.486163269104955, 1.6956424868194673, 0.7053985046295215, 1.8109614421292222)
                 if self._selected_marker is None:
                     self.get_logger().error('POSE_ACQUIRED but no marker available')
                     self.publish_state(TaskState.ERROR)
                     return
 
                 self._sequence = self._build_sequence(self._selected_marker)
-                self.get_logger().info(f'sequence: {self._sequence}')
-                self._returning = False
+                self._on_sequence_done = lambda: self.publish_state(TaskState.AT_MARKER)
                 self._execute_next_step()
-                self.publish_state(TaskState.MOVING_TO_WEDGELOCK)
             case TaskState.AT_MARKER:
-                # Check low level readiness
-                # Request hammering action
+                # arduino handshake / readiness check goes here in future
                 self.publish_state(TaskState.HAMMERING)
                 pass
             case TaskState.HAMMERING:
                 # wait for result from arduino
-                self.get_logger().info(f'sequence: {self._sequence}')
+
                 self.publish_state(TaskState.DONE)
+                pass
             case TaskState.DONE:
-                self._sequence = self._build_return_sequence()
-                self._returning = True
-                self.get_logger().info(f'sequence: {self._sequence}')
-                self._execute_next_step()
+                # Transition logic will go here
                 self.publish_state(TaskState.RETURNING)
                 pass
+            case TaskState.RETURNING:
+                # Transition logic will go here
+                self._sequence = self._build_return_sequence()
+                self._on_sequence_done = lambda: self.publish_state(TaskState.IDLE)
+                self._execute_next_step()
             case _:
+        
                 pass
 
     
@@ -266,48 +268,25 @@ class TaskManagerNode(Node):
             % (selected.marker_id, selected.pose.x, selected.pose.y, selected.pose.z)
         )
 
-
         self._selected_marker = selected.pose
-
-
         self.publish_state(TaskState.POSE_ACQUIRED)
-
-        
-        # Rework to be more general motion.
-
-
-        #self._sequence = self._build_sequence(selected.pose)
-        #self._returning = False
-        #self._execute_next_step()
 
     # ------------------------------------------------------------------
     # Sequence execution
     # ------------------------------------------------------------------
 
-    def _execute_next_step(self) -> None:
+    def _execute_next_step(self) -> bool:
         if not self._sequence:
-            self.get_logger().info(f'if not self.sequence')
-            if not self._returning:
-                self.publish_state(TaskState.AT_MARKER)
-                # Main sequence done — start return sequence
-                # self._returning = True
-                # self._sequence = self._build_return_sequence()
-                # self.publish_state(TaskState.HAMMERING)
-                # self.get_logger().info(f'Hammer sequence . . . ')
-                # self.publish_state(TaskState.DONE)
-                pass 
-            else:
-                # Return sequence done — back to idle
-                self.publish_state(TaskState.IDLE)
-                return
+            if self._on_sequence_done:
+                self._on_sequence_done()
+            return True
 
         step = self._sequence.pop(0)
-        phase = 'RETURNING' if self._returning else 'MOVING_TO_WEDGELOCK'
         self.get_logger().info(
-            f'{phase} step: {step["motion_type"]} '
-            f'({len(self._sequence)} steps remaining)'
+            f'Step: {step["motion_type"]} ({len(self._sequence)} steps remaining)'
         )
         self._send_motion_goal(step)
+        return False
 
     def _send_motion_goal(self, step: dict) -> None:
         if step['marker_pose'] is None:
@@ -325,27 +304,32 @@ class TaskManagerNode(Node):
         goal.marker_pose     = step['marker_pose']
         goal.approach_offset = step['approach_offset']
 
-        #state = TaskState.RETURNING if self._returning else TaskState.MOVING_TO_WEDGELOCK
-        #self.publish_state(state)
-        send_future = self._motion_client.send_goal_async(goal)
-        send_future.add_done_callback(self._on_motion_goal_accepted)
+        def _on_goal_response(future):
+            handle = future.result()
+            if not handle.accepted:
+                self.get_logger().error('Motion goal rejected by motion node.')
+                self.publish_state(TaskState.ERROR)
+                return
+            handle.get_result_async().add_done_callback(self._on_motion_result)
 
-    def _on_motion_goal_accepted(self, future) -> None:
-        goal_handle = future.result()
-        if not goal_handle.accepted:
-            self.get_logger().error('Motion goal rejected by motion node.')
-            self.publish_state(TaskState.ERROR)
-            return
-        goal_handle.get_result_async().add_done_callback(self._on_motion_result)
+        self._motion_client.send_goal_async(goal).add_done_callback(_on_goal_response)
 
     def _on_motion_result(self, future) -> None:
-        result = future.result().result
+        try:
+            result = future.result().result
+        except Exception as exc:
+            self.get_logger().error(f'Motion action failed (server may have crashed): {exc}')
+            self._sequence.clear()
+            self._on_sequence_done = None
+            self.publish_state(TaskState.ERROR)
+            return
         if result.success:
             self.get_logger().info('Step complete.')
             self._execute_next_step()
         else:
             self.get_logger().error(f'Step failed: {result.message}')
             self._sequence.clear()
+            self._on_sequence_done = None
             self.publish_state(TaskState.ERROR)
 
 
