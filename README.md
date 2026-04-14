@@ -82,9 +82,12 @@ ros2 service call /start_task std_srvs/srv/Trigger
 
 ## Architecture
 
-The following diagram shows the general workflow of the percussion module. 
- 
-(may not be entirely up to date)
+The following diagram shows the architectural layout of the ROS project. The task manager node is a main orchestrator which decides the system state and what to do. The underlying nodes are called upon as needed;
+
+![ROS node architecture](./ros_node_architecture.png)
+
+
+The following diagram gives an overview of the general workflow of the program. When a task is requested this is the sequence in which things are executed. (not yet fully implemented)
 
 ![ROS task flow sequence](ros_task_flow_sequence.png)
 
@@ -93,26 +96,7 @@ Three nodes are started by the launch file, along with two static TF publishers 
 
 
 
-```
-/start_task (Trigger)
-      │ 
-      v
-task_manager_node
-      │  /trigger_capture (TriggerCapture srv)
-      v
-capture_service_node          ← RealSense + ArUco detection
-      │
-      │ MarkerDetection[] (pose in gripper frame)
-      v
-task_manager_node
-      │  /execute_motion (ExecuteMotion action)
-      v
-percussion_motion_node        ← RTDE → UR10e
 
-to add: motion success -> task_manager_node -> startHammering -> Arduino node -> ...
-
-
-```
 
 | Node | Package | Role |
 |---|---|---|
