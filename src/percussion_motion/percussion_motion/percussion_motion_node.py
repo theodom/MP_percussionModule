@@ -278,7 +278,7 @@ class PercussionMotionNode(Node):
             result = motions.move_until_contact(
                 self._rtde_c, self._rtde_r,
                 direction=direction,
-                force_threshold=2,
+                force_threshold=self._contact_frc,
                 timeout_sec=self._contact_tmt,
             )
             if result.status == MoveStatus.SUCCESS:

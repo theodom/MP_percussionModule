@@ -35,7 +35,6 @@ Connects to the UR10e robot via RTDE at startup (blocking). The action server is
 - `/execute_motion`: Action server (`ExecuteMotion`)
 - `RTDEControlInterface` + `RTDEReceiveInterface`: Blocking connection to robot at startup
 
-> `contact_force` parameter is currently not passed to `move_until_contact` in `_execute_motion_sequence` — force threshold is hardcoded to `2` there. The parameter has no effect.
 
 ---
 
@@ -101,7 +100,7 @@ Core dispatch function. Selects and executes the correct motion primitive based 
 | Motion type | Behaviour |
 | ---         | ---       |
 | `MOVE_TO_MARKER` | Converts `marker_pose` from TCP frame to base frame via `poseTrans`. Computes face-to-marker TCP orientation via `compute_face_marker_rvec` (accounts for 45° robot mount). Subtracts 0.10 m on base-frame X as standoff. Calls `move_to_pose` twice to that position. `pose_offset` is ignored. |
-| `MOVE_TO_CONTACT` | Converts `marker_pose` to base frame. Adds `pose_offset[:3]` in base frame as approach position and moves there. Then calls `move_until_contact` with `pose_offset` as the contact direction. Force threshold hardcoded to `2` N. |
+| `MOVE_TO_CONTACT` | Converts `marker_pose` to base frame. Adds `pose_offset[:3]` in base frame as approach position and moves there. Then calls `move_until_contact` with `pose_offset` as the contact direction. Force threshold from `contact_force` parameter (default: 1.0 N). |
 | `RETURN_HOME` | Calls `move_to_pose` with `home_pose` parameter. |
 | `RELATIVE_MOVE` | Calls `move_relative_world` — applies `pose_offset` as a 6DOF TCP-frame offset via `poseTrans`. |
 

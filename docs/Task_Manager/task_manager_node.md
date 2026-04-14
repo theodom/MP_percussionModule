@@ -23,11 +23,11 @@
 - List of Dicts containing motion type and movement instructions. 
 
 
-| Key | Value | info |
+| Key | Value | info |
 | --- | ---   | ---  |
-|`motion_type`| MOVE_TO_MARKER / RELATIVE_MOVE / MOVE_TO_CONTACT | type of motion corresponding to available types in percussion_motion package|
+|`motion_type`| MOVE_TO_MARKER / RELATIVE_MOVE / MOVE_TO_CONTACT | type of motion corresponding to available types in percussion_motion package|
 | `marker_pose` | `percussion_interfaces/ msg/Pose6D` | 6D TCP pose. Marker position in gripper frame for MOVE_TO_MARKER type. otherwise 6 x 0. |
-| `approach_offset` | List of 6 floats. | relevant movement information for each move type. Offset for MOVE_TO_MARKER, direction + speed for MOVE_TO_CONTACT. relative final TCP Position for RELATIVE_MOVE.
+| `approach_offset` | List of 6 floats. | relevant movement information for each move type. Offset for MOVE_TO_MARKER, direction + speed for MOVE_TO_CONTACT. relative final TCP Position for RELATIVE_MOVE.
 
 
 > **Notice**: Entire build sequence concept/logic should be reworked to be more generalised. Including dictionary naming and content. 
@@ -53,16 +53,18 @@ Logic is equal to `_build_sequence`, but containing different Dictionaries/motio
 
 /
 
-| Value | info |
+| Value | info |
 | ---   | ---  |
-| IDLE | default state  at (successful) startup. No process going on and ready to receive request |
-| CAPTURING | Perception service in progress. |
-| POSE_ACQUIRED | Capture service completed. Task manager will decide which marker to select. |
-| MOVING_TO_WEDGELOCK | Motion sequence from starting position to 'at wedgelock' in progress. Including moving to marker, 'homeing' and positioning on wedgelock. |
-| ... | more states to be added as they are implemented
-| DONE | Hammering task (low level) completed. Ready to move back to home position|
-| RETURNING | Robot is moving away from wedgelock, and towards it's 'HOME' position. |
-| ERROR | Something went wrong and program was aborted. See log for more specific information. |
+| IDLE | Default state at startup. Ready to accept `/start_task` service call. |
+| TASK_REQUESTED | Service call received, state change published via pub/sub. |
+| CAPTURING | Perception service in progress (waiting for vision capture). |
+| POSE_ACQUIRED | Marker detected. Sequence building in progress. |
+| MOVING_TO_WEDGELOCK | *(Deprecated state name, defined but not actively used).* |
+| AT_MARKER | Main 10-step motion sequence complete. Awaiting percussion event (external/arduino trigger). |
+| HAMMERING | Percussion event triggered. Percussion task in progress. |
+| DONE | Percussion task completed. Ready to return to home. |
+| RETURNING | Executing 3-step return sequence back to home position. |
+| ERROR | Failure detected (capture timeout, motion failure, RTDE disconnect, etc.). See log for details. |
 
 
 ### start_task_callback
@@ -170,5 +172,4 @@ Handles the result of a completed motion step.
 | ---     | ---       |
 | `result.success == True` | Calls `_execute_next_step` to continue the sequence. |
 | `result.success == False` | Logs the error message, clears the remaining sequence, transitions to ERROR. |
-
 
