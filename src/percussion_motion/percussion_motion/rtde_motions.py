@@ -122,12 +122,22 @@ def move_to_pose(
     ----------
     target_pose : [x, y, z, rx, ry, rz]  in the robot base frame
     """
+
+    current_Q = rtde_r.getActualQ()
     try:
-        rtde_c.moveJ_IK(target_pose, velocity, acceleration, blend)
-        final = _current_tcp(rtde_r)
-        return MoveResult(MoveStatus.SUCCESS, 'Reached target pose.', final)
-    except Exception as exc:
-        return MoveResult(MoveStatus.FAILED, f'moveJ_IK failed: {exc}')
+        target_Q = rtde_c.getInverseKinematics(target_pose, current_Q)
+    except Exception as e:
+        return MoveResult(MoveStatus.FAILED, f'IK failed: {e}')
+    except len(target_Q) != 6:
+        return MoveResult(MoveStatus.FAILED, f'IK failed: no Q vector returned')
+    try:
+        rtde_c.moveJ(target_Q, velocity, acceleration, blend)
+    except Exception as e:
+        return MoveResult(MoveStatus.FAILED, f'moveJ failed: {e}')
+    # rtde_c.moveJ_IK(target_pose, velocity, acceleration, blend)
+    final = _current_tcp(rtde_r)
+    return MoveResult(MoveStatus.SUCCESS, 'Reached target pose.', final)
+
 
 
 def move_until_contact(

@@ -91,7 +91,7 @@ class PercussionMotionNode(Node):
 
         # --- Parameters ---
         self.declare_parameter('robot_ip',         '169.254.0.22')
-        self.declare_parameter('home_pose', [-0.0068470948161484385, 0.43908904189889597, 0.5208511217908346, 1.9216815074629128, 0.7705997896029447, 1.5926581228860712]
+        self.declare_parameter('home_pose', [0.0652, 0.4498, 0.4911, 1.9767, 0.9942, 1.6870]
 )
         self.declare_parameter('default_velocity', 0.2)
         self.declare_parameter('default_accel',    0.2)

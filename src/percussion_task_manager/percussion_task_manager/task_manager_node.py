@@ -83,7 +83,7 @@ class TaskManagerNode(Node):
             {
                 'motion_type':    'RELATIVE_MOVE', # move backwards from Ledger + UP
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0, 0.12, -0.05, 0, 0.0, 0.0], # TCP frame
+                'approach_offset': [0, 0.15, -0.05, 0, 0.0, 0.0], # TCP frame
             },
             {
                 'motion_type':    'RELATIVE_MOVE', # Rotate Tool to face wedgelock
@@ -93,7 +93,7 @@ class TaskManagerNode(Node):
             {
                 'motion_type':    'RELATIVE_MOVE', # Move towards wedgelock (sideways) for contact 2D
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.080, 0, 0, 0, 0.0, 0.0],  # TCP frame
+                'approach_offset': [0.080, -0.05, 0, 0, 0.0, 0.0],  # TCP frame
             },
             {
                 'motion_type': 'MOVE_TO_CONTACT', # Touch ledger top down
@@ -118,7 +118,7 @@ class TaskManagerNode(Node):
             {
                 'motion_type':    'RELATIVE_MOVE', # Move into striking position
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, 0.0, -0.00200, 0.0, 0.0, 0.0],   # TCP frame
+                'approach_offset': [0.0, 0.0, -0.00150, 0.0, 0.0, 0.0],   # TCP frame
             },
         ]
 
