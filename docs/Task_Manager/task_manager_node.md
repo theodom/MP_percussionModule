@@ -45,11 +45,11 @@ Logic is equal to `_build_sequence`, but containing different Dictionaries/motio
 
 ### `publish_state`:
 
-**Parameters:
+**Parameters**:
 
 - state: Enum TaskState containing current system state.
 
-**Return:
+**Return**:
 
 /
 
@@ -122,7 +122,7 @@ If the sequence is empty:
 - If the **main sequence** just finished (`_returning == False`): sets state to DONE, loads the return sequence, sets `_returning = True`, and immediately starts executing it.
 - If the **return sequence** just finished (`_returning == True`): sets state to IDLE and returns.
 
-This means the full task cycle runs as a self-driven chain of callbacks with no timer or thread involvement.
+> Potential future improvement: remove _returning flag and let task_manager deal with state changes.
 
 ---
 
