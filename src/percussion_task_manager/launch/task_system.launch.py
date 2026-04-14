@@ -16,6 +16,10 @@ def generate_launch_description() -> LaunchDescription:
         DeclareLaunchArgument('default_accel',      default_value='0.2',          description='Default joint acceleration (m/s²)'),
         DeclareLaunchArgument('contact_force',      default_value='5.0',          description='Contact detection force threshold (N)'),
         DeclareLaunchArgument('contact_timeout',    default_value='5.0',          description='Contact detection timeout (s)'),
+
+        # --- Arduino ---
+        DeclareLaunchArgument('arduino_port',       default_value='/dev/ttyACM0', description='Arduino serial port'),
+        DeclareLaunchArgument('arduino_baudrate',   default_value='115200',       description='Arduino serial baudrate'),
     ]
 
     nodes = [
@@ -46,6 +50,16 @@ def generate_launch_description() -> LaunchDescription:
                 'default_accel':    LaunchConfiguration('default_accel'),
                 'contact_force':    LaunchConfiguration('contact_force'),
                 'contact_timeout':  LaunchConfiguration('contact_timeout'),
+            }],
+        ),
+        Node(
+            package='percussion_arduino_bridge',
+            executable='arduino_bridge_node',
+            name='arduino_bridge',
+            output='screen',
+            parameters=[{
+                'port':     LaunchConfiguration('arduino_port'),
+                'baudrate': LaunchConfiguration('arduino_baudrate'),
             }],
         ),
         Node(  # Broadcast transform from camera (child) to TCP/tool0 (parent)

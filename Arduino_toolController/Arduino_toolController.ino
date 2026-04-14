@@ -31,6 +31,7 @@ void setup() {
   delay(100);
   digitalWrite(LED_BUILTIN, LOW);
   delay(50);
+  Serial.println("setup finished.");
 }
 
 void loop() {
@@ -58,11 +59,18 @@ void loop() {
       analogWrite(fan, 255);
       EMState = true;
       digitalWrite(EM, EMState);
-      actionState = 0;
+
       break;
     case HAMMER_REQ: // Perform hammering cycle. 
-      Serial.println("ack hammer req");
+      msg_out.state = "DONE";
+      msg_out.type = "HAMMER_REQ";
+      actionState = -1;
       actionState = hammerCycle();
+
+      while (actionState != 0){
+        delay(1);
+      }
+      writeROSSerial(msg_out);
       break;
     case IND_VALUES:
 

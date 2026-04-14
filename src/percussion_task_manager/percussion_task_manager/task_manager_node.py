@@ -8,7 +8,7 @@ from rclpy.action import ActionClient
 from std_msgs.msg import String
 from std_srvs.srv import Trigger
 from percussion_interfaces.srv import TriggerCapture
-from percussion_interfaces.action import ExecuteMotion
+from percussion_interfaces.action import ExecuteMotion, Hammer
 from percussion_interfaces.msg import Pose6D
 
 
@@ -49,6 +49,7 @@ class TaskManagerNode(Node):
         self._state_sub     = self.create_subscription(String, '/task_manager/state', self._on_state_changed, 10)
         self._capture_client: Client = self.create_client(TriggerCapture, capture_service_name)
         self._motion_client = ActionClient(self, ExecuteMotion, '/execute_motion')
+        self._hammer_client = ActionClient(self, Hammer, '/hammer')
 
         self._selected_marker: Optional[Pose6D] = None
         self._current_state = TaskState.IDLE
@@ -171,13 +172,9 @@ class TaskManagerNode(Node):
                 self._on_sequence_done = lambda: self.publish_state(TaskState.AT_MARKER)
                 self._execute_next_step()
             case TaskState.AT_MARKER:
-                # arduino handshake / readiness check goes here in future
-                self.publish_state(TaskState.HAMMERING)
-                pass
+                self._send_hammer_goal()
             case TaskState.HAMMERING:
-                # wait for result from arduino
-
-                self.publish_state(TaskState.DONE)
+                # waiting for hammer action result (handled by callback)
                 pass
             case TaskState.DONE:
                 # Transition logic will go here
@@ -330,6 +327,55 @@ class TaskManagerNode(Node):
             self.get_logger().error(f'Step failed: {result.message}')
             self._sequence.clear()
             self._on_sequence_done = None
+            self.publish_state(TaskState.ERROR)
+
+    # ------------------------------------------------------------------
+    # Hammer action
+    # ------------------------------------------------------------------
+
+    def _send_hammer_goal(self) -> None:
+        if not self._hammer_client.server_is_ready():
+            self.get_logger().error('Hammer action server not available.')
+            self.publish_state(TaskState.ERROR)
+            return
+
+        # Hardcoded cycle_length for now; can be made configurable
+        goal = Hammer.Goal()
+        goal.cycle_length = 5
+
+        def _on_goal_response(future):
+            handle = future.result()
+            if not handle.accepted:
+                self.get_logger().error('Hammer goal rejected by arduino bridge.')
+                self.publish_state(TaskState.ERROR)
+                return
+            self.get_logger().info('Hammer goal accepted. Waiting for percussion...')
+            self.publish_state(TaskState.HAMMERING)
+            handle.get_result_async().add_done_callback(self._on_hammer_result)
+
+        def _on_feedback(feedback_msg):
+            feedback = feedback_msg.feedback
+            self.get_logger().info(f'Hammer feedback: {feedback.state}')
+
+        send_goal_future = self._hammer_client.send_goal_async(
+            goal,
+            feedback_callback=_on_feedback
+        )
+        send_goal_future.add_done_callback(_on_goal_response)
+
+    def _on_hammer_result(self, future) -> None:
+        try:
+            result = future.result().result
+        except Exception as exc:
+            self.get_logger().error(f'Hammer action failed (server may have crashed): {exc}')
+            self.publish_state(TaskState.ERROR)
+            return
+
+        if result.success:
+            self.get_logger().info('Hammering complete.')
+            self.publish_state(TaskState.DONE)
+        else:
+            self.get_logger().error(f'Hammering failed: {result.message}')
             self.publish_state(TaskState.ERROR)
 
 

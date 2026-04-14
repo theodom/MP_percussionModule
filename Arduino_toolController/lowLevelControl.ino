@@ -51,15 +51,21 @@ int writeROSSerial(messageToParse message) {
 int hammerCycle(int cycleLength) {
   analogWrite(fan, 255);
 
-  if (!EMState) {
-    return 1;
-  }
+  // if (!EMState) {
+  //   return 1;
+  // }
   for (int i = 0; i < (cycleLength); i++) {
     EMState = !EMState;
     digitalWrite(EM, EMState);
     delay(1000);
+    EMState = false;
+    messageToParse feedback;
+    feedback.type = "HAMMER_REQ";
+    feedback.state = "DONE";
+    feedback.msg = i;
+    writeROSSerial(feedback);
   }
-  EMState = true;
+
   digitalWrite(EM, EMState);
 
   return 0;

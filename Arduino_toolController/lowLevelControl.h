@@ -29,5 +29,6 @@ struct messageToParse {
 
 parsedMessage readROSSerial();
 int hammerCycle(int cycleLength = 6);
+int writeROSSerial(messageToParse message);
 
 #endif

@@ -16,6 +16,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Pose6D.msg"
   "srv/TriggerCapture.srv"
   "action/ExecuteMotion.action"
+  "action/Hammer.action"
   DEPENDENCIES geometry_msgs
 )
 
