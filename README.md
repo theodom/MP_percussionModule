@@ -145,6 +145,8 @@ to add: motion success -> task_manager_node -> startHammering -> Arduino node ->
 
   - building of motion sequences is cumbersome. (Move to motion package?)
 
+  - Orientation facing marker isn't always correct -> compounding error on next positions.
+
 - **Marker selection**: always picks `detections[0]`. Should be replaced with more intelligent decision making. (Wedgelock memory?)
 
 - ~~**`capture_service_stub.py`**: should be removed.~~
@@ -169,4 +171,7 @@ to add: motion success -> task_manager_node -> startHammering -> Arduino node ->
 
 - **interfaces**: Possibly simplify Pose6D and MarkerDetection into 1 Pose message with extra fields. (header?)
 
+- **Motion**:
+      - Add more freedom/parameters to motion sequence. (custom vel/acc, ...)
+      
 
