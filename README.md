@@ -135,12 +135,15 @@ to add: motion success -> task_manager_node -> startHammering -> Arduino node ->
 
 - **Task manager**: 
   - ~~launch parameters are not being passed downstream -> implement LaunchArgument~~
-  - `capture_timeout_sec` not being passed to service.
+  - ~~`capture_timeout_sec` not being passed to service.~~ (capture timeout removed)
+
 
 - **perception_motion**: 
   - ~~The robot currently moves using rtde, but to the wrong position -- problem with marker pose transform camera -> TCP pose~~
       
-  -    Implement `MOVE_HOME`
+  - ~~Implement `MOVE_HOME`~~
+
+  - building of motion sequences is cumbersome. (Move to motion package?)
 
 - **Marker selection**: always picks `detections[0]`. Should be replaced with more intelligent decision making. (Wedgelock memory?)
 
@@ -150,6 +153,10 @@ to add: motion success -> task_manager_node -> startHammering -> Arduino node ->
 
 ### Features to add
 
+- **Optimalisation / error handling**:
+      - Add timeout for camera. (Not connected == keeps waiting forever)
+      - Better error handling for robot connection / reconnect automatically
+
 - **Tool control**:
       - Write arduino program to read sensors and control actuators
       - Add tool control logic
@@ -157,7 +164,7 @@ to add: motion success -> task_manager_node -> startHammering -> Arduino node ->
       - tool controller node
       - ...
 
-- **Move until contact**
+- **Move until contact while hammering**
       - Implement move until contact: requires bridge between rtde, Arduino serial and ROS
 
 - **interfaces**: Possibly simplify Pose6D and MarkerDetection into 1 Pose message with extra fields. (header?)
