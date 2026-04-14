@@ -102,7 +102,11 @@ class ArduinoBridgeNode(Node):
         return None
 
     async def _execute_hammer(self, goal_handle) -> Hammer.Result:
-        """Execute hammer action."""
+        """Execute hammer action.
+
+        Sends HAMMER_REQ to Arduino and listens for responses.
+        Forwards intermediate feedback messages and waits for HAMMER_REQ|DONE.
+        """
         cycle_length = goal_handle.request.cycle_length
 
         self.get_logger().info(
@@ -111,56 +115,84 @@ class ArduinoBridgeNode(Node):
 
         result = Hammer.Result()
 
-        # Calculate timeout: 5 second per cycle + 5 second buffer
-        timeout = (cycle_length * 5.0) + 5.0
+        try:
+            ser = serial.Serial(
+                port=self.port,
+                baudrate=self.baudrate,
+                timeout=1.0
+            )
+            time.sleep(0.5)
 
-        # Send command and wait for response
-        response = self._send_and_wait(
-            msg_type='HAMMER_REQ',
-            data=str(cycle_length),
-            msg_info='',
-            timeout_sec=timeout
-        )
+            # Send initial command
+            message = f'HAMMER_REQ|{cycle_length}|\n'
+            ser.write(message.encode('utf-8'))
+            self.get_logger().debug(f'Sent: {message.strip()}')
 
-        if not response:
-            result.success = False
-            result.message = 'No response from Arduino'
-            goal_handle.abort()
+            # Calculate timeout: 5 seconds per cycle + 5 second buffer
+            timeout = (cycle_length * 5.0) + 5.0
+            start_time = time.time()
+
+            # Listen for responses until HAMMER_REQ|DONE or timeout
+            while (time.time() - start_time) < timeout:
+                if ser.in_waiting > 0:
+                    response = ser.readline().decode('utf-8').strip()
+                    if not response:
+                        continue
+
+                    self.get_logger().debug(f'Received: {response}')
+
+                    # Parse response
+                    parsed = self._parse_response(response)
+                    if not parsed:
+                        self.get_logger().warn(f'Failed to parse response: {response}')
+                        continue
+
+                    msg_type, state = parsed
+
+                    # Publish feedback for all messages
+                    feedback_msg = Hammer.Feedback()
+                    feedback_msg.state = f'{msg_type}|{state}'
+                    goal_handle.publish_feedback(feedback_msg)
+
+                    # Log the message
+                    self.get_logger().info(f'Arduino: {msg_type} - {state}')
+
+                    # Check for completion
+                    if msg_type == 'HAMMER_REQ' and state == 'DONE':
+                        result.success = True
+                        result.message = 'Hammer completed successfully'
+                        goal_handle.succeed()
+                        self.get_logger().info('Hammer action succeeded')
+                        break
+
+                    # Check for error
+                    if state == 'ERROR':
+                        result.success = False
+                        result.message = f'Arduino error: {response}'
+                        goal_handle.abort()
+                        self.get_logger().error('Hammer action failed with ERROR state')
+                        break
+                else:
+                    time.sleep(0.01)
+
+            else:
+                # Timeout occurred
+                result.success = False
+                result.message = f'Hammer timed out after {timeout}s'
+                goal_handle.abort()
+                self.get_logger().error('Hammer action timed out')
+
             return result
 
-        # Parse response
-        parsed = self._parse_response(response)
-        if not parsed:
+        except serial.SerialException as e:
+            self.get_logger().error(f'Serial error: {e}')
             result.success = False
-            result.message = 'Failed to parse Arduino response'
+            result.message = f'Serial error: {e}'
             goal_handle.abort()
             return result
-
-        msg_type, state = parsed
-
-        # Update feedback
-        feedback_msg = Hammer.Feedback()
-        feedback_msg.state = state
-        goal_handle.publish_feedback(feedback_msg)
-
-        # Check result
-        if state == 'DONE':
-            result.success = True
-            result.message = 'Hammer completed successfully'
-            goal_handle.succeed()
-            self.get_logger().info('Hammer action succeeded')
-        elif state == 'ERROR':
-            result.success = False
-            result.message = f'Arduino error: {response}'
-            goal_handle.abort()
-            self.get_logger().error('Hammer action failed')
-        else:
-            result.success = False
-            result.message = f'Unexpected state: {state}'
-            goal_handle.abort()
-            self.get_logger().error(f'Unexpected state: {state}')
-
-        return result
+        finally:
+            if 'ser' in locals() and ser.is_open:
+                ser.close()
 
 
 def main(args=None):
