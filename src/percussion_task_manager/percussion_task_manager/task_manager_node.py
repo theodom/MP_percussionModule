@@ -8,7 +8,7 @@ from rclpy.action import ActionClient
 from std_msgs.msg import String
 from std_srvs.srv import Trigger
 from percussion_interfaces.srv import TriggerCapture
-from percussion_interfaces.action import ExecuteMotion, Hammer
+from percussion_interfaces.action import ExecuteMotion, ArduinoCommand
 from percussion_interfaces.msg import Pose6D
 
 
@@ -49,7 +49,7 @@ class TaskManagerNode(Node):
         self._state_sub     = self.create_subscription(String, '/task_manager/state', self._on_state_changed, 10)
         self._capture_client: Client = self.create_client(TriggerCapture, capture_service_name)
         self._motion_client = ActionClient(self, ExecuteMotion, '/execute_motion')
-        self._hammer_client = ActionClient(self, Hammer, '/hammer')
+        self._arduino_client = ActionClient(self, ArduinoCommand, '/arduino_command')
 
         self._selected_marker: Optional[Pose6D] = None
         self._current_state = TaskState.IDLE
@@ -182,7 +182,10 @@ class TaskManagerNode(Node):
                 self._on_sequence_done = lambda: self.publish_state(TaskState.AT_MARKER)
                 self._execute_next_step()
             case TaskState.AT_MARKER:
-                self._send_hammer_goal()
+                self.publish_state(TaskState.HAMMERING)
+                self._send_arduino_command('HAMMER_REQ', '5', '',
+                                           on_success=TaskState.DONE,
+                                           on_failure=TaskState.ERROR)
             case TaskState.HAMMERING:
                 # waiting for hammer action result (handled by callback)
                 pass
@@ -341,53 +344,53 @@ class TaskManagerNode(Node):
             self.publish_state(TaskState.ERROR)
 
     # ------------------------------------------------------------------
-    # Hammer action
+    # Arduino command action
     # ------------------------------------------------------------------
 
-    def _send_hammer_goal(self) -> None:
-        if not self._hammer_client.server_is_ready():
-            self.get_logger().error('Hammer action server not available.')
+    def _send_arduino_command(self, msg_type: str, data: str, msg_info: str,
+                              on_success, on_failure) -> None:
+        """
+        Send a generic ArduinoCommand action goal.
+        on_success / on_failure: TaskState to publish, or callable to invoke.
+        """
+        if not self._arduino_client.server_is_ready():
+            self.get_logger().error('Arduino action server not available.')
             self.publish_state(TaskState.ERROR)
             return
 
-        # Hardcoded cycle_length for now; can be made configurable
-        goal = Hammer.Goal()
-        goal.cycle_length = 5
+        goal = ArduinoCommand.Goal()
+        goal.msg_type = msg_type
+        goal.data     = data
+        goal.msg_info = msg_info
 
         def _on_goal_response(future):
             handle = future.result()
             if not handle.accepted:
-                self.get_logger().error('Hammer goal rejected by arduino bridge.')
+                self.get_logger().error(f'{msg_type} goal rejected.')
                 self.publish_state(TaskState.ERROR)
                 return
-            self.get_logger().info('Hammer goal accepted. Waiting for percussion...')
-            self.publish_state(TaskState.HAMMERING)
-            handle.get_result_async().add_done_callback(self._on_hammer_result)
+            handle.get_result_async().add_done_callback(_on_result)
 
-        def _on_feedback(feedback_msg):
-            feedback = feedback_msg.feedback
-            self.get_logger().info(f'Hammer feedback: {feedback.state}')
+        def _on_result(future):
+            try:
+                result = future.result().result
+            except Exception as exc:
+                self.get_logger().error(f'{msg_type} action failed: {exc}')
+                self.publish_state(TaskState.ERROR)
+                return
+            if result.success:
+                if callable(on_success):
+                    on_success()
+                else:
+                    self.publish_state(on_success)
+            else:
+                self.get_logger().error(f'{msg_type} failed: {result.message}')
+                if callable(on_failure):
+                    on_failure()
+                else:
+                    self.publish_state(on_failure)
 
-        send_goal_future = self._hammer_client.send_goal_async(
-            goal,
-            feedback_callback=_on_feedback
-        )
-        send_goal_future.add_done_callback(_on_goal_response)
-
-    def _on_hammer_result(self, future) -> None:
-        try:
-            result = future.result().result
-        except Exception as exc:
-            self.get_logger().error(f'Hammer action failed (server may have crashed): {exc}')
-            self.publish_state(TaskState.ERROR)
-            return
-
-        if result.success:
-            self.get_logger().info('Hammering complete.')
-            self.publish_state(TaskState.DONE)
-        else:
-            self.get_logger().error(f'Hammering failed: {result.message}')
-            self.publish_state(TaskState.ERROR)
+        self._arduino_client.send_goal_async(goal).add_done_callback(_on_goal_response)
 
 
 def main(args=None) -> None:
