@@ -107,6 +107,46 @@ def compute_face_marker_rvec(
     return rvec.flatten().tolist()
 
 
+def compute_snap_to_principal_rvec(
+    marker_rvec_base: List[float],
+    principal_dirs_base: List[List[float]],
+    world_up_in_base: Optional[List[float]] = None,
+) -> List[float]:
+    """
+    Like compute_face_marker_rvec, but snaps the TCP Z-axis to the closest
+    of the given candidate directions rather than aligning it exactly.
+
+    Parameters
+    ----------
+    marker_rvec_base    : [rx, ry, rz] Rodrigues vector of the marker in base frame
+    principal_dirs_base : candidate TCP Z directions (unit vectors in base frame)
+    world_up_in_base    : world "up" in base frame; used for X/Y construction (default [0,0,1])
+    """
+    R_marker, _ = cv2.Rodrigues(np.array(marker_rvec_base, dtype=np.float64))
+    marker_z = R_marker[:, 2]
+    desired_z = -marker_z / np.linalg.norm(marker_z)   # ideal TCP Z: into marker surface
+
+    candidates = [np.array(d, dtype=np.float64) for d in principal_dirs_base]
+    candidates = [c / np.linalg.norm(c) for c in candidates]
+    z_tcp = candidates[int(np.argmax([np.dot(c, desired_z) for c in candidates]))]
+
+    world_up = np.array(world_up_in_base, dtype=np.float64) if world_up_in_base is not None \
+        else np.array([0.0, 0.0, 1.0])
+    world_up /= np.linalg.norm(world_up)
+
+    if abs(np.dot(z_tcp, world_up)) > 0.99:
+        world_up = np.array([1.0, 0.0, 0.0])
+
+    x_tcp = np.cross(world_up, z_tcp)
+    x_tcp /= np.linalg.norm(x_tcp)
+    y_tcp = np.cross(z_tcp, x_tcp)
+    y_tcp /= np.linalg.norm(y_tcp)
+
+    R_desired = np.column_stack([x_tcp, y_tcp, z_tcp])
+    rvec, _ = cv2.Rodrigues(R_desired)
+    return rvec.flatten().tolist()
+
+
 def move_to_pose(
     rtde_c: RTDEControl,
     rtde_r: RTDEReceive,

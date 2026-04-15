@@ -50,7 +50,8 @@ from rtde_receive import RTDEReceiveInterface as RTDEReceive
 
 from percussion_motion import rtde_motions as motions
 from percussion_motion.rtde_motions import (
-    MoveStatus, MoveResult, move_to_pose, apply_offset as apply_pose_offset, compute_face_marker_rvec
+    MoveStatus, MoveResult, move_to_pose, apply_offset as apply_pose_offset,
+    compute_face_marker_rvec, compute_snap_to_principal_rvec
 )
 
 
@@ -160,6 +161,7 @@ class PercussionMotionNode(Node):
         motion_type     = goal.motion_type
         marker_pose     = _pose6d_to_list(goal.marker_pose)
         pose_offset = list(goal.approach_offset)  # float64[6], in TCP frame
+        contact_force   = goal.contact_force if goal.contact_force > 0 else self._contact_frc
 
         self.get_logger().info(
             f'Executing motion: {motion_type} | '
@@ -172,7 +174,7 @@ class PercussionMotionNode(Node):
 
         try:
             move_result = self._execute_motion_sequence(
-                goal_handle, motion_type, marker_pose, pose_offset
+                goal_handle, motion_type, marker_pose, pose_offset, contact_force
             )
             result.success        = move_result.status == MoveStatus.SUCCESS
             result.message        = move_result.message
@@ -205,6 +207,7 @@ class PercussionMotionNode(Node):
         motion_type: str,
         marker_pose: List[float],
         pose_offset: List[float],
+        contact_force: float,
     ) -> MoveResult:
 
         feedback = ExecuteMotion.Feedback()
@@ -228,12 +231,24 @@ class PercussionMotionNode(Node):
             # World Z expressed in base_link frame, accounting for the 45° roll mount
             # (world → base_link: roll=0.785398 rad around X)
             # R_x(-45°)^T * [0,0,1] = [0, sin(-45°), cos(-45°)]
+            _s45 = np.sin(np.deg2rad(45.0))
+            _c45 = np.cos(np.deg2rad(45.0))
             _s = np.sin(np.deg2rad(-45.0))
             _c = np.cos(np.deg2rad(-45.0))
             world_up_in_base = [0.0, _s, _c]
 
-            # Compute face-to-face orientation with upright constraint
-            rvec_desired = compute_face_marker_rvec(marker_base[3:], world_up_in_base)
+            # 4 world horizontal principal directions expressed in base frame
+            principal_dirs_base = [
+                [1.0, 0.0, 0.0],        # +X_world
+                [-1.0, 0.0, 0.0],       # -X_world
+                [0.0, _c45, _s45],      # +Y_world
+                [0.0, -_c45, -_s45],    # -Y_world
+            ]
+
+            # Snap TCP Z to closest world principal direction
+            rvec_desired = compute_snap_to_principal_rvec(
+                marker_base[3:], principal_dirs_base, world_up_in_base
+            )
             marker_base[3:] = rvec_desired
 
             # Apply standoff (-10 cm along base X)
@@ -278,7 +293,7 @@ class PercussionMotionNode(Node):
             result = motions.move_until_contact(
                 self._rtde_c, self._rtde_r,
                 direction=direction,
-                force_threshold=self._contact_frc,
+                force_threshold=contact_force,
                 timeout_sec=self._contact_tmt,
             )
             if result.status == MoveStatus.SUCCESS:

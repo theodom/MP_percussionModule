@@ -1,5 +1,5 @@
-#define EM D2
-#define fan D3
+#define EM 3
+#define fan 2
 #define inductive_1 D9
 #define inductive_2 D10
 
@@ -23,6 +23,10 @@ void setup() {
   Serial.begin(115200);
   // while (!Serial.available());
 
+
+  digitalWrite(fan, HIGH);
+  delay(1000);
+  digitalWrite(fan,LOW);
   digitalWrite(LED_BUILTIN, HIGH);
   delay(100);
   digitalWrite(LED_BUILTIN, LOW);
@@ -35,6 +39,11 @@ void setup() {
 }
 
 void loop() {
+
+  digitalWrite(fan, HIGH);
+  delay(5000);
+  digitalWrite(fan, LOW);
+  delay(3000);
   parsedMessage request;
   digitalWrite(LED_BUILTIN, HIGH);
   delay(100);

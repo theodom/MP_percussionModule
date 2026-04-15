@@ -54,17 +54,19 @@ int hammerCycle(int cycleLength) {
   // if (!EMState) {
   //   return 1;
   // }
-  for (int i = 0; i < (cycleLength); i++) {
-    EMState = !EMState;
-    digitalWrite(EM, EMState);
-    delay(1000);
-    EMState = false;
-    messageToParse feedback;
-    feedback.type = "HAMMER_REQ";
-    feedback.state = "IN_PROGRESS";
-    feedback.msg = i;
-    writeROSSerial(feedback);
-  }
+  for (int i = 0; i < cycleLength; i++){
+        EMState = false;
+        digitalWrite(EM, LOW);
+        delay(500);
+        EMState = true;
+        digitalWrite(EM, HIGH);
+        delay(500);
+        messageToParse feedback;
+        feedback.type = "HAMMER_REQ";
+        feedback.state = "IN_PROGRESS";
+        feedback.msg = i;
+        writeROSSerial(feedback);
+      }
 
   digitalWrite(EM, EMState);
 

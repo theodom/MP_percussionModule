@@ -67,7 +67,8 @@ class TaskManagerNode(Node):
     def _build_sequence(self, marker_pose: Pose6D) -> List[dict]:
         """
         Define the full motion sequence for one percussion task.
-        Each step is a dict with keys: motion_type, marker_pose, approach_offset.
+        Each step is a dict with keys: motion_type, marker_pose, approach_offset, contact_force.
+        contact_force is optional and defaults to ROS parameter if not specified.
         Edit here to add, remove, or reorder steps.
         """
         return [
@@ -107,19 +108,25 @@ class TaskManagerNode(Node):
                 'approach_offset': [0,0.06, 0, 0.0, 0.0, 0.0], # TCP frame
             },
             {
-                'motion_type':    'RELATIVE_MOVE', # MOVE closer to pole 
+                'motion_type':    'RELATIVE_MOVE', # MOVE closer to pole
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.030, 0.0, 0.10, 0.0, 0.0, 0.0], # TCP frame
+                'approach_offset': [0.040, 0.0, 0.10, 0.0, 0.0, 0.0], # TCP frame
             },
             {
                 'motion_type':    'MOVE_TO_CONTACT', # Touch bar sideways
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, -0.00707, -0.00707, 0.0, 0.0, 0.0], # Base Frame            
+                'approach_offset': [0.0, -0.00707, -0.00707, 0.0, 0.0, 0.0], # Base Frame
             },
             {
                 'motion_type':    'RELATIVE_MOVE', # Move into striking position
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, 0.0, -0.00150, 0.0, 0.0, 0.0],   # TCP frame
+                'approach_offset': [0.0, 0.000, -0.00150, 0.0, 0.0, 0.0],   # TCP frame
+            },
+            {
+                'motion_type':    'MOVE_TO_CONTACT', # Touch bar sideways
+                'marker_pose':    _make_pose6d(),
+                'approach_offset': [0.0, 0.00303, -0.00303, 0.0, 0.0, 0.0], # Base Frame
+                'contact_force': 10.0,
             },
         ]
 
@@ -133,16 +140,19 @@ class TaskManagerNode(Node):
                 'motion_type':    'RELATIVE_MOVE', # Retract from wedgelock
                 'marker_pose':    _make_pose6d(),
                 'approach_offset': [0.0, 0.05, -0.10, 0.0, 0.0, 0.0], # TCP frame
+                'contact_force':   5.0,
             },
             {
                 'motion_type':    'RELATIVE_MOVE', # Retract from wedgelock
                 'marker_pose':    _make_pose6d(),
                 'approach_offset': [0.0, 0.0, 0.0, 0.0, 1.57, 0.0], # TCP frame
+                'contact_force':   5.0,
             },
             {
                 'motion_type':    'RETURN_HOME',
                 'marker_pose':    _make_pose6d(),
                 'approach_offset': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                'contact_force':   5.0,
             },
         ]
 
@@ -300,6 +310,7 @@ class TaskManagerNode(Node):
         goal.motion_type     = step['motion_type']
         goal.marker_pose     = step['marker_pose']
         goal.approach_offset = step['approach_offset']
+        goal.contact_force   = step.get('contact_force', 2.0)  # Default to 2.0 N if not specified
 
         def _on_goal_response(future):
             handle = future.result()
