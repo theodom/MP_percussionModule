@@ -1,4 +1,4 @@
-[back](../percussionModule.md)
+[back](../percussionModule.md#task-manager)
 # Task manager package:
 
 ## Components

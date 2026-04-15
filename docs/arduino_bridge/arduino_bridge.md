@@ -1,4 +1,4 @@
-[back](../percussionModule.md)
+[back](../percussionModule.md#arduino-bridge)
 # Arduino Bridge Package
 
 ## Overview

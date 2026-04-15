@@ -1,4 +1,4 @@
-[back](../percussionModule.md)
+[back](../percussionModule.md#motion)
 # Motion package
 
 ## Components
