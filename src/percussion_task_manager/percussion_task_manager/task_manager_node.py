@@ -318,7 +318,7 @@ class TaskManagerNode(Node):
         def _on_goal_response(future):
             handle = future.result()
             if not handle.accepted:
-                self.get_logger().error('Motion goal rejected by motion node.')
+                # self.get_logger().error('Motion goal rejected by motion node.')
                 self.publish_state(TaskState.ERROR)
                 return
             handle.get_result_async().add_done_callback(self._on_motion_result)

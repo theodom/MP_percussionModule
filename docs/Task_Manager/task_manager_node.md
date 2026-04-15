@@ -1,104 +1,178 @@
 # Task_manager_node
 
+## Overview
+
+## Components
+
+- [`__init__`](#init): Node startup — declares parameters, creates services, clients, and publishers.
+- [`_on_state_changed`](#_on_state_changed): Central state machine dispatcher; triggers follow-up actions on every state transition.
+- [`_build_sequence`](#_build_sequence): Returns the ordered list of motion steps for one percussion task.
+- [`_build_return_sequence`](#_build_return_sequence): Returns the ordered list of retract/home steps executed after task completion.
+- [`publish_state`](#publish_state): Publishes a new `TaskState` and updates internal state.
+- [`start_task_callback`](#start_task_callback): `/start_task` service handler; publishes `TASK_REQUESTED`.
+- [`run_capture_service`](#run_capture_service): Sends async `TriggerCapture` request and transitions to `CAPTURING`.
+- [`_on_capture_done`](#_on_capture_done): Callback for capture result; selects marker and transitions to `POSE_ACQUIRED` or error.
+- [`_execute_next_step`](#_execute_next_step): Pops and dispatches the next step from the active sequence; calls `_on_sequence_done` when empty.
+- [`_send_motion_goal`](#_send_motion_goal): Constructs and sends an `ExecuteMotion` action goal for one sequence step.
+- [`_on_motion_result`](#_on_motion_result): Handles motion step result; continues sequence or transitions to `ERROR`.
+- [`_send_arduino_command`](#_send_arduino_command): Sends a generic `ArduinoCommand` action goal with configurable success/failure transitions.
+
+---
+
 ### `init`:
 
-**Declare Paramters**: 
+**Declare Parameters**: 
 
 - `capture_service_name`: Name of the service which handles camera image capture
 - `target_frame`: unused
-- `capture_timeout_sec`: Timeout in seconds for camera service, currently unimplemented, possibly redundant
-
 
 **Setup services/topics**:
-- `/start_task`: Service which triggers the system start: Callback calls the capture service.
-- `/task_manager/state`: Publilisher for the current task state. IDLE/CAPTURING/...
--`_motion_client`: Create service client for the camera capture service.
--
+- `/start_task`: Service which triggers the system start. Callback publishes `TASK_REQUESTED`.
+- `/task_manager/state`: Publisher for the current task state. IDLE/CAPTURING/...
+- `/task_manager/state` *(subscriber)*: `_on_state_changed` — drives the state machine on every state change.
+- `_capture_client`: Client for the `TriggerCapture` service.
+- `_motion_client`: `ActionClient` for the `ExecuteMotion` action.
+- `_arduino_client`: `ActionClient` for the `ArduinoCommand` action.
+
+**Instance state**:
+- `_selected_marker`: `Optional[Pose6D]` — pose of the selected marker from last capture.
+- `_sequence`: `List[dict]` — remaining steps in the active motion sequence.
+- `_on_sequence_done`: `Optional[callable]` — called when `_sequence` empties; drives post-sequence state transitions.
+
+---
+
+### `_on_state_changed`
+
+**Parameters**:
+- `_msg`: `String` — state value published on `/task_manager/state`.
+
+**Return**: /
+
+Central state machine dispatcher. Runs on every state transition and triggers the appropriate follow-up action:
+
+```
+TASK_REQUESTED  -->  run_capture_service()
+      |
+      v
+  CAPTURING      -->  (waiting for capture result)
+      |
+      v
+POSE_ACQUIRED   -->  _build_sequence()  +  _execute_next_step()
+      |
+      v
+  AT_MARKER      -->  publish(HAMMERING)  +  _send_arduino_command('HAMMER_REQ', 5)
+      |                                             
+      | on_failure -> ERROR
+      v                                              
+                 | 
+      on_success v
+  HAMMERING      -->  (waiting for Arduino result)
+      |
+      v
+    DONE         -->  publish(RETURNING)
+      |
+      v
+  RETURNING      -->  _build_return_sequence()  +  _execute_next_step()
+      |
+      v
+    IDLE
+```
+
+---
 
 ### `_build_sequence`: 
-**parameters**: 
- - marker_pose: Pose6D with marker coordinates in base_link frame.
+**Parameters**: 
+ - `marker_pose`: `Pose6D` — marker coordinates in base_link frame.
 
 **Return**: 
-- List of Dicts containing motion type and movement instructions. 
+- List of dicts containing motion type and movement instructions. 
 
 
 | Key | Value | info |
 | --- | ---   | ---  |
-|`motion_type`| MOVE_TO_MARKER / RELATIVE_MOVE / MOVE_TO_CONTACT | type of motion corresponding to available types in percussion_motion package|
-| `marker_pose` | `percussion_interfaces/ msg/Pose6D` | 6D TCP pose. Marker position in gripper frame for MOVE_TO_MARKER type. otherwise 6 x 0. |
-| `approach_offset` | List of 6 floats. | relevant movement information for each move type. Offset for MOVE_TO_MARKER, direction + speed for MOVE_TO_CONTACT. relative final TCP Position for RELATIVE_MOVE.
+|`motion_type`| `MOVE_TO_MARKER` / `RELATIVE_MOVE` / `MOVE_TO_CONTACT` | type of motion corresponding to available types in percussion_motion package|
+| `marker_pose` | `percussion_interfaces/msg/Pose6D` | 6D TCP pose. Marker position in gripper frame for `MOVE_TO_MARKER` type. Otherwise 6 × 0. |
+| `approach_offset` | `List[float]` (6 elements) | Offset for `MOVE_TO_MARKER`; direction for `MOVE_TO_CONTACT`; relative TCP delta for `RELATIVE_MOVE`. |
+| `contact_force` | `float` *(optional)* | Force threshold (N) for contact moves. Defaults to `2.0` N if omitted. |
 
 
 > **Notice**: Entire build sequence concept/logic should be reworked to be more generalised. Including dictionary naming and content. 
 
 ### `_build_return_sequence`
 
-**parameters**:
+**Parameters**: /
 
-/
+**Return**:
+- List of dicts containing motion type and movement instructions. 
 
-**Return**
-- List of Dicts containing motion type and movement instructions. 
+> Logic is equal to `_build_sequence`, but containing different dictionaries/motions (retract + `RETURN_HOME`). To be reworked and generalised along with said function.
 
-Logic is equal to `_build_sequence`, but containing different Dictionaries/motions. To be reworked and generalised along with said function.
+---
 
 ### `publish_state`:
 
 **Parameters**:
 
-- state: Enum TaskState containing current system state.
+- `state`: `TaskState` enum value.
 
-**Return**:
+**Return**: /
 
-/
+Publishes `state.value` on `/task_manager/state` and updates `_current_state`. The subscriber `_on_state_changed` picks it up and drives the next action.
 
 | Value | info |
 | ---   | ---  |
-| IDLE | Default state at startup. Ready to accept `/start_task` service call. |
-| TASK_REQUESTED | Service call received, state change published via pub/sub. |
-| CAPTURING | Perception service in progress (waiting for vision capture). |
-| POSE_ACQUIRED | Marker detected. Sequence building in progress. |
-| MOVING_TO_WEDGELOCK | *(Deprecated state name, defined but not actively used).* |
-| AT_MARKER | Main 10-step motion sequence complete. Awaiting percussion event (external/arduino trigger). |
-| HAMMERING | Percussion event triggered. Percussion task in progress. |
-| DONE | Percussion task completed. Ready to return to home. |
-| RETURNING | Executing 3-step return sequence back to home position. |
-| ERROR | Failure detected (capture timeout, motion failure, RTDE disconnect, etc.). See log for details. |
+| `IDLE` | Default state at startup. Ready to accept `/start_task` service call. |
+| `TASK_REQUESTED` | Service call received, capture service will be triggered. |
+| `CAPTURING` | Perception service in progress (waiting for vision capture). |
+| `POSE_ACQUIRED` | Marker detected. Main sequence building in progress. |
+| `MOVING_TO_WEDGELOCK` | *(Deprecated state name, defined but not actively used).* |
+| `AT_MARKER` | Main motion sequence complete. Arduino hammer command sent. |
+| `HAMMERING` | Percussion event triggered. Waiting for Arduino result. |
+| `DONE` | Percussion task completed. Return sequence will be triggered. |
+| `RETURNING` | Executing return sequence back to home position. |
+| `ERROR` | Failure detected (capture timeout, motion failure, RTDE disconnect, etc.). See log for details. |
 
+---
 
-### start_task_callback
+### `start_task_callback`
 
 **Parameters**:
 
-- Request: Trigger.Request
-- Response: Trigger.Response
+- `request`: `Trigger.Request`
+- `response`: `Trigger.Response`
 
-**Return**:
- - response: Trigger
+**Return**: `Trigger.Response`
 
-Checks that the task manager is in a suitable state. Triggers the capture service and changes TaskState to CAPTURING. 
+Publishes `TASK_REQUESTED` (unconditionally — does not check current state). `_on_state_changed` then calls `run_capture_service`.
 
-the start_callback also creates the link to the 'done_callback' upon service finish.
+---
+
+### `run_capture_service`
+
+**Parameters**: /
+
+**Return**: /
+
+Resets `_selected_marker` to `None`, sends an async `TriggerCapture` request, and registers `_on_capture_done` as the callback. Publishes `CAPTURING`.
+
+---
 
 ### `_on_capture_done`
 
 **Parameters**:
 
-- future: future object returned by the async capture service call.
+- `future`: future object returned by the async capture service call.
 
-**Return**:
-
-/
+**Return**: /
 
 Callback triggered when the capture service completes. Handles the following outcomes:
 
 | Outcome | State transition | info |
 | ---     | ---              | ---  |
-| Exception / no result | ERROR | Service call itself failed. |
-| `result.success == False` | ERROR | Perception node returned failure. |
-| No markers detected | IDLE | Capture succeeded but scene had no markers. |
-| Markers detected | POSE_ACQUIRED - (sequence start) | Logs all detections, selects `detections[0]`, builds the motion sequence and calls `_execute_next_step`. |
+| Exception / no result | `ERROR` | Service call itself failed. |
+| `result.success == False` | `ERROR` | Perception node returned failure. |
+| No markers detected | `IDLE` | Capture succeeded but scene had no markers. |
+| Markers detected | `POSE_ACQUIRED` | Logs all detections, selects `detections[0]`, stores pose in `_selected_marker`. |
 
 > Possible improvement: if no markers detected, request robot move/rotation and retry instead of returning to IDLE.
 
@@ -108,21 +182,15 @@ Callback triggered when the capture service completes. Handles the following out
 
 ### `_execute_next_step`
 
-**Parameters**:
+**Parameters**: /
 
-/
+**Return**: `bool` — `True` if sequence was empty, `False` otherwise.
 
-**Return**:
+Pops the first step from `_sequence` and dispatches it to `_send_motion_goal`.
 
-/
-
-Pops the first step from the active sequence list and dispatches it to `_send_motion_goal`.
-
-If the sequence is empty:
-- If the **main sequence** just finished (`_returning == False`): sets state to DONE, loads the return sequence, sets `_returning = True`, and immediately starts executing it.
-- If the **return sequence** just finished (`_returning == True`): sets state to IDLE and returns.
-
-> Potential future improvement: remove _returning flag and let task_manager deal with state changes.
+If the sequence is empty, calls `_on_sequence_done()` (if set) to drive the next state transition. The callback is set by `_on_state_changed` before the sequence starts:
+- Main sequence → `_on_sequence_done` publishes `AT_MARKER`
+- Return sequence → `_on_sequence_done` publishes `IDLE`
 
 ---
 
@@ -130,29 +198,13 @@ If the sequence is empty:
 
 **Parameters**:
 
-- step: Dict with keys `motion_type`, `marker_pose`, `approach_offset`. One element from the sequence list.
+- `step`: dict with keys `motion_type`, `marker_pose`, `approach_offset`, and optional `contact_force`.
 
-**Return**:
+**Return**: /
 
-/
+Constructs an `ExecuteMotion.Goal` from the step dict (using `contact_force` defaulting to `2.0` N) and sends it asynchronously to `/execute_motion`. Goal response and result are handled by inlined closures; `_on_motion_result` is called on completion.
 
-Constructs an `ExecuteMotion.Goal` from the step dict and sends it asynchronously to the `/execute_motion` action server. Sets state to `MOVING_TO_WEDGELOCK` or `RETURNING` depending on `_returning`. Registers `_on_motion_goal_accepted` as the done callback.
-
-If the action server is not ready, immediately transitions to ERROR.
-
----
-
-### `_on_motion_goal_accepted`
-
-**Parameters**:
-
-- future: future returned by `send_goal_async`.
-
-**Return**:
-
-/
-
-Checks whether the motion node accepted the goal. If rejected, transitions to ERROR. If accepted, registers `_on_motion_result` to be called when the action finishes.
+If `marker_pose` is `None` or the action server is not ready, immediately transitions to `ERROR`.
 
 ---
 
@@ -160,16 +212,30 @@ Checks whether the motion node accepted the goal. If rejected, transitions to ER
 
 **Parameters**:
 
-- future: future returned by `get_result_async`.
+- `future`: future returned by `get_result_async`.
 
-**Return**:
-
-/
+**Return**: /
 
 Handles the result of a completed motion step.
 
 | Outcome | Behaviour |
 | ---     | ---       |
 | `result.success == True` | Calls `_execute_next_step` to continue the sequence. |
-| `result.success == False` | Logs the error message, clears the remaining sequence, transitions to ERROR. |
+| `result.success == False` | Logs error, clears sequence, clears `_on_sequence_done`, transitions to `ERROR`. |
+| Exception (server crash) | Logs error, clears sequence, clears `_on_sequence_done`, transitions to `ERROR`. |
 
+---
+
+### `_send_arduino_command`
+
+**Parameters**:
+
+- `msg_type`: `str` — command type (e.g. `'HAMMER_REQ'`)
+- `data`: `str` — command payload
+- `msg_info`: `str` — optional metadata
+- `on_success`: `TaskState` or `callable` — state to publish or function to call on success
+- `on_failure`: `TaskState` or `callable` — state to publish or function to call on failure
+
+**Return**: /
+
+Sends a generic `ArduinoCommand` action goal to `/arduino_command`. On result, calls or publishes `on_success` / `on_failure` depending on `result.success`. If the action server is not ready, transitions to `ERROR` immediately.

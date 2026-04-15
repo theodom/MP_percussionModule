@@ -1,3 +1,4 @@
+[back](./motion.md)
 # rtde_motions
 
 ## Overview
@@ -7,24 +8,14 @@ Pure-Python module. No ROS dependency. Contains all RTDE motion primitives used 
 
 ## Components
 
-- `MoveStatus` / `MoveResult`: return types used by all primitives
-- `compute_face_marker_rvec`: compute desired TCP orientation to face a marker
-- `move_to_pose`: move to a Cartesian pose via `moveJ_IK`
-- `move_until_contact`: move in a direction until force contact or timeout
-- `move_relative_world`: apply a 6DOF TCP-frame offset to the current pose
-- `apply_offset`: convert a TCP-frame delta to base frame via `poseTrans`
-
----
-
-### `MoveResult`
-
-Dataclass returned by all motion primitives.
-
-| Field | Type | Info |
-| ---   | ---  | ---  |
-| `status` | `MoveStatus` | `SUCCESS`, `FAILED`, or `ABORTED` |
-| `message` | str | Human-readable description of outcome |
-| `final_tcp_pose` | `List[float]` or `None` | TCP pose `[x,y,z,rx,ry,rz]` after the move, if available |
+- [`MoveStatus` / `MoveResult`](#moveresult): return types used by all primitives
+- `_current_ctp`: Gets TCP pose as 6D List from `rtde_r`
+- [`apply_offset`](#apply_offset): convert a TCP-frame delta to base frame via `poseTrans`
+- [`compute_face_marker_rvec`](#compute_face_marker_rvec): compute desired TCP orientation to face a marker
+- [`compute_snap_to_principal_rvec`](#compute_snap_to_principal_rvec): Aligns TCP to one of four principal directions
+- [`move_to_pose`](#move_to_pose): move to a Cartesian pose via `moveJ_IK`
+- [`move_until_contact`](#move_until_contact): move in a direction until force contact or timeout
+- [`move_relative_world`](#move_relative_world): apply a 6DOF TCP-frame offset to the current pose
 
 ---
 
@@ -43,6 +34,19 @@ Dataclass returned by all motion primitives.
 Converts a TCP-frame position delta to base frame using `rtde_c.poseTrans`. Only the translational part `[x, y, z]` is used; orientation is zeroed out in the delta.
 
 ---
+
+### `MoveResult`
+
+Dataclass returned by all motion primitives.
+
+| Field | Type | Info |
+| ---   | ---  | ---  |
+| `status` | `MoveStatus` | `SUCCESS`, `FAILED`, or `ABORTED` |
+| `message` | str | Human-readable description of outcome |
+| `final_tcp_pose` | `List[float]` or `None` | TCP pose `[x,y,z,rx,ry,rz]` after the move, if available |
+
+---
+
 
 ### `compute_face_marker_rvec`
 
@@ -64,6 +68,26 @@ world_up_in_base = [0, sin(-45°), cos(-45°)]
 ```
 
 > If the marker normal is nearly parallel to `world_up_in_base` (dot product > 0.99), falls back to `[1, 0, 0]` to avoid a degenerate cross product.
+
+---
+
+### `compute_snap_to_principal_rvec`
+
+**Parameters**:
+
+- `marker_rvec_base`: `List[float]` — Rodrigues vector `[rx, ry, rz]` of the marker in the robot base frame
+- `principal_dirs_base`: `List[List[float]]` — candidate TCP Z-axis unit vectors in the base frame; the function snaps to the closest one
+- `world_up_in_base`: `List[float]` or `None` — world "up" direction in base frame. Defaults to `[0, 0, 1]`
+
+**Return**:
+
+- `List[float]` — desired TCP Rodrigues vector `[rx, ry, rz]`
+
+Variant of `compute_face_marker_rvec` that constrains the TCP approach to a finite set of pre-defined directions instead of tracking the exact marker normal.
+
+Converts `marker_rvec_base` to a rotation matrix, extracts the marker's outward Z-axis, negates it to get the ideal TCP Z direction, then picks the entry from `principal_dirs_base` with the highest dot product against that ideal direction. An orthonormal TCP frame (X, Y, Z) is built using `world_up_in_base` as the reference up-vector and converted back to a Rodrigues vector.
+
+> If the chosen principal direction is nearly parallel to `world_up_in_base` (dot product > 0.99), the up fallback switches to `[1, 0, 0]` to avoid a degenerate cross product.
 
 ---
 
@@ -110,7 +134,7 @@ Moves along `direction` until contact is detected or timeout expires.
 | `AttributeError` (firmware < 5.9) | `ABORTED` | `moveUntilContact` not available; fallback not implemented |
 | Other exception | `FAILED` | Unexpected RTDE error |
 
-> `tool_speed` and `force_threshold` parameters are accepted but currently unused — `moveUntilContact` handles speed and threshold internally via firmware. They are kept for the polling fallback path which is not yet implemented.
+> `tool_speed` parameter is accepted but currently unused — `moveUntilContact` handles speed internally via firmware. They are kept for the polling fallback path which is not yet implemented.
 
 ---
 
@@ -127,3 +151,5 @@ Moves along `direction` until contact is detected or timeout expires.
 - `MoveResult`
 
 Reads the current TCP pose, applies `relative_pose` via `rtde_c.poseTrans` (full 6DOF TCP-frame composition, not simple vector addition), and calls `move_to_pose` to the resulting target. Rotation components in `relative_pose` are applied as a TCP-frame rotation.
+
+> name is misleading, shoudl be move_relative_TCP 

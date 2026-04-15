@@ -1,3 +1,4 @@
+[back](../percussionModule.md)
 # Motion package
 
 ## Components
@@ -8,7 +9,7 @@
 
 ## Goals
 
-Action server which takes a [`ExecuteMotion.goal`](../interfaces/action/ExecuteMotion.md) as input parameters. Depending on the `goal.motion_type` it orchestrates the correct robot movement from [`rtde_motions`](./rtde_motions.md) 
+Action takes a [`ExecuteMotion.goal`](../interfaces/action/ExecuteMotion.md) as input parameters. Depending on the `goal.motion_type` it orchestrates the correct robot movement from [`rtde_motions`](./rtde_motions.md). Optional parameters for specific motion types will be added later. 
 It returns a `ExecuteMotion.Result` object to the action client ([`task_manager_node`](../Task_Manager/task_manager_node.md))s
 
 ### [percussion_motion_node](percussion_motion_node.md)
@@ -26,7 +27,7 @@ ROS 2 action server node. Exposes the [`/execute_motion`](../interfaces/action/E
 
 **Actions**:
 
-- `/execute_motion` (`ExecuteMotion`): Receives a motion goal, executes it, and returns success/failure with final TCP pose.
+- `/execute_motion` [(`ExecuteMotion`)](../interfaces/action/ExecuteMotion.md): Receives a motion goal, executes it, and returns success/failure with final TCP pose.
 
 ### [rtde_motions](./rtde_motions.md)
 
@@ -41,3 +42,4 @@ Pure-Python module (no ROS). Contains all RTDE motion primitives. Each function 
 | `move_relative_world` | Apply a 6DOF TCP-frame offset to the current pose via `poseTrans` |
 | `compute_face_marker_rvec` | Compute TCP orientation so the tool faces a marker surface, with upright constraint |
 
+> name `move_relative_world` is ambiguous and should be changed.
