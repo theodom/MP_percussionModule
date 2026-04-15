@@ -271,21 +271,6 @@ class PercussionMotionNode(Node):
         elif motion_type == MotionType.MOVE_TO_CONTACT:
             current_tcp = list(self._rtde_r.getActualTCPPose())
             marker_base = apply_pose_offset(self._rtde_c, current_tcp, marker_pose)
-            send_feedback('APPROACHING')
-            approach_pose = list(marker_base)
-            approach_pose[0] += pose_offset[0]
-            approach_pose[1] += pose_offset[1]
-            approach_pose[2] += pose_offset[2]
-            result = move_to_pose(self._rtde_c, self._rtde_r, approach_pose,
-                                  velocity=self._def_vel, acceleration=self._def_acc)
-            if result.status != MoveStatus.SUCCESS:
-                return result
-
-            # Contact direction: toward the marker (opposite of the approach pose_offset)
-            pose_offset_vec = np.array(pose_offset[:3])
-            norm = np.linalg.norm(pose_offset_vec)
-            #direction = (list(-pose_offset_vec / norm) + [0.0, 0.0, 0.0]) if norm > 1e-6 \
-            #            else [0.0, 0.0, -1.0, 0.0, 0.0, 0.0]
             direction = pose_offset
             self.get_logger().info(f'Moving to contact in direction: {direction}')
 

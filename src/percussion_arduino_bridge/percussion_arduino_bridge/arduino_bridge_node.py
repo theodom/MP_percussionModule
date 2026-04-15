@@ -124,7 +124,7 @@ class ArduinoBridgeNode(Node):
             time.sleep(0.5)
 
             # Send initial command
-            message = f'HAMMER_REQ|{cycle_length}|\n'
+            message = f'HAMMER_REQ|{cycle_length}|.\n'
             ser.write(message.encode('utf-8'))
             self.get_logger().debug(f'Sent: {message.strip()}')
 

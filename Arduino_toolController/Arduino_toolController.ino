@@ -1,19 +1,17 @@
-#define EM 3
-#define fan 2
+#define EM D2
+#define fan D3
 #define inductive_1 D9
 #define inductive_2 D10
 
 
 #include "lowLevelControl.h"
-
-// --------- Global Variables ----------
 bool EMState = false;
 
 
 void setup() {
 
   // Inductive sensors are connected 3.3V -> sensor -> input.
-  pinMode(inductive_1, INPUT_PULLDOWN);
+  pinMode(inductive_1,INPUT_PULLDOWN);
   pinMode(inductive_2, INPUT_PULLDOWN);
 
   // Digital outputs
@@ -27,28 +25,14 @@ void setup() {
   digitalWrite(fan, HIGH);
   delay(1000);
   digitalWrite(fan,LOW);
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(100);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(50);
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(100);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(50);
+  delay(1000);
   Serial.println("setup finished.");
 }
 
 void loop() {
+  digitalWrite(EM, HIGH);
 
-  digitalWrite(fan, HIGH);
-  delay(5000);
-  digitalWrite(fan, LOW);
-  delay(3000);
   parsedMessage request;
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(100);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(50);
   request = readROSSerial();
 
   if (!request.valid) {
@@ -57,6 +41,7 @@ void loop() {
 
   int ind_a = digitalRead(inductive_1);
   int ind_b = digitalRead(inductive_2);
+  digitalWrite(fan, 127);
 
   digitalWrite(LED_BUILTIN, LOW);
   messageToParse msg_out;
@@ -66,20 +51,18 @@ void loop() {
     int actionState;
     case RETRACT_EM:  // Retract EM and enable fan max speed.
       analogWrite(fan, 255);
-      EMState = true;
-      digitalWrite(EM, EMState);
+      EMState = false;
+      digitalWrite(EM, LOW);
 
       break;
     case HAMMER_REQ: // Perform hammering cycle. 
+      digitalWrite(fan, LOW);
       msg_out.state = "DONE";
       msg_out.type = "HAMMER_REQ";
       actionState = -1;
-      actionState = hammerCycle();
-
-      while (actionState != 0){
-        delay(1);
-      }
+      hammerCycle();
       writeROSSerial(msg_out);
+      digitalWrite(fan, HIGH);
       break;
     case IND_VALUES:
 

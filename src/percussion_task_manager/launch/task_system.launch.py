@@ -11,9 +11,9 @@ def generate_launch_description() -> LaunchDescription:
         DeclareLaunchArgument('marker_size',        default_value='0.0398',      description='ArUco marker side length in metres'),
 
         # --- Motion ---
-        DeclareLaunchArgument('robot_ip',           default_value='169.254.0.22', description='UR10e RTDE IP address'),
-        DeclareLaunchArgument('default_velocity',   default_value='0.2',          description='Default joint velocity (m/s)'),
-        DeclareLaunchArgument('default_accel',      default_value='0.2',          description='Default joint acceleration (m/s²)'),
+        DeclareLaunchArgument('robot_ip',           default_value='169.254.0.22', description='UR10e IP address'),
+        DeclareLaunchArgument('default_velocity',   default_value='1.0',          description='Default joint velocity (m/s)'),
+        DeclareLaunchArgument('default_accel',      default_value='0.50',          description='Default joint acceleration (m/s²)'),
         DeclareLaunchArgument('contact_force',      default_value='5.0',          description='Contact detection force threshold (N)'),
         DeclareLaunchArgument('contact_timeout',    default_value='5.0',          description='Contact detection timeout (s)'),
 
