@@ -84,12 +84,12 @@ ros2 service call /start_task std_srvs/srv/Trigger
 
 The following diagram shows the architectural layout of the ROS project. The task manager node is a main orchestrator which decides the system state and what to do. The underlying nodes are called upon as needed;
 
-![ROS node architecture](./ros_node_architecture.png)
+![ROS node architecture](docs/ros_node_architecture.svg)
 
 
 The following diagram gives an overview of the general workflow of the program. When a task is requested this is the sequence in which things are executed. (not yet fully implemented)
 
-![ROS task flow sequence](ros_task_flow_sequence.png)
+![ROS task flow sequence](docs/ros_task_flow_sequence.svg)
 
 Three nodes are started by the launch file, along with two static TF publishers (`world` -> `base_link` and `tool0` -> `camera_frame`).
 
