@@ -37,17 +37,13 @@ void loop() {
   digitalWrite(EM, HIGH);
 
   if (cooldownActive){
-    Serial.println("coolign down");
     int now = millis();
     if (now - cooldownStart > (cooldownTime * 1000)){
       analogWrite(fan, 255);
       cooldownActive = false;
     }
   }
-  else {
-    Serial.println("not");
-    Serial.println(cooldownActive);
-  }
+
   parsedMessage request;
   request = readROSSerial();
 

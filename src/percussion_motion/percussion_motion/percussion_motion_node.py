@@ -94,8 +94,8 @@ class PercussionMotionNode(Node):
         self.declare_parameter('robot_ip',         '169.254.0.22')
         self.declare_parameter('home_pose', [0.0652, 0.4498, 0.4911, 1.9767, 0.9942, 1.6870]
 )
-        self.declare_parameter('default_velocity', 0.2)
-        self.declare_parameter('default_accel',    0.2)
+        self.declare_parameter('default_velocity', 0.6)
+        self.declare_parameter('default_accel',    0.3)
         self.declare_parameter('contact_force',    1.0)
         self.declare_parameter('contact_timeout',  5.0)
 
@@ -297,7 +297,7 @@ class PercussionMotionNode(Node):
         # ---- RELATIVE_MOVE ------------------------------------------
         elif motion_type == MotionType.RELATIVE_MOVE:
             send_feedback('MOVING')
-            return motions.move_relative_world(self._rtde_c, self._rtde_r, pose_offset)
+            return motions.move_relative_world(self._rtde_c, self._rtde_r, pose_offset, self._def_vel, self._def_acc)
 
         else:
             return MoveResult(MoveStatus.FAILED, f'Unhandled motion type: {motion_type}')

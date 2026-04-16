@@ -132,6 +132,8 @@ Three nodes are started by the launch file, along with two static TF publishers 
 
   - building of motion sequences is cumbersome. (Move to motion package?)
 
+  - MoveUntilContact has no parameter Force threshold --> build custom force detection function.  
+
 
 - **Marker selection**: always picks `detections[0]`. Should be replaced with more intelligent decision making. (Wedgelock memory?)
 

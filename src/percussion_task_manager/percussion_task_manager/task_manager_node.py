@@ -95,7 +95,7 @@ class TaskManagerNode(Node):
             {
                 'motion_type':    'RELATIVE_MOVE', # Move towards wedgelock (sideways) for contact 2D
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.080, -0.05, 0, 0, 0.0, 0.0],  # TCP frame
+                'approach_offset': [0.080, -0.07, 0, 0, 0.0, 0.0],  # TCP frame
             },
             {
                 'motion_type': 'MOVE_TO_CONTACT', # Touch ledger top down
@@ -110,7 +110,7 @@ class TaskManagerNode(Node):
             {
                 'motion_type':    'RELATIVE_MOVE', # MOVE closer to pole
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.040, 0.0, 0.10, 0.0, 0.0, 0.0], # TCP frame
+                'approach_offset': [0.040, 0.0, 0.13, 0.0, 0.0, 0.0], # TCP frame
             },
             {
                 'motion_type':    'MOVE_TO_CONTACT', # Touch bar sideways
@@ -120,13 +120,12 @@ class TaskManagerNode(Node):
             {
                 'motion_type':    'RELATIVE_MOVE', # Move into striking position
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, 0.000, -0.00150, 0.0, 0.0, 0.0],   # TCP frame
+                'approach_offset': [0.0, 0.000, -0.0010, 0.0, 0.0, 0.0],   # TCP frame
             },
             {
-                'motion_type':    'MOVE_TO_CONTACT', # Touch bar sideways
+                'motion_type':    'RELATIVE_MOVE', # Touch bar sideways
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, 0.00303, -0.0030, 0.0, 0.0, 0.0], # Base Frame
-                'contact_force': 10.0,
+                'approach_offset': [0.0, -0.010, 0.0, 0.0, 0.0, 0.0], # TCP Frame
             },
         ]
 
@@ -183,7 +182,7 @@ class TaskManagerNode(Node):
                 self._execute_next_step()
             case TaskState.AT_MARKER:
                 self.publish_state(TaskState.HAMMERING)
-                self._send_arduino_command('HAMMER_REQ', '5', '',
+                self._send_arduino_command('HAMMER_REQ', '5', 'a',
                                            on_success=TaskState.DONE,
                                            on_failure=TaskState.ERROR)
             case TaskState.HAMMERING:
