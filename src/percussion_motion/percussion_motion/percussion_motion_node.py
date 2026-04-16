@@ -252,7 +252,7 @@ class PercussionMotionNode(Node):
             marker_base[3:] = rvec_desired
 
             # Apply standoff (-10 cm along base X)
-            marker_base[0] -= 0.10
+            marker_base[:] -= pose_offset[:]
 
             send_feedback('APPROACHING', f'Goal pose: {marker_base}')
             result = move_to_pose(self._rtde_c, self._rtde_r, marker_base,

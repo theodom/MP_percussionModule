@@ -73,9 +73,9 @@ class TaskManagerNode(Node):
         """
         return [
             {
-                'motion_type':    'MOVE_TO_MARKER', # 10 cm standoff in base X
+                'motion_type':    'MOVE_TO_MARKER', # Move to Marker with approach_offset
                 'marker_pose':    marker_pose,
-                'approach_offset': [-0.05, 0.0, 0.0, 0.0, 0.0, 0.0],  # Base Frame
+                'approach_offset': [0.05, 0.0, 0.0, 0.0, 0.0, 0.0],  # Base Frame
             },
             {
                 'motion_type':    'MOVE_TO_CONTACT', # Touch Ledger facing marker
