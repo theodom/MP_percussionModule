@@ -30,7 +30,11 @@ parsedMessage readROSSerial() {
     result.type = HAMMER_REQ;
   } else if (typeStr == "IND_VALUES") {
     result.type = IND_VALUES;
+  } else if (typeStr == "FAN_TEST"){
+    result.type = FAN_TEST;
+    Serial.println("fan tested");
   } else {
+    Serial.println(" no result");
     return result;
   }
 

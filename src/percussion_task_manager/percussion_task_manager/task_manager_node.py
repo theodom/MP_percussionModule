@@ -75,12 +75,12 @@ class TaskManagerNode(Node):
             {
                 'motion_type':    'MOVE_TO_MARKER', # 10 cm standoff in base X
                 'marker_pose':    marker_pose,
-                'approach_offset': [0.005, 0.0, 0.0, 0.0, 0.0, 0.0],  # Base Frame
+                'approach_offset': [-0.05, 0.0, 0.0, 0.0, 0.0, 0.0],  # Base Frame
             },
             {
                 'motion_type':    'MOVE_TO_CONTACT', # Touch Ledger facing marker
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.010, 0.0, 0.0, 0.0, 0.0, 0.0],   # Base frame
+                'approach_offset': [0.020, 0.0, 0.0, 0.0, 0.0, 0.0],   # Base frame
             },
             {
                 'motion_type':    'RELATIVE_MOVE', # move backwards from Ledger + UP
@@ -93,24 +93,24 @@ class TaskManagerNode(Node):
                 'approach_offset': [0.0, 0.0, 0.0, 0.0, -1.5701, 0.0],   # TCP frame
             },
             {
-                'motion_type':    'RELATIVE_MOVE', # Move towards wedgelock (sideways) for contact 2D
+                'motion_type':    'RELATIVE_MOVE', # Move towards wedgelock (sideways) before contact 2D
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.080, -0.07, 0, 0, 0.0, 0.0],  # TCP frame
+                'approach_offset': [0.080, -0.04, 0, 0, 0.0, 0.0],  # TCP frame
             },
             {
-                'motion_type': 'MOVE_TO_CONTACT', # Touch ledger top down
+                'motion_type': 'MOVE_TO_CONTACT', # Touch ledger top down (contact 2D)
                 'marker_pose': _make_pose6d(),
                 'approach_offset': [0.0, 0.00707, -0.00707, 0.0, 0.0, 0.0], # Base Frame
             },
             {
                 'motion_type':    'RELATIVE_MOVE', # MOVE up for clearance
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0,0.06, 0, 0.0, 0.0, 0.0], # TCP frame
+                'approach_offset': [0, 0.08, 0, 0.0, 0.0, 0.0], # TCP frame
             },
             {
-                'motion_type':    'RELATIVE_MOVE', # MOVE closer to pole
+                'motion_type':    'RELATIVE_MOVE', # MOVE closer to wedgelock
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.040, 0.0, 0.13, 0.0, 0.0, 0.0], # TCP frame
+                'approach_offset': [0.045, 0.0, 0.11, 0.0, 0.0, 0.0], # TCP frame
             },
             {
                 'motion_type':    'MOVE_TO_CONTACT', # Touch bar sideways
@@ -118,14 +118,34 @@ class TaskManagerNode(Node):
                 'approach_offset': [0.0, -0.00707, -0.00707, 0.0, 0.0, 0.0], # Base Frame
             },
             {
+                'motion_type':    'RELATIVE_MOVE', # MOVE back from bar
+                'marker_pose':    _make_pose6d(),
+                'approach_offset': [0.0, 0.0, -0.06, 0.0, 0.0, 0.0], # TCP frame
+            },
+            {
+                'motion_type':    'RELATIVE_MOVE', # MOVE down ready for wedgelock insert
+                'marker_pose':    _make_pose6d(),
+                'approach_offset': [0.0, -0.05, 0.0, 0.0, 0.0, 0.0], # TCP frame
+            },
+            {
+                'motion_type':    'RELATIVE_MOVE', # MOVE wedgelock in position
+                'marker_pose':    _make_pose6d(),
+                'approach_offset': [0.0, 0.015, 0.045, 0.0, 0.0, 0.0], # TCP frame
+            },
+            {
                 'motion_type':    'RELATIVE_MOVE', # Move into striking position
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, 0.000, -0.0010, 0.0, 0.0, 0.0],   # TCP frame
+                'approach_offset': [0.0, 0.010, 0.0, 0.0, 0.0, 0.0],   # TCP frame
+            },
+            {
+                'motion_type':    'RELATIVE_MOVE', # MOVE over wedgelock
+                'marker_pose':    _make_pose6d(),
+                'approach_offset': [0.0, -0.00, 0.015, 0.0, 0.0, 0.0], # TCP Frame
             },
             {
                 'motion_type':    'RELATIVE_MOVE', # Touch bar sideways
                 'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, -0.010, 0.0, 0.0, 0.0, 0.0], # TCP Frame
+                'approach_offset': [0.0, -0.007, 0.0, 0.0, 0.0, 0.0], # TCP Frame
             },
         ]
 

@@ -58,6 +58,17 @@ void loop() {
   switch (request.type)
   {
     int actionState;
+    case FAN_TEST:
+      digitalWrite(EM, LOW);
+      delay(1000);
+      digitalWrite(EM, HIGH);
+      Serial.println("setting fan low");
+      analogWrite(fan, 0);
+      delay(4000);
+      Serial.println("setting fan HIGH");
+      analogWrite(fan,255);
+      delay(4000);
+      analogWrite(fan, 127);
     case HAMMER_REQ: // Perform hammering cycle. 
       analogWrite(fan, 0);
       msg_out.state = "DONE";
