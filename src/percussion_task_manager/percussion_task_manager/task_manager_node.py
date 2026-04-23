@@ -64,97 +64,143 @@ class TaskManagerNode(Node):
     # Sequence definition
     # ------------------------------------------------------------------
 
+
+    loosening = True
     def _build_sequence(self, marker_pose: Pose6D) -> List[dict]:
+
         """
         Define the full motion sequence for one percussion task.
         Each step is a dict with keys: motion_type, marker_pose, approach_offset, contact_force.
         contact_force is optional and defaults to ROS parameter if not specified.
         Edit here to add, remove, or reorder steps.
         """
-        return [
-            {
-                'motion_type':    'MOVE_TO_MARKER', # Move to Marker with approach_offset
-                'marker_pose':    marker_pose,
-                'approach_offset': [0.05, 0.0, 0.0, 0.0, 0.0, 0.0],  # Base Frame
-            },
-            {
-                'motion_type':    'MOVE_TO_CONTACT', # Touch Ledger facing marker
-                'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.020, 0.0, 0.0, 0.0, 0.0, 0.0],   # Base frame
-            },
-            {
-                'motion_type':    'RELATIVE_MOVE', # move backwards from Ledger + UP
-                'marker_pose':    _make_pose6d(),
-                'approach_offset': [0, 0.15, -0.05, 0, 0.0, 0.0], # TCP frame
-            },
-            {
-                'motion_type':    'RELATIVE_MOVE', # Rotate Tool to face wedgelock
-                'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, 0.0, 0.0, 0.0, -1.5701, 0.0],   # TCP frame
-            },
-            {
-                'motion_type':    'RELATIVE_MOVE', # Move towards wedgelock (sideways) before contact 2D
-                'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.080, -0.04, 0, 0, 0.0, 0.0],  # TCP frame
-            },
-            {
-                'motion_type': 'MOVE_TO_CONTACT', # Touch ledger top down (contact 2D)
-                'marker_pose': _make_pose6d(),
-                'approach_offset': [0.0, 0.00707, -0.00707, 0.0, 0.0, 0.0], # Base Frame
-            },
-            {
-                'motion_type':    'RELATIVE_MOVE', # MOVE up for clearance
-                'marker_pose':    _make_pose6d(),
-                'approach_offset': [0, 0.08, 0, 0.0, 0.0, 0.0], # TCP frame
-            },
-            {
-                'motion_type':    'RELATIVE_MOVE', # MOVE closer to wedgelock
-                'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.045, 0.0, 0.11, 0.0, 0.0, 0.0], # TCP frame
-            },
-            {
-                'motion_type':    'MOVE_TO_CONTACT', # Touch bar sideways
-                'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, -0.00707, -0.00707, 0.0, 0.0, 0.0], # Base Frame
-            },
-            {
-                'motion_type':    'RELATIVE_MOVE', # MOVE back from bar
-                'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, 0.0, -0.06, 0.0, 0.0, 0.0], # TCP frame
-            },
-            {
-                'motion_type':    'RELATIVE_MOVE', # MOVE down ready for wedgelock insert
-                'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, -0.05, 0.0, 0.0, 0.0, 0.0], # TCP frame
-            },
-            {
-                'motion_type':    'RELATIVE_MOVE', # MOVE wedgelock in position
-                'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, 0.015, 0.045, 0.0, 0.0, 0.0], # TCP frame
-            },
-            {
-                'motion_type':    'RELATIVE_MOVE', # Move into striking position
-                'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, 0.010, 0.0, 0.0, 0.0, 0.0],   # TCP frame
-            },
-            {
-                'motion_type':    'RELATIVE_MOVE', # MOVE over wedgelock
-                'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, -0.00, 0.015, 0.0, 0.0, 0.0], # TCP Frame
-            },
-            {
-                'motion_type':    'RELATIVE_MOVE', # Touch bar sideways
-                'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, -0.007, 0.0, 0.0, 0.0, 0.0], # TCP Frame
-            },
-        ]
+        if not self.loosening:
+            return [
+                {
+                    'motion_type':    'MOVE_TO_MARKER', # Move to Marker with approach_offset
+                    'marker_pose':    marker_pose,
+                    'approach_offset': [0.05, 0.0, 0.0, 0.0, 0.0, 0.0],  # Base Frame
+                },
+                {
+                    'motion_type':    'MOVE_TO_CONTACT', # Touch Ledger facing marker
+                    'marker_pose':    _make_pose6d(),
+                    'approach_offset': [0.020, 0.0, 0.0, 0.0, 0.0, 0.0],   # Base frame
+                },
+                {
+                    'motion_type':    'RELATIVE_MOVE', # move backwards from Ledger + UP
+                    'marker_pose':    _make_pose6d(),
+                    'approach_offset': [0, 0.15, -0.05, 0, 0.0, 0.0], # TCP frame
+                },
+                {
+                    'motion_type':    'RELATIVE_MOVE', # Rotate Tool to face wedgelock
+                    'marker_pose':    _make_pose6d(),
+                    'approach_offset': [0.0, 0.0, 0.0, 0.0, -1.5701, 0.0],   # TCP frame
+                },
+                {
+                    'motion_type':    'RELATIVE_MOVE', # Move towards wedgelock (sideways) before contact 2D
+                    'marker_pose':    _make_pose6d(),
+                    'approach_offset': [0.080, -0.04, 0, 0, 0.0, 0.0],  # TCP frame
+                },
+                {
+                    'motion_type': 'MOVE_TO_CONTACT', # Touch ledger top down (contact 2D)
+                    'marker_pose': _make_pose6d(),
+                    'approach_offset': [0.0, 0.00707, -0.00707, 0.0, 0.0, 0.0], # Base Frame
+                },
+                {
+                    'motion_type':    'RELATIVE_MOVE', # MOVE up for clearance
+                    'marker_pose':    _make_pose6d(),
+                    'approach_offset': [0, 0.08, 0, 0.0, 0.0, 0.0], # TCP frame
+                },
+                {
+                    'motion_type':    'RELATIVE_MOVE', # MOVE closer to wedgelock
+                    'marker_pose':    _make_pose6d(),
+                    'approach_offset': [0.045, 0.0, 0.11, 0.0, 0.0, 0.0], # TCP frame
+                },
+                {
+                    'motion_type':    'MOVE_TO_CONTACT', # Touch bar sideways
+                    'marker_pose':    _make_pose6d(),
+                    'approach_offset': [0.0, -0.00707, -0.00707, 0.0, 0.0, 0.0], # Base Frame
+                },
+                {
+                    'motion_type':    'RELATIVE_MOVE', # MOVE back from bar
+                    'marker_pose':    _make_pose6d(),
+                    'approach_offset': [0.0, 0.0, -0.06, 0.0, 0.0, 0.0], # TCP frame
+                },
+                {
+                    'motion_type':    'RELATIVE_MOVE', # MOVE down ready for wedgelock insert
+                    'marker_pose':    _make_pose6d(),
+                    'approach_offset': [0.0, -0.05, 0.0, 0.0, 0.0, 0.0], # TCP frame
+                },
+                {
+                    'motion_type':    'RELATIVE_MOVE', # MOVE wedgelock in position
+                    'marker_pose':    _make_pose6d(),
+                    'approach_offset': [0.0, 0.015, 0.045, 0.0, 0.0, 0.0], # TCP frame
+                },
+                {
+                    'motion_type':    'RELATIVE_MOVE', # Move into striking position
+                    'marker_pose':    _make_pose6d(),
+                    'approach_offset': [0.0, 0.010, 0.0, 0.0, 0.0, 0.0],   # TCP frame
+                },
+                {
+                    'motion_type':    'RELATIVE_MOVE', # MOVE over wedgelock
+                    'marker_pose':    _make_pose6d(),
+                    'approach_offset': [0.0, -0.00, 0.015, 0.0, 0.0, 0.0], # TCP Frame
+                },
+                {
+                    'motion_type':    'RELATIVE_MOVE', # Touch bar sideways
+                    'marker_pose':    _make_pose6d(),
+                    'approach_offset': [0.0, -0.007, 0.0, 0.0, 0.0, 0.0], # TCP Frame
+                },
+            ]
+        else:
+            return [
+                {
+                    'motion_type':    'MOVE_TO_MARKER', # Move to Marker with approach_offset
+                    'marker_pose':    marker_pose,
+                    'approach_offset': [0.05, 0.0, 0.0, 0.0, -1.57, 1.57],  # Base Frame
+                },
+                {
+                    'motion_type':    'MOVE_TO_CONTACT', # Touch Ledger facing marker
+                    'marker_pose':    _make_pose6d(),
+                    'approach_offset': [0.020, 0.0, 0.0, 0.0, 0.0, 0.0],   # Base frame
+                },
+                {
+                    'motion_type':    'RELATIVE_MOVE', # Move back from bar
+                    'marker_pose':    _make_pose6d(),
+                    'approach_offset': [0.0, -0.15, - 0.10, 0.0, 0.0, -3.14], # TCP Frame
+                },
+                {
+                    'motion_type':    'RELATIVE_MOVE', # Move back from bar
+                    'marker_pose':    _make_pose6d(),
+                    'approach_offset': [0.0, -0.0,  0.1050, 0.0, 0.0, 0.0], # TCP Frame
+                },
+                {
+                    'motion_type': 'MOVE_TO_CONTACT',
+                    'marker_pose': _make_pose6d(),
+                    'approach_offset': [0.0, -0.020, 0.020, 0.0, 0.0, 0.0],
+                },
+                {
+                    'motion_type': 'RELATIVE_MOVE',
+                    'marker_pose': _make_pose6d(),
+                    'approach_offset': [0.0, 0.05, 0.03, 0.0, 0.0, 0.0],
+                },
+                {
+                    'motion_type': 'RELATIVE_MOVE', # Move to Wedgelock
+                    'marker_pose': _make_pose6d(),
+                    'approach_offset': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                },
+
+
+# Makerspace: vragen voor gedetailleerde factuur. 
+            ]
 
     def _build_return_sequence(self) -> List[dict]:
         """
         Sequence executed automatically after the main task completes.
         Edit here to adjust the return/retract motion before going home.
         """
-        return [
+        if not self.loosening:
+            return [
             {
                 'motion_type':    'RELATIVE_MOVE', # Retract from wedgelock
                 'marker_pose':    _make_pose6d(),
@@ -174,6 +220,25 @@ class TaskManagerNode(Node):
                 'contact_force':   5.0,
             },
         ]
+        else:
+            return [
+                {
+                'motion_type':    'RELATIVE_MOVE', # Retract from wedgelock
+                'marker_pose':    _make_pose6d(),
+                'approach_offset': [0.0, 0.05, -0.10, 0.0, 0.0, 0.0], # TCP frame
+                'contact_force':   5.0,
+            },
+            {
+                'motion_type':    'RELATIVE_MOVE', # Retract from wedgelock
+                'marker_pose':    _make_pose6d(),
+                'approach_offset': [0.0, 0.0, 0.0, 0.0, 0.0, -3.145], # TCP frame
+            },
+            {
+                'motion_type':    'RETURN_HOME',
+                'marker_pose':    _make_pose6d(),
+                'approach_offset': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            },
+            ]
 
     # ------------------------------------------------------------------
     # State
