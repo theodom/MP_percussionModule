@@ -217,7 +217,7 @@ def move_until_contact(
     except Exception as exc:
         return MoveResult(MoveStatus.FAILED, f'move_until_contact failed: {exc}')
 
-def move_relative_world(
+def move_relative_tcp(
     rtde_c: RTDEControl,
     rtde_r: RTDEReceive,
     relative_pose: list[float],

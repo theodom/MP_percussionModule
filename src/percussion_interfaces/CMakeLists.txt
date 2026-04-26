@@ -15,6 +15,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/MarkerDetection.msg"
   "msg/Pose6D.msg"
   "srv/TriggerCapture.srv"
+  "srv/StartTask.srv"
   "action/ExecuteMotion.action"
   "action/Hammer.action"
   "action/ArduinoCommand.action"

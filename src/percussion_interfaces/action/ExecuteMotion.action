@@ -1,8 +1,6 @@
 # Goal
 string motion_type
-Pose6D marker_pose
-float64[6] approach_offset
-float64 contact_force
+string step_data
 ---
 # Result
 bool success

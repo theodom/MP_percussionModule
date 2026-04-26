@@ -1,20 +1,22 @@
 from enum import Enum
 from typing import Optional, List
+import json
 
 import rclpy
 from rclpy.node import Node
 from rclpy.client import Client
 from rclpy.action import ActionClient
 from std_msgs.msg import String
-from std_srvs.srv import Trigger
-from percussion_interfaces.srv import TriggerCapture
+from percussion_interfaces.srv import TriggerCapture, StartTask
 from percussion_interfaces.action import ExecuteMotion, ArduinoCommand
 from percussion_interfaces.msg import Pose6D
+from .task_modes import MODES
 
 
 class TaskState(str, Enum):
     IDLE                = 'IDLE'
     TASK_REQUESTED      = 'TASK_REQUESTED'
+    AT_HOME             = 'AT_HOME'
     CAPTURING           = 'CAPTURING'
     POSE_ACQUIRED       = 'POSE_ACQUIRED'
     MOVING_TO_WEDGELOCK = 'MOVING_TO_WEDGELOCK'
@@ -25,11 +27,6 @@ class TaskState(str, Enum):
     ERROR               = 'ERROR'
 
 
-def _make_pose6d(x=0.0, y=0.0, z=0.0, rx=0.0, ry=0.0, rz=0.0) -> Pose6D:
-    p = Pose6D()
-    p.x, p.y, p.z = x, y, z
-    p.rx, p.ry, p.rz = rx, ry, rz
-    return p
 
 
 class TaskManagerNode(Node):
@@ -44,7 +41,7 @@ class TaskManagerNode(Node):
         self._target_frame   = self.get_parameter('target_frame').get_parameter_value().string_value
 
         # Services/Topics
-        self._start_srv     = self.create_service(Trigger, '/start_task', self.start_task_callback)
+        self._start_srv     = self.create_service(StartTask, '/start_task', self.start_task_callback)
         self._state_pub     = self.create_publisher(String, '/task_manager/state', 10)
         self._state_sub     = self.create_subscription(String, '/task_manager/state', self._on_state_changed, 10)
         self._capture_client: Client = self.create_client(TriggerCapture, capture_service_name)
@@ -56,189 +53,11 @@ class TaskManagerNode(Node):
         self._pending_capture_call = None
         self._on_sequence_done = None
         self._sequence: List[dict] = []
+        self._mode = None
 
         self.publish_state(self._current_state)
         self.get_logger().info('Task manager node started.')
 
-    # ------------------------------------------------------------------
-    # Sequence definition
-    # ------------------------------------------------------------------
-
-
-    loosening = True
-    def _build_sequence(self, marker_pose: Pose6D) -> List[dict]:
-
-        """
-        Define the full motion sequence for one percussion task.
-        Each step is a dict with keys: motion_type, marker_pose, approach_offset, contact_force.
-        contact_force is optional and defaults to ROS parameter if not specified.
-        Edit here to add, remove, or reorder steps.
-        """
-        if not self.loosening:
-            return [
-                {
-                    'motion_type':    'MOVE_TO_MARKER', # Move to Marker with approach_offset
-                    'marker_pose':    marker_pose,
-                    'approach_offset': [0.05, 0.0, 0.0, 0.0, 0.0, 0.0],  # Base Frame
-                },
-                {
-                    'motion_type':    'MOVE_TO_CONTACT', # Touch Ledger facing marker
-                    'marker_pose':    _make_pose6d(),
-                    'approach_offset': [0.020, 0.0, 0.0, 0.0, 0.0, 0.0],   # Base frame
-                },
-                {
-                    'motion_type':    'RELATIVE_MOVE', # move backwards from Ledger + UP
-                    'marker_pose':    _make_pose6d(),
-                    'approach_offset': [0, 0.15, -0.05, 0, 0.0, 0.0], # TCP frame
-                },
-                {
-                    'motion_type':    'RELATIVE_MOVE', # Rotate Tool to face wedgelock
-                    'marker_pose':    _make_pose6d(),
-                    'approach_offset': [0.0, 0.0, 0.0, 0.0, -1.5701, 0.0],   # TCP frame
-                },
-                {
-                    'motion_type':    'RELATIVE_MOVE', # Move towards wedgelock (sideways) before contact 2D
-                    'marker_pose':    _make_pose6d(),
-                    'approach_offset': [0.080, -0.04, 0, 0, 0.0, 0.0],  # TCP frame
-                },
-                {
-                    'motion_type': 'MOVE_TO_CONTACT', # Touch ledger top down (contact 2D)
-                    'marker_pose': _make_pose6d(),
-                    'approach_offset': [0.0, 0.00707, -0.00707, 0.0, 0.0, 0.0], # Base Frame
-                },
-                {
-                    'motion_type':    'RELATIVE_MOVE', # MOVE up for clearance
-                    'marker_pose':    _make_pose6d(),
-                    'approach_offset': [0, 0.08, 0, 0.0, 0.0, 0.0], # TCP frame
-                },
-                {
-                    'motion_type':    'RELATIVE_MOVE', # MOVE closer to wedgelock
-                    'marker_pose':    _make_pose6d(),
-                    'approach_offset': [0.045, 0.0, 0.11, 0.0, 0.0, 0.0], # TCP frame
-                },
-                {
-                    'motion_type':    'MOVE_TO_CONTACT', # Touch bar sideways
-                    'marker_pose':    _make_pose6d(),
-                    'approach_offset': [0.0, -0.00707, -0.00707, 0.0, 0.0, 0.0], # Base Frame
-                },
-                {
-                    'motion_type':    'RELATIVE_MOVE', # MOVE back from bar
-                    'marker_pose':    _make_pose6d(),
-                    'approach_offset': [0.0, 0.0, -0.06, 0.0, 0.0, 0.0], # TCP frame
-                },
-                {
-                    'motion_type':    'RELATIVE_MOVE', # MOVE down ready for wedgelock insert
-                    'marker_pose':    _make_pose6d(),
-                    'approach_offset': [0.0, -0.05, 0.0, 0.0, 0.0, 0.0], # TCP frame
-                },
-                {
-                    'motion_type':    'RELATIVE_MOVE', # MOVE wedgelock in position
-                    'marker_pose':    _make_pose6d(),
-                    'approach_offset': [0.0, 0.015, 0.045, 0.0, 0.0, 0.0], # TCP frame
-                },
-                {
-                    'motion_type':    'RELATIVE_MOVE', # Move into striking position
-                    'marker_pose':    _make_pose6d(),
-                    'approach_offset': [0.0, 0.010, 0.0, 0.0, 0.0, 0.0],   # TCP frame
-                },
-                {
-                    'motion_type':    'RELATIVE_MOVE', # MOVE over wedgelock
-                    'marker_pose':    _make_pose6d(),
-                    'approach_offset': [0.0, -0.00, 0.015, 0.0, 0.0, 0.0], # TCP Frame
-                },
-                {
-                    'motion_type':    'RELATIVE_MOVE', # Touch bar sideways
-                    'marker_pose':    _make_pose6d(),
-                    'approach_offset': [0.0, -0.007, 0.0, 0.0, 0.0, 0.0], # TCP Frame
-                },
-            ]
-        else:
-            return [
-                {
-                    'motion_type':    'MOVE_TO_MARKER', # Move to Marker with approach_offset
-                    'marker_pose':    marker_pose,
-                    'approach_offset': [0.05, 0.0, 0.0, 0.0, -1.57, 1.57],  # Base Frame
-                },
-                {
-                    'motion_type':    'MOVE_TO_CONTACT', # Touch Ledger facing marker
-                    'marker_pose':    _make_pose6d(),
-                    'approach_offset': [0.020, 0.0, 0.0, 0.0, 0.0, 0.0],   # Base frame
-                },
-                {
-                    'motion_type':    'RELATIVE_MOVE', # Move back from bar
-                    'marker_pose':    _make_pose6d(),
-                    'approach_offset': [0.0, -0.15, - 0.10, 0.0, 0.0, -3.14], # TCP Frame
-                },
-                {
-                    'motion_type':    'RELATIVE_MOVE', # Move back from bar
-                    'marker_pose':    _make_pose6d(),
-                    'approach_offset': [0.0, -0.0,  0.1050, 0.0, 0.0, 0.0], # TCP Frame
-                },
-                {
-                    'motion_type': 'MOVE_TO_CONTACT',
-                    'marker_pose': _make_pose6d(),
-                    'approach_offset': [0.0, -0.020, 0.020, 0.0, 0.0, 0.0],
-                },
-                {
-                    'motion_type': 'RELATIVE_MOVE',
-                    'marker_pose': _make_pose6d(),
-                    'approach_offset': [0.0, 0.05, 0.03, 0.0, 0.0, 0.0],
-                },
-                {
-                    'motion_type': 'RELATIVE_MOVE', # Move to Wedgelock
-                    'marker_pose': _make_pose6d(),
-                    'approach_offset': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                },
-
-
-# Makerspace: vragen voor gedetailleerde factuur. 
-            ]
-
-    def _build_return_sequence(self) -> List[dict]:
-        """
-        Sequence executed automatically after the main task completes.
-        Edit here to adjust the return/retract motion before going home.
-        """
-        if not self.loosening:
-            return [
-            {
-                'motion_type':    'RELATIVE_MOVE', # Retract from wedgelock
-                'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, 0.05, -0.10, 0.0, 0.0, 0.0], # TCP frame
-                'contact_force':   5.0,
-            },
-            {
-                'motion_type':    'RELATIVE_MOVE', # Retract from wedgelock
-                'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, 0.0, 0.0, 0.0, 1.57, 0.0], # TCP frame
-                'contact_force':   5.0,
-            },
-            {
-                'motion_type':    'RETURN_HOME',
-                'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                'contact_force':   5.0,
-            },
-        ]
-        else:
-            return [
-                {
-                'motion_type':    'RELATIVE_MOVE', # Retract from wedgelock
-                'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, 0.05, -0.10, 0.0, 0.0, 0.0], # TCP frame
-                'contact_force':   5.0,
-            },
-            {
-                'motion_type':    'RELATIVE_MOVE', # Retract from wedgelock
-                'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, 0.0, 0.0, 0.0, 0.0, -3.145], # TCP frame
-            },
-            {
-                'motion_type':    'RETURN_HOME',
-                'marker_pose':    _make_pose6d(),
-                'approach_offset': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            },
-            ]
 
     # ------------------------------------------------------------------
     # State
@@ -248,42 +67,52 @@ class TaskManagerNode(Node):
         state = _msg.data
 
         match state:
-            case TaskState.TASK_REQUESTED: 
-                self.run_capture_service()
-            
-            case TaskState.CAPTURING:
+            case TaskState.TASK_REQUESTED:
+                self._sequence = self._mode['build_home_sequence']()
+                self._on_sequence_done = lambda: self.publish_state(TaskState.AT_HOME)
+                self._execute_next_step()
 
+            case TaskState.AT_HOME:
+                self.run_capture_service()
+
+            case TaskState.CAPTURING:
                 pass
             case TaskState.POSE_ACQUIRED:
-                # ENKEL VOOR THUIS TESTEN... ANDERS NIET GEBRUIKEN!
-                # self._selected_marker = _make_pose6d(0.6597723446915864, 0.4272507575618981, 0.486163269104955, 1.6956424868194673, 0.7053985046295215, 1.8109614421292222)
+                self._selected_marker = Pose6D()
+                self._selected_marker.x = 0.0
+                self._selected_marker.y = 0.0
+                self._selected_marker.z = 0.50
+                self._selected_marker.rx = 0.0
+                self._selected_marker.ry = 0.0
+                self._selected_marker.rz = 1.50
+                self.get_logger().info(f"marker: {self._selected_marker}")
                 if self._selected_marker is None:
                     self.get_logger().error('POSE_ACQUIRED but no marker available')
                     self.publish_state(TaskState.ERROR)
                     return
-
-                self._sequence = self._build_sequence(self._selected_marker)
+                if self._mode is None:
+                    self.get_logger().error('POSE_ACQUIRED but no task mode selected')
+                    self.publish_state(TaskState.ERROR)
+                    return
+                marker_list = [self._selected_marker.x, self._selected_marker.y, self._selected_marker.z, self._selected_marker.rx, self._selected_marker.ry, self._selected_marker.rz]
+                self._sequence = self._mode['build_sequence'](marker_list)
                 self._on_sequence_done = lambda: self.publish_state(TaskState.AT_MARKER)
                 self._execute_next_step()
             case TaskState.AT_MARKER:
                 self.publish_state(TaskState.HAMMERING)
-                self._send_arduino_command('HAMMER_REQ', '5', 'a',
+                cmd = self._mode['arduino']
+                self._send_arduino_command(cmd['msg_type'], cmd['data'], cmd['msg_info'],
                                            on_success=TaskState.DONE,
                                            on_failure=TaskState.ERROR)
             case TaskState.HAMMERING:
-                # waiting for hammer action result (handled by callback)
                 pass
             case TaskState.DONE:
-                # Transition logic will go here
                 self.publish_state(TaskState.RETURNING)
-                pass
             case TaskState.RETURNING:
-                # Transition logic will go here
-                self._sequence = self._build_return_sequence()
+                self._sequence = self._mode['build_return_sequence']()
                 self._on_sequence_done = lambda: self.publish_state(TaskState.IDLE)
                 self._execute_next_step()
             case _:
-        
                 pass
 
     
@@ -301,11 +130,17 @@ class TaskManagerNode(Node):
     # /start_task service
     # ------------------------------------------------------------------
 
-    def start_task_callback(self, request: Trigger.Request, response: Trigger.Response) -> Trigger.Response:
-        del request
+    def start_task_callback(self, request: StartTask.Request, response: StartTask.Response) -> StartTask.Response:
+        mode_key = request.mode.upper()
+        if mode_key not in MODES:
+            response.success = False
+            response.message = f"Unknown mode '{mode_key}'. Valid: {list(MODES.keys())}"
+            return response
+        self._mode = MODES[mode_key]
         self.publish_state(TaskState.TASK_REQUESTED)
         response.success = True
-        response.message = 'Task requested.'
+        response.message = f'Task requested: {mode_key}'
+        self.get_logger().info(f"MODE: {mode_key}")
         return response
     
     # ------------------------------------------------------------------
@@ -377,17 +212,12 @@ class TaskManagerNode(Node):
 
         step = self._sequence.pop(0)
         self.get_logger().info(
-            f'Step: {step["motion_type"]} ({len(self._sequence)} steps remaining)'
+            f'Step: {step["motion_type"]} ({len(self._sequence) + 1} steps remaining)'
         )
         self._send_motion_goal(step)
         return False
 
     def _send_motion_goal(self, step: dict) -> None:
-        if step['marker_pose'] is None:
-            self.get_logger().error('Attempting to send goal with None marker_pose')
-            self.publish_state(TaskState.ERROR)
-            return
-
         if not self._motion_client.server_is_ready():
             self.get_logger().error('Motion action server not available.')
             self.publish_state(TaskState.ERROR)
@@ -395,9 +225,7 @@ class TaskManagerNode(Node):
 
         goal = ExecuteMotion.Goal()
         goal.motion_type     = step['motion_type']
-        goal.marker_pose     = step['marker_pose']
-        goal.approach_offset = step['approach_offset']
-        goal.contact_force   = step.get('contact_force', 2.0)  # Default to 2.0 N if not specified
+        goal.step_data       = json.dumps(step)
 
         def _on_goal_response(future):
             handle = future.result()
