@@ -77,6 +77,7 @@ class MotionType(str, Enum):
     MOVE_TO_CONTACT = 'MOVE_TO_CONTACT'  # approach via pose_offset, then search for contact
     RETURN_HOME     = 'RETURN_HOME'      # go back to home joint configuration
     RELATIVE_MOVE   = 'RELATIVE_MOVE'    # apply pose_offset to current TCP pose
+    JOINT_MOVE      = 'JOINT_MOVE'
 
 
 # ---------------------------------------------------------------------------
@@ -257,7 +258,7 @@ class PercussionMotionNode(Node):
             marker_base[3:] = rvec_desired
 
             # Apply standoff (-10 cm along base X)
-            marker_base[:] -= pose_offset[:]
+            marker_base[:3] -= pose_offset[:3]
 
             send_feedback('MOVING_TO_MARKER')
             result = move_to_pose(self._rtde_c, self._rtde_r, marker_base,
@@ -299,6 +300,12 @@ class PercussionMotionNode(Node):
 
             send_feedback('MOVING')
             return motions.move_relative_tcp(self._rtde_c, self._rtde_r, relative_goal, self._def_vel, self._def_acc)
+
+        # ---- JOINT MOVE ---------------------------------------------
+        elif motion_type == MotionType.JOINT_MOVE:
+            joint_goal = list(step.get('goal_Q'))
+            send_feedback("MOVING")
+            return motions.move_joints(self._rtde_c, self._rtde_r, joint_goal, self._def_vel, self._def_acc)
 
         else:
             return MoveResult(MoveStatus.FAILED, f'Unhandled motion type: {motion_type}')

@@ -231,3 +231,18 @@ def move_relative_tcp(
     start = _current_tcp(rtde_r)
     target_pose = list(rtde_c.poseTrans(start, relative_pose))
     return move_to_pose(rtde_c, rtde_r, target_pose, velocity, acceleration)
+
+
+def move_joints(
+    rtde_c: RTDEControl,
+    rtde_r: RTDEReceive,
+    goal_Q: list[float],
+    velocity: float = 0.2,
+    acceleration: float = 0.2,
+)-> MoveResult:
+    try:
+        rtde_c.moveJ(goal_Q, velocity, acceleration)
+    except Exception as e:
+        return MoveResult(MoveStatus.FAILED, f'moveJ failed: {e}')
+    final = _current_tcp(rtde_r)
+    return MoveResult(MoveStatus.SUCCESS, 'Reached target pose.', final)

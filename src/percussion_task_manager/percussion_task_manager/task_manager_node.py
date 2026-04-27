@@ -78,14 +78,14 @@ class TaskManagerNode(Node):
             case TaskState.CAPTURING:
                 pass
             case TaskState.POSE_ACQUIRED:
-                self._selected_marker = Pose6D()
-                self._selected_marker.x = 0.0
-                self._selected_marker.y = 0.0
-                self._selected_marker.z = 0.50
-                self._selected_marker.rx = 0.0
-                self._selected_marker.ry = 0.0
-                self._selected_marker.rz = 1.50
-                self.get_logger().info(f"marker: {self._selected_marker}")
+                #self._selected_marker = Pose6D()
+                #self._selected_marker.x = 0.0
+                #self._selected_marker.y = 0.0
+                #self._selected_marker.z = 0.50
+                #self._selected_marker.rx = 0.0
+                #self._selected_marker.ry = 0.0
+                #self._selected_marker.rz = 1.50
+                #self.get_logger().info(f"marker: {self._selected_marker}")
                 if self._selected_marker is None:
                     self.get_logger().error('POSE_ACQUIRED but no marker available')
                     self.publish_state(TaskState.ERROR)
