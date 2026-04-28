@@ -151,6 +151,7 @@ def move_to_pose(
     rtde_c: RTDEControl,
     rtde_r: RTDEReceive,
     target_pose: List[float],
+    Q_near: List[float] = None,
     velocity: float = 0.2,
     acceleration: float = 0.2,
     blend: float = 0.0,
@@ -164,6 +165,8 @@ def move_to_pose(
     """
 
     current_Q = rtde_r.getActualQ()
+    if Q_near is not None:
+        current_Q[:] = Q_near[:]
     try:
         target_Q = rtde_c.getInverseKinematics(target_pose, current_Q)
     except Exception as e:
@@ -221,6 +224,7 @@ def move_relative_tcp(
     rtde_c: RTDEControl,
     rtde_r: RTDEReceive,
     relative_pose: list[float],
+    Q_near: list[float] = None,
     velocity: float = 0.2,
     acceleration: float = 0.2,
 ) -> MoveResult:
@@ -230,7 +234,7 @@ def move_relative_tcp(
     """
     start = _current_tcp(rtde_r)
     target_pose = list(rtde_c.poseTrans(start, relative_pose))
-    return move_to_pose(rtde_c, rtde_r, target_pose, velocity, acceleration)
+    return move_to_pose(rtde_c, rtde_r, target_pose, Q_near, velocity, acceleration)
 
 
 def move_joints(

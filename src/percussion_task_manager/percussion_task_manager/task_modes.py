@@ -20,10 +20,6 @@ def _fixing_home() -> List[dict]:
             'motion_type':  'JOINT_MOVE',
             'goal_Q':   [-2.2192, -1.841, 2.4652, -3.0588, -2.5319, -1.6911],
         },
-        {
-            'motion_type':    'RETURN_HOME',
-            'home_pose':    [0.0652, 0.4498, 0.4911, 1.9767, 0.9942, 1.6870], 
-        },
     ]
 
 
@@ -36,7 +32,7 @@ def _fixing_sequence(marker_pose: List) -> List[dict]:
             'approach_offset': [0.05, 0.0, 0.0, 0.0, 0.0, 0.0],
         },
         {
-            'motion_type':    'MOVE_TO_CONTACT',
+            'motion_type':    'MOVE_TO_CONTACT', # Touch Marker facing
             'direction': [0.020, 0.0, 0.0, 0.0, 0.0, 0.0],
         },
         {
@@ -52,7 +48,7 @@ def _fixing_sequence(marker_pose: List) -> List[dict]:
             'relative_pose': [0.080, -0.04, 0, 0, 0.0, 0.0],
         },
         {
-            'motion_type': 'MOVE_TO_CONTACT',
+            'motion_type': 'MOVE_TO_CONTACT', # Touch ledger top down
             'direction': [0.0, 0.00707, -0.00707, 0.0, 0.0, 0.0],
         },
         {
@@ -64,7 +60,7 @@ def _fixing_sequence(marker_pose: List) -> List[dict]:
             'relative_pose': [0.0350, 0.0, 0.11, 0.0, 0.0, 0.0],
         },
         {
-            'motion_type':    'MOVE_TO_CONTACT',
+            'motion_type':    'MOVE_TO_CONTACT', # Touch bar facing
             'direction': [0.0, -0.00707, -0.00707, 0.0, 0.0, 0.0],
         },
         {
@@ -105,10 +101,7 @@ def _fixing_return() -> List[dict]:
             'motion_type':    'RELATIVE_MOVE',
             'relative_pose': [0.0, 0.0, 0.0, 0.0, 1.57, 0.0],
         },
-        {
-            'motion_type':    'RETURN_HOME',
-            'home_pose':    [0.0652, 0.4498, 0.4911, 1.9767, 0.9942, 1.6870],
-        },
+        _fixing_home(),
     ]
 
 
@@ -130,7 +123,7 @@ def _loosening_home() -> List[dict]:
         {
             'motion_type':    'JOINT_MOVE',
             #'home_pose':    [0.1530, 0.4098, 0.5720, 2.4704, 0.7305, 1.4247],
-            'goal_Q': [1.4552586078643799, -1.428090201025345, -2.368151903152466, -2.969842573205465, -3.7495289937794496e-05, 1.2412118911743164],
+            'goal_Q': [1.4552586078643799, -1.428090201025345, -2.368151903152466, -2.969842573205465, -3.7495289937794496e-05, -1.47551108995546514],
         },
     ]
 
@@ -141,20 +134,26 @@ def _loosening_sequence(marker_pose: Pose6D) -> List[dict]:
         {
             'motion_type':    'MOVE_TO_MARKER', # Move in front of marker
             'marker_pose':    marker_pose,
-            'approach_offset': [0.05, 0.0, 0.0, 0.0, -1.57, 1.57],
+            'approach_offset': [0.05, 0.0, 0.0, 0.0, 1.57, -1.57],
+            'invert_tcp':     True,
         },
         {
             'motion_type':    'MOVE_TO_CONTACT', # Touch marker forwards
             'direction': [0.020, 0.0, 0.0, 0.0, 0.0, 0.0],
         },
         {
-            'motion_type':    'RELATIVE_MOVE', # Rotate to upside down position
-            'relative_pose': [0.0, -0.15, -0.10, 0.0, 0.0, -3.14],
+            'motion_type':    'RELATIVE_MOVE', # Move back for clearance
+            'relative_pose': [0.0, 0.15, -0.10, 0.0, 0.0, 0.0],
         },
-
+        {
+            'motion_type': 'RELATIVE_MOVE', # rotate 90° For correct position. 
+            'relative_pose':[0.0, 0.0, 0.0, 0.0, -1.57, 0.0],
+            #'Q_near': [0.7658, -2.4929, -1.0438, -4.9712, -1.0623, -0.6307],
+            'Q_near': [0.7746564745903015, -2.3317557773985804, -1.3908557891845703, -4.710584541360372, -1.1626928488360804, -0.6768596808062952],
+        },
         {
             'motion_type':    'RELATIVE_MOVE', # Move in position for 2nd contact 
-            'relative_pose': [0.0, -0.0,  0.1050, 0.0, 0.0, 0.0],
+            'relative_pose': [-0.12, 0.0,  -0.1050, 0.0, 0.0, 0.0],
         },
         {
             'motion_type': 'MOVE_TO_CONTACT', # Touh bottom up
@@ -162,15 +161,12 @@ def _loosening_sequence(marker_pose: Pose6D) -> List[dict]:
         },
         {
             'motion_type': 'RELATIVE_MOVE',
-            'relative_pose': [0.0, 0.05, 0.0, 0.0, 0.0, 0.0],
+            'relative_pose': [0.08, 0.05, 0.08, 0.0, 0.0, 0.0],
         },
         {
-            'motion_type': 'RELATIVE_MOVE',
-            'relative_pose': [0.0, 0.0, 0.07, 0.0, 0.0, 0.0],
-        },
-        {
-
-        },
+            'motion_type': 'MOVE_TO_CONTACT',
+            'direction': [0.0, -0.00707, -0.00707, 0.0, 0.0, 0.0],
+        }
     ]
 
 
@@ -179,16 +175,9 @@ def _loosening_return() -> List[dict]:
     return [
         {
             'motion_type':    'RELATIVE_MOVE',
-            'relative_pose': [0.0, 0.05, -0.10, 0.0, 0.0, 0.0],
+            'relative_pose': [0.10, 0.05, -0.10, 0.0, 0.0, 0.0],
         },
-        {
-            'motion_type':    'RELATIVE_MOVE',
-            'relative_pose': [0.0, 0.0, 0.0, 0.0, 0.0, -3.145],
-        },
-        {
-            'motion_type': 'RETURN_HOME',
-            'home_pose': [0.2867213892745623, 0.2234403756388975, 0.4695269442033048, 2.126905532028363, 1.087181305546692, 1.667092289024616],
-        }
+        _loosening_home()[0],
     ]
 
 

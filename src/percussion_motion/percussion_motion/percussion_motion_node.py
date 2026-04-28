@@ -36,6 +36,7 @@ from typing import List
 import json
 
 import numpy as np
+import cv2
 import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionServer, CancelResponse, GoalResponse
@@ -228,6 +229,7 @@ class PercussionMotionNode(Node):
         if motion_type == MotionType.MOVE_TO_MARKER:
             marker_pose = list(step.get("marker_pose"))
             pose_offset = list(step.get("approach_offset", [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]))
+            invert_tcp = bool(step.get("invert_tcp", False))
 
             current_tcp = list(self._rtde_r.getActualTCPPose())
 
@@ -242,6 +244,8 @@ class PercussionMotionNode(Node):
             _s = np.sin(np.deg2rad(-45.0))
             _c = np.cos(np.deg2rad(-45.0))
             world_up_in_base = [0.0, _s, _c]
+            if invert_tcp:
+                world_up_in_base = [-v for v in world_up_in_base]
 
             # 4 world horizontal principal directions expressed in base frame
             principal_dirs_base = [
@@ -259,6 +263,8 @@ class PercussionMotionNode(Node):
 
             # Apply standoff (-10 cm along base X)
             marker_base[:3] -= pose_offset[:3]
+
+            #marker_base[5] = 0 if -0.30 < current_tcp[5] < 0.30 else 3.14
 
             send_feedback('MOVING_TO_MARKER')
             result = move_to_pose(self._rtde_c, self._rtde_r, marker_base,
@@ -297,9 +303,11 @@ class PercussionMotionNode(Node):
         # ---- RELATIVE_MOVE ------------------------------------------
         elif motion_type == MotionType.RELATIVE_MOVE:
             relative_goal = list(step.get("relative_pose"))
+            Q_near_raw = step.get('Q_near')
+            Q_near = list(Q_near_raw) if Q_near_raw is not None else None
 
             send_feedback('MOVING')
-            return motions.move_relative_tcp(self._rtde_c, self._rtde_r, relative_goal, self._def_vel, self._def_acc)
+            return motions.move_relative_tcp(self._rtde_c, self._rtde_r, relative_goal, Q_near, self._def_vel, self._def_acc)
 
         # ---- JOINT MOVE ---------------------------------------------
         elif motion_type == MotionType.JOINT_MOVE:
