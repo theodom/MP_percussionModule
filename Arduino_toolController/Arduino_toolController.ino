@@ -20,7 +20,7 @@ void setup() {
   // Digital outputs
   pinMode(EM, OUTPUT);
   pinMode(fan, OUTPUT);
-  digitalWrite(EM, HIGH);
+  analogWrite(EM, 255);
   Serial.begin(115200);
   // while (!Serial.available());
 
@@ -34,7 +34,7 @@ void setup() {
 }
 
 void loop() {
-  digitalWrite(EM, HIGH);
+  analogWrite(EM, 255);
 
   if (cooldownActive){
     int now = millis();
@@ -59,9 +59,9 @@ void loop() {
   {
     int actionState;
     case FAN_TEST:
-      digitalWrite(EM, LOW);
-      delay(1000);
-      digitalWrite(EM, HIGH);
+      // digitalWrite(EM, LOW);
+      // delay(1000);
+      // digitalWrite(EM, HIGH);
       Serial.println("setting fan low");
       analogWrite(fan, 0);
       delay(4000);

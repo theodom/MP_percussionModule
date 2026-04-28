@@ -56,11 +56,11 @@ int hammerCycle(int cycleLength) {
   for (int i = 0; i < cycleLength; i++){
         // slag
         EMState = false;
-        digitalWrite(EM, LOW);
-        delay(200);
+        analogWrite(EM, 0.25 * 255);
+        delay(1000);
         //Opspannen
         EMState = true;
-        digitalWrite(EM, HIGH);
+        analogWrite(EM, 255);
         delay(400);
         messageToParse feedback;
         feedback.type = "HAMMER_REQ";
@@ -69,6 +69,6 @@ int hammerCycle(int cycleLength) {
         writeROSSerial(feedback);
       }
   EMState = true;
-  digitalWrite(EM, HIGH);
+  analogWrite(EM, 255);
   return 0;
 }
