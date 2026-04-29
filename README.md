@@ -118,48 +118,52 @@ Three nodes are started by the launch file, along with two static TF publishers 
 
 
 - **Task manager**: 
-  - ~~launch parameters are not being passed downstream -> implement LaunchArgument~~
-  - ~~`capture_timeout_sec` not being passed to service.~~ (capture timeout removed)
-  - rework motion sequence building/handling
+  - Pause motion sequence to request inductive sensor (ArduinoCommand)
 
 
-- **perception_motion**: 
-  - ~~The robot currently moves using rtde, but to the wrong position -- problem with marker pose transform camera -> TCP pose~~
-      
-  - ~~Implement `MOVE_HOME`~~
-
-  - ~~Orientation facing marker isn't always correct -> compounding error on next positions.~~
-
-  - building of motion sequences is cumbersome. (Move to motion package?)
-
-  - MoveUntilContact has no parameter Force threshold --> build custom force detection function.  
 
 
 - **Marker selection**: always picks `detections[0]`. Should be replaced with more intelligent decision making. (Wedgelock memory?)
 
-- ~~**`capture_service_stub.py`**: should be removed.~~
 
 - **Shutdown warning**: all three nodes emit `rcl_shutdown already called` — deduplicate `rclpy.shutdown()` calls in launch.
 
 ### Features to add
 
 - **Optimalisation / error handling**:
-      - Add timeout for camera. (Not connected == keeps waiting forever)
+      - ~~Add timeout for camera. (Not connected == keeps waiting forever)~~
       - Better error handling for robot connection / reconnect automatically
+
+- **Tool control**:
+ - Add inductive sensor readout/passthrough
+ - ...
+
+
+- **interfaces**: Possibly simplify Pose6D and MarkerDetection into 1 Pose message with extra fields. (header?)
+
+      
+
+### Fixed 
+
+- **Task manager**:
+  - ~~launch parameters are not being passed downstream -> implement LaunchArgument~~
+  - ~~`capture_timeout_sec` not being passed to service.~~ (capture timeout removed)
+  - ̃~~Rework motion sequence building/handling~~
+
+- **percussion_motion**: 
+  - ~~The robot currently moves using rtde, but to the wrong position -- problem with marker pose transform camera -> TCP pose~~
+  - ~~Implement `MOVE_HOME`~~
+  - ~~Orientation facing marker isn't always correct -> compounding error on next positions.~~
+  - ~~building of motion sequences is cumbersome. (Move to motion package?)~~
+  - ~~MoveUntilContact has no parameter Force threshold --> build custom force detection function.~~  
+
+- ~~**`capture_service_stub.py`**: should be removed.~~
 
 - **Tool control**:
  - ~~ Write Arduino program for low level control ~~
  - ~~tool controller node~~
  - ~~Serial Communication / Arduino-ROS bridge~~
- - Add inductive sensor readout/passthrough
- - ...
-
 - **Move until contact while hammering**
       - ~~Implement move until contact: requires bridge between rtde, Arduino serial and ROS~~
-
-- **interfaces**: Possibly simplify Pose6D and MarkerDetection into 1 Pose message with extra fields. (header?)
-
 - **Motion**:
-      - Add more freedom/parameters to motion sequence. (custom vel/acc, ...) 
-      
-
+      - ~~Add more freedom/parameters to motion sequence. (custom vel/acc, ...)~~
