@@ -45,7 +45,7 @@ def _fixing_sequence(marker_pose: List) -> List[dict]:
         },
         {
             'motion_type':    'RELATIVE_MOVE',
-            'relative_pose': [0.080, -0.04, 0, 0, 0.0, 0.0],
+            'relative_pose': [0.080, -0.08, 0, 0, 0.0, 0.0],
         },
         {
             'motion_type': 'MOVE_TO_CONTACT', # Touch ledger top down
@@ -57,7 +57,7 @@ def _fixing_sequence(marker_pose: List) -> List[dict]:
         },
         {
             'motion_type':    'RELATIVE_MOVE',
-            'relative_pose': [0.0350, 0.0, 0.11, 0.0, 0.0, 0.0],
+            'relative_pose': [0.0320, 0.0, 0.11, 0.0, 0.0, 0.0],
         },
         {
             'motion_type':    'MOVE_TO_CONTACT', # Touch bar facing
@@ -65,7 +65,7 @@ def _fixing_sequence(marker_pose: List) -> List[dict]:
         },
         {
             'motion_type':    'RELATIVE_MOVE',
-            'relative_pose': [0.0, 0.0, -0.06, 0.0, 0.0, 0.0],
+            'relative_pose': [0.0, 0.0, -0.06, -0.05, 0.0, 0.0],
         },
         {
             'motion_type':    'RELATIVE_MOVE',
@@ -84,9 +84,15 @@ def _fixing_sequence(marker_pose: List) -> List[dict]:
             'relative_pose': [0.0, -0.00, 0.015, 0.0, 0.0, 0.0],
         },
         {
-            'motion_type':    'RELATIVE_MOVE',
-            'relative_pose': [0.0, -0.007, 0.0, 0.0, 0.0, 0.0],
+            'motion_type': 'MOVE_TO_FORCE',
+            'direction': [0.0, -0.05, 0.0, 0.0, 0.0, 0.0],
+            'force_threshold': 15.0,
         },
+        # {
+            # 'motion_type':    'RELATIVE_MOVE',
+            # 'relative_pose': [0.0, -0.007, 0.0, 0.0, 0.0, 0.0],
+        # },
+        
     ]
 
 
@@ -95,13 +101,14 @@ def _fixing_return() -> List[dict]:
     return [
         {
             'motion_type':    'RELATIVE_MOVE',
-            'relative_pose': [0.0, 0.05, -0.10, 0.0, 0.0, 0.0],
+            'relative_pose': [-0.10, 0.05, -0.10, 0.0, 0.0, 0.0],
         },
+        #_fixing_home(),
         {
-            'motion_type':    'RELATIVE_MOVE',
-            'relative_pose': [0.0, 0.0, 0.0, 0.0, 1.57, 0.0],
+            'motion_type':  'JOINT_MOVE',
+            'goal_Q':   [-2.2192, -1.841, 2.4652, -3.0588, -2.5319, -1.6911],
         },
-        _fixing_home(),
+
     ]
 
 
@@ -120,11 +127,15 @@ def _loosening_home() -> List[dict]:
         #    'motion_type': 'RELATIVE_MOVE',
         #    'relative_pose': [0.0, 0.0, -0.10, 3.10, 0.0, 0.0],
         #},
+        # {
+        #     'motion_type':    'JOINT_MOVE',
+        #     #'home_pose':    [0.1530, 0.4098, 0.5720, 2.4704, 0.7305, 1.4247],
+        #     'goal_Q': [1.4552586078643799, -1.428090201025345, -2.368151903152466, -2.969842573205465, -3.7495289937794496e-05, -1.47551108995546514],
+        # },
         {
-            'motion_type':    'JOINT_MOVE',
-            #'home_pose':    [0.1530, 0.4098, 0.5720, 2.4704, 0.7305, 1.4247],
-            'goal_Q': [1.4552586078643799, -1.428090201025345, -2.368151903152466, -2.969842573205465, -3.7495289937794496e-05, -1.47551108995546514],
-        },
+            'motion_type':     'JOINT_MOVE',
+            'goal_Q': [1.4644263982772827, -0.7090473932078858, -1.802927017211914, -0.6575923723033448, -0.3903558889972132, -5.693070475255148],
+        }
     ]
 
 
@@ -190,7 +201,7 @@ MODES = {
         'build_home_sequence':   _fixing_home,
         'build_sequence':        _fixing_sequence,
         'build_return_sequence': _fixing_return,
-        'arduino': {'msg_type': 'HAMMER_REQ', 'data': '7', 'msg_info': 'a'},
+        'arduino': {'msg_type': 'HAMMER_REQ', 'data': '8', 'msg_info': 'a'},
     },
     'LOOSENING': {
         'build_home_sequence':   _loosening_home,
