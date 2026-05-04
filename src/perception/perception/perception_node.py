@@ -5,17 +5,17 @@ from percussion_interfaces.srv import TriggerCapture
 from percussion_interfaces.msg import MarkerDetection
 from percussion_interfaces.msg import Pose6D
 
-import percussion_perception.detectAruco as Ar
+import perception.detectAruco as Ar
 import time
 
 
-class CaptureServiceNode(Node):
+class PerceptionNode(Node):
     def __init__(self):
-        super().__init__('capture_service_node')
+        super().__init__('perception_node')
 
         self._srv = self.create_service(
             TriggerCapture,
-            '/trigger_capture',
+            'trigger_capture',
             self.handle_capture
         )
 
@@ -94,7 +94,7 @@ class CaptureServiceNode(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    node = CaptureServiceNode()
+    node = PerceptionNode()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

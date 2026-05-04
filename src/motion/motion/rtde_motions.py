@@ -206,7 +206,7 @@ def move_until_contact(
     """
     try:
         # Preferred: built-in contact detection (UR firmware ≥ 5.9)
-        
+
         success = rtde_c.moveUntilContact(direction)
         final = _current_tcp(rtde_r)
         if success:
@@ -219,6 +219,72 @@ def move_until_contact(
 
     except Exception as exc:
         return MoveResult(MoveStatus.FAILED, f'move_until_contact failed: {exc}')
+
+
+def move_until_force(
+    rtde_c: RTDEControl,
+    rtde_r: RTDEReceive,
+    direction: List[float],
+    force_threshold: float = 10.0,
+    tool_speed: float = 0.01,
+    timeout_sec: float = 5.0,
+    lookahead_time: float = 0.1,
+    gain: float = 300,
+) -> MoveResult:
+    """
+    Move in *direction* (base frame unit vector) using servoL until TCP force
+    along that axis reaches *force_threshold*, or timeout is exceeded.
+
+    Parameters
+    ----------
+    direction       : [dx, dy, dz] unit vector in base frame (rotation ignored)
+    force_threshold : contact force in N to stop at
+    tool_speed      : m/s — determines step size per servoL call
+    timeout_sec     : hard timeout; returns ABORTED if threshold not reached
+    lookahead_time  : servoL trajectory smoothing [0.03, 0.2]
+    gain            : servoL position gain [100, 2000]
+    """
+    d = np.array(direction[:3], dtype=np.float64)
+    d /= np.linalg.norm(d)
+
+    dt = 0.02                           # servoL step duration (20 ms)
+
+    # Target far ahead so robot always has somewhere to servo toward
+    start_pose = _current_tcp(rtde_r)
+    start_Q = rtde_r.getActualQ()
+    target = rtde_c.poseTrans(start_pose, direction)
+
+    start_time = time.time()
+    pose_rel = list()
+    pose_rel_big = list()
+    pose_rel_big[:] = direction[:]
+    pose_rel = [i * 0.01 for i in pose_rel_big]
+    try:
+        while True:
+            tcp_force = list(rtde_r.getActualTCPForce())
+            force_in_dir = float(np.dot(tcp_force[:3], d))
+
+            if abs(force_in_dir) >= force_threshold:
+                rtde_c.servoStop()
+                return MoveResult(
+                    MoveStatus.SUCCESS,
+                    f'Force threshold reached: {force_in_dir:.1f} N.',
+                    _current_tcp(rtde_r),
+                )
+
+            if time.time() - start_time > timeout_sec:
+                rtde_c.servoStop()
+                return MoveResult(MoveStatus.ABORTED, 'Force timeout.', _current_tcp(rtde_r))
+            # target_Q = rtde_c.getInverseKinematics(target, start_Q)
+            # rtde_c.servoL(target_Q, 0, 0, dt, lookahead_time, gain)
+            move_relative_tcp(rtde_c, rtde_r, pose_rel, start_Q, velocity=0.05)
+
+    except Exception as exc:
+        try:
+            rtde_c.servoStop()
+        except Exception:
+            pass
+        return MoveResult(MoveStatus.FAILED, f'move_until_force failed: {exc}')
 
 def move_relative_tcp(
     rtde_c: RTDEControl,

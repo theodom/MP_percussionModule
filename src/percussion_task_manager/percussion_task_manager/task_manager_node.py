@@ -34,19 +34,17 @@ class TaskManagerNode(Node):
         super().__init__('task_manager')
 
         # Parameters 
-        self.declare_parameter('capture_service_name', '/trigger_capture')
         self.declare_parameter('target_frame', 'base')
 
-        capture_service_name = self.get_parameter('capture_service_name').get_parameter_value().string_value
         self._target_frame   = self.get_parameter('target_frame').get_parameter_value().string_value
 
         # Services/Topics
-        self._start_srv     = self.create_service(StartTask, '/start_task', self.start_task_callback)
-        self._state_pub     = self.create_publisher(String, '/task_manager/state', 10)
-        self._state_sub     = self.create_subscription(String, '/task_manager/state', self._on_state_changed, 10)
-        self._capture_client: Client = self.create_client(TriggerCapture, capture_service_name)
-        self._motion_client = ActionClient(self, ExecuteMotion, '/execute_motion')
-        self._arduino_client = ActionClient(self, ArduinoCommand, '/arduino_command')
+        self._start_srv     = self.create_service(StartTask, 'start_task', self.start_task_callback)
+        self._state_pub     = self.create_publisher(String, 'state', 10)
+        self._state_sub     = self.create_subscription(String, 'state', self._on_state_changed, 10)
+        self._capture_client: Client = self.create_client(TriggerCapture, '/percussion/perception/trigger_capture')
+        self._motion_client = ActionClient(self, ExecuteMotion, '/percussion/motion/execute_motion')
+        self._arduino_client = ActionClient(self, ArduinoCommand, '/percussion/arduino_bridge/arduino_command')
 
         self._selected_marker: Optional[Pose6D] = None
         self._current_state = TaskState.IDLE
@@ -78,14 +76,15 @@ class TaskManagerNode(Node):
             case TaskState.CAPTURING:
                 pass
             case TaskState.POSE_ACQUIRED:
-                #self._selected_marker = Pose6D()
-                #self._selected_marker.x = 0.0
-                #self._selected_marker.y = 0.0
-                #self._selected_marker.z = 0.50
-                #self._selected_marker.rx = 0.0
-                #self._selected_marker.ry = 0.0
-                #self._selected_marker.rz = 1.50
-                #self.get_logger().info(f"marker: {self._selected_marker}")
+                # faked_list = [0.00630962,  0.06311957,  0.40705869, -1.72622068,  2.50957927,  0.20299939]
+                # self._selected_marker = Pose6D()
+                # self._selected_marker.x  = faked_list[0]
+                # self._selected_marker.y  = faked_list[1]
+                # self._selected_marker.z  = faked_list[2]
+                # self._selected_marker.rx = faked_list[3]
+                # self._selected_marker.ry = faked_list[4]
+                # self._selected_marker.rz = faked_list[5]
+                # self.get_logger().info(f"marker: {self._selected_marker}")
                 if self._selected_marker is None:
                     self.get_logger().error('POSE_ACQUIRED but no marker available')
                     self.publish_state(TaskState.ERROR)

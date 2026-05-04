@@ -1,12 +1,12 @@
 """
-percussion_motion_node.py
--------------------------
+motion_node.py
+--------------
 ROS 2 node that receives a marker pose from the task manager and orchestrates
 robot motion via the RTDE back-end (rtde_motions.py).
 
 Architecture
 ------------
-  TaskManagerNode  --[ExecuteMotion action]--> PercussionMotionNode
+  TaskManagerNode  --[ExecuteMotion action]--> MotionNode
                                                    |
                                               rtde_motions.py
                                                    |
@@ -50,8 +50,8 @@ from percussion_interfaces.msg import Pose6D
 from rtde_control import RTDEControlInterface as RTDEControl
 from rtde_receive import RTDEReceiveInterface as RTDEReceive
 
-from percussion_motion import rtde_motions as motions
-from percussion_motion.rtde_motions import (
+from motion import rtde_motions as motions
+from motion.rtde_motions import (
     MoveStatus, MoveResult, move_to_pose, apply_offset as apply_pose_offset,
     compute_face_marker_rvec, compute_snap_to_principal_rvec
 )
@@ -79,16 +79,17 @@ class MotionType(str, Enum):
     RETURN_HOME     = 'RETURN_HOME'      # go back to home joint configuration
     RELATIVE_MOVE   = 'RELATIVE_MOVE'    # apply pose_offset to current TCP pose
     JOINT_MOVE      = 'JOINT_MOVE'
+    MOVE_TO_FORCE   = 'MOVE_TO_FORCE'
 
 
 # ---------------------------------------------------------------------------
 # Node
 # ---------------------------------------------------------------------------
 
-class PercussionMotionNode(Node):
+class MotionNode(Node):
 
     def __init__(self) -> None:
-        super().__init__('percussion_motion')
+        super().__init__('motion')
 
         # --- Parameters ---
         self.declare_parameter('robot_ip',         '169.254.0.22')
@@ -107,7 +108,7 @@ class PercussionMotionNode(Node):
         self._contact_tmt = self.get_parameter('contact_timeout').get_parameter_value().double_value
 
         # --- State publisher ---
-        self._state_pub = self.create_publisher(String, '/motion_node/state', 10)
+        self._state_pub = self.create_publisher(String, 'state', 10)
 
         # --- Action server (register before blocking RTDE connect) ---
         self._rtde_ready = False
@@ -115,7 +116,7 @@ class PercussionMotionNode(Node):
         self._action_server = ActionServer(
             self,
             ExecuteMotion,
-            '/execute_motion',
+            'execute_motion',
             goal_callback=self._goal_callback,
             cancel_callback=self._cancel_callback,
             execute_callback=self._execute_callback,
@@ -315,8 +316,18 @@ class PercussionMotionNode(Node):
             send_feedback("MOVING")
             return motions.move_joints(self._rtde_c, self._rtde_r, joint_goal, self._def_vel, self._def_acc)
 
+        # ---- MOVE_TO_FORCE -------------------------------------------
+        elif motion_type == MotionType.MOVE_TO_FORCE:
+            direction = list(step.get('direction'))
+            force = float(step.get('force_threshold'))
+            send_feedback("MOVING")
+            return motions.move_until_force(self._rtde_c, self._rtde_r, direction, force)
+        
+
         else:
             return MoveResult(MoveStatus.FAILED, f'Unhandled motion type: {motion_type}')
+        
+
 
     # ------------------------------------------------------------------
     # Helpers
@@ -336,7 +347,7 @@ class PercussionMotionNode(Node):
 
 def main(args=None) -> None:
     rclpy.init(args=args)
-    node = PercussionMotionNode()
+    node = MotionNode()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

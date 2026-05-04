@@ -116,10 +116,13 @@ Three nodes are started by the launch file, along with two static TF publishers 
 
 ### Currently known issues
 
+- **Motion**:
+ - inverse kinematics issues with loosening mode (multiple theoretical joint solutions, only 1 practical solution)
 
-- **Task manager**: 
-  - Pause motion sequence to request inductive sensor (ArduinoCommand)
-
+- **Arduino Command**:
+  - ~~Number of hits not being passed to arduino~~
+  - Properly pass arduino feedback to ROS log
+  
 
 
 
@@ -129,6 +132,16 @@ Three nodes are started by the launch file, along with two static TF publishers 
 - **Shutdown warning**: all three nodes emit `rcl_shutdown already called` — deduplicate `rclpy.shutdown()` calls in launch.
 
 ### Features to add
+
+- **Task manager**: 
+  - Error Handling (geen inductief, gee marker, ...)
+  - Pause motion sequence to request inductive sensor (ArduinoCommand)
+  - publish "SystemState" topic with:
+    - TaskState
+    - Task Mode
+    - Inductive states
+    - robot Pose?
+    - ...
 
 - **Optimalisation / error handling**:
       - ~~Add timeout for camera. (Not connected == keeps waiting forever)~~

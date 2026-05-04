@@ -1,10 +1,10 @@
 from setuptools import find_packages, setup
 
-package_name = 'percussion_motion'
+package_name = 'perception'
 
 setup(
     name=package_name,
-    version='0.0.0',
+    version='0.0.1',
     packages=find_packages(exclude=['test']),
     data_files=[
         ('share/ament_index/resource_index/packages',
@@ -13,18 +13,14 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='theo',
-    maintainer_email='theo@todo.todo',
-    description='TODO: Package description',
-    license='TODO: License declaration',
-    extras_require={
-        'test': [
-            'pytest',
-        ],
-    },
+    maintainer='Theo Dom',
+    maintainer_email='theo.dom@student.kuleuven.be',
+    description='Perception nodes for percussion system',
+    license='TODO',
+    tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'percussion_motion_node = percussion_motion.percussion_motion_node:main',
+            'perception_node = perception.perception_node:main',
         ],
     },
 )

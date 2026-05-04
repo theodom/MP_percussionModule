@@ -43,16 +43,18 @@ void loop() {
       cooldownActive = false;
     }
   }
-
+  int ind_a = digitalRead(inductive_1);
+  // Serial.println("Inductive 2:");
+  int ind_b = digitalRead(inductive_2);
+  // Serial.println(ind_b);
+  
   parsedMessage request;
   request = readROSSerial();
-
+  
   if (!request.valid) {
     return;
   }
 
-  int ind_a = digitalRead(inductive_1);
-  int ind_b = digitalRead(inductive_2);
   messageToParse msg_out;
   String msg_str;
   switch (request.type)
@@ -69,17 +71,18 @@ void loop() {
       analogWrite(fan,255);
       delay(4000);
       analogWrite(fan, 127);
-    case HAMMER_REQ: // Perform hammering cycle. 
+    case HAMMER_REQ: {// Perform hammering cycle. 
       analogWrite(fan, 0);
       msg_out.state = "DONE";
       msg_out.type = "HAMMER_REQ";
       actionState = -1;
-      hammerCycle();
+      int hammerLength = request.data.toInt();
+      hammerCycle(hammerLength);
       writeROSSerial(msg_out);
       // analogWrite(fan, 255);
       cooldownActive = true;
       cooldownStart = millis();
-      break;
+      break;}
     case IND_VALUES:
       msg_out.type = "IND_VALUES";
       msg_out.state = "DONE";
