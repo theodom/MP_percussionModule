@@ -50,8 +50,8 @@ from percussion_interfaces.msg import Pose6D
 from rtde_control import RTDEControlInterface as RTDEControl
 from rtde_receive import RTDEReceiveInterface as RTDEReceive
 
-from motion import rtde_motions as motions
-from motion.rtde_motions import (
+from percussion_motion import rtde_motions as motions
+from percussion_motion.rtde_motions import (
     MoveStatus, MoveResult, move_to_pose, apply_offset as apply_pose_offset,
     compute_face_marker_rvec, compute_snap_to_principal_rvec
 )

@@ -5,7 +5,7 @@ from percussion_interfaces.srv import TriggerCapture
 from percussion_interfaces.msg import MarkerDetection
 from percussion_interfaces.msg import Pose6D
 
-import perception.detectAruco as Ar
+import percussion_perception.detectAruco as Ar
 import time
 
 

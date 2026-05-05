@@ -34,7 +34,7 @@ def generate_launch_description() -> LaunchDescription:
             parameters=[],
         ),
         Node(
-            package='perception',
+            package='percussion_perception',
             executable='perception_node',
             name='node',
             namespace='perception',
@@ -44,7 +44,7 @@ def generate_launch_description() -> LaunchDescription:
             }],
         ),
         Node(
-            package='motion',
+            package='percussion_motion',
             executable='motion_node',
             name='node',
             namespace='motion',
@@ -60,7 +60,8 @@ def generate_launch_description() -> LaunchDescription:
         Node(
             package='percussion_arduino_bridge',
             executable='arduino_bridge_node',
-            name='arduino_bridge',
+            name='node',
+            namespace='arduino_bridge',
             output='screen',
             parameters=[{
                 'port':     LaunchConfiguration('arduino_port'),
