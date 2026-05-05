@@ -127,14 +127,14 @@ def _loosening_home() -> List[dict]:
         #    'motion_type': 'RELATIVE_MOVE',
         #    'relative_pose': [0.0, 0.0, -0.10, 3.10, 0.0, 0.0],
         #},
-        # {
-        #     'motion_type':    'JOINT_MOVE',
-        #     #'home_pose':    [0.1530, 0.4098, 0.5720, 2.4704, 0.7305, 1.4247],
-        #     'goal_Q': [1.4552586078643799, -1.428090201025345, -2.368151903152466, -2.969842573205465, -3.7495289937794496e-05, -1.47551108995546514],
-        # },
+        {
+            'motion_type':    'JOINT_MOVE',
+            #'home_pose':    [0.1530, 0.4098, 0.5720, 2.4704, 0.7305, 1.4247],
+            'goal_Q': [1.4552586078643799, -1.428090201025345, -2.368151903152466, -2.969842573205465, -3.7495289937794496e-05, -1.47551108995546514],
+        },
         {
             'motion_type':     'JOINT_MOVE',
-            'goal_Q': [1.4644263982772827, -0.7090473932078858, -1.802927017211914, -0.6575923723033448, -0.3903558889972132, -5.693070475255148],
+            'goal_Q': [1.4644263982772827, -0.7090473932078858, -1.802927017211914, -0.6575923723033448, -0.3903558889972132, 0.079482],
         }
     ]
 
@@ -158,26 +158,39 @@ def _loosening_sequence(marker_pose: Pose6D) -> List[dict]:
         },
         {
             'motion_type': 'RELATIVE_MOVE', # rotate 90° For correct position. 
-            'relative_pose':[0.0, 0.0, 0.0, 0.0, -1.57, 0.0],
+            'relative_pose':[0.0, 0.0, 0.0, 0.0, 1.57, 0.0],
             #'Q_near': [0.7658, -2.4929, -1.0438, -4.9712, -1.0623, -0.6307],
-            'Q_near': [0.7746564745903015, -2.3317557773985804, -1.3908557891845703, -4.710584541360372, -1.1626928488360804, -0.6768596808062952],
+            #'Q_near': [0.7746564745903015, -2.3317557773985804, -1.3908557891845703, -4.710584541360372, -1.1626928488360804, -0.6768596808062952],
         },
         {
             'motion_type':    'RELATIVE_MOVE', # Move in position for 2nd contact 
-            'relative_pose': [-0.12, 0.0,  -0.1050, 0.0, 0.0, 0.0],
+            'relative_pose': [-0.120, 0.0,  0.0, 0.0, 0.0, 0.0],
         },
         {
             'motion_type': 'MOVE_TO_CONTACT', # Touh bottom up
             'direction': [0.0, -0.020, 0.020, 0.0, 0.0, 0.0],
         },
         {
-            'motion_type': 'RELATIVE_MOVE',
-            'relative_pose': [0.08, 0.05, 0.08, 0.0, 0.0, 0.0],
+            'motion_type': 'RELATIVE_MOVE', # Create vertical space
+            'relative_pose': [0.0, 0.120, 0.0, 0.0, 0.0, 0.0],
         },
         {
-            'motion_type': 'MOVE_TO_CONTACT',
+            'motion_type': 'RELATIVE_MOVE', # Move closer to pole
+            'relative_pose': [-0.026, 0.0, 0.200, 0.0, 0.0, 0.0],
+        },
+        {
+            'motion_type': 'MOVE_TO_CONTACT', # Touch pole facing
             'direction': [0.0, -0.00707, -0.00707, 0.0, 0.0, 0.0],
-        }
+        },
+        {
+            'motion_type': 'RELATIVE_MOVE',
+            'relative_pose': [0.0, -0.030, -0.0105, 0.0, 0.0, 0.0],
+        },
+        {
+            'motion_type': 'MOVE_TO_FORCE',
+            'direction': [0.0, -0.05, 0.0, 0.0, 0.0, 0.0],
+            'force_threshold': 15.0,
+        },
     ]
 
 

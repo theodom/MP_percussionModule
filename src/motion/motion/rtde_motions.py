@@ -187,8 +187,6 @@ def move_until_contact(
     rtde_c: RTDEControl,
     rtde_r: RTDEReceive,
     direction: List[float],
-    tool_speed: float = 0.01,
-    force_threshold: float = 10.0,
     timeout_sec: float = 5.0,
 ) -> MoveResult:
     """
@@ -277,7 +275,7 @@ def move_until_force(
                 return MoveResult(MoveStatus.ABORTED, 'Force timeout.', _current_tcp(rtde_r))
             # target_Q = rtde_c.getInverseKinematics(target, start_Q)
             # rtde_c.servoL(target_Q, 0, 0, dt, lookahead_time, gain)
-            move_relative_tcp(rtde_c, rtde_r, pose_rel, start_Q, velocity=0.05)
+            move_relative_tcp(rtde_c, rtde_r, pose_rel, start_Q, velocity=0.02)
 
     except Exception as exc:
         try:
