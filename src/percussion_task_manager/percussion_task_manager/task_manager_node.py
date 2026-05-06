@@ -99,12 +99,11 @@ class TaskManagerNode(Node):
                 self._execute_next_step()
             case TaskState.AT_MARKER:
                 self.publish_state(TaskState.HAMMERING)
+            case TaskState.HAMMERING:
                 cmd = self._mode['arduino']
                 self._send_arduino_command(cmd['msg_type'], cmd['data'], cmd['msg_info'],
                                            on_success=TaskState.DONE,
                                            on_failure=TaskState.ERROR)
-            case TaskState.HAMMERING:
-                pass
             case TaskState.DONE:
                 self.publish_state(TaskState.RETURNING)
             case TaskState.RETURNING:
