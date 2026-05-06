@@ -12,7 +12,6 @@ from percussion_interfaces.action import ArduinoCommand
 
 
 class ArduinoBridgeNode(Node):
-    """ROS 2 node: generic Arduino command action server over serial."""
 
     def __init__(self):
         super().__init__('arduino_bridge_node')
@@ -42,7 +41,7 @@ class ArduinoBridgeNode(Node):
 
         try:
             ser = serial.Serial(port=self.port, baudrate=self.baudrate, timeout=1.0)
-            time.sleep(0.5)  # wait for Arduino reset
+            time.sleep(0.2)  # wait for Arduino reset
 
             message = f'{msg_type}|{data}|{msg_info}\n'
             ser.write(message.encode('utf-8'))
@@ -66,7 +65,8 @@ class ArduinoBridgeNode(Node):
                     parts = line.split('|')
                     if len(parts) >= 2 and parts[0] == msg_type:
                         state = parts[1]
-                        self.get_logger().info(f'Arduino: {msg_type} - {state}')
+                        message = parts[2]
+                        self.get_logger().info(f'Arduino: {msg_type} - {state} - {message}')
                         if state == 'DONE':
                             result.success = True
                             result.message = 'Command completed'
