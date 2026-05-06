@@ -75,7 +75,11 @@ ros2 launch percussion_task_manager task_system.launch.py
 ### 3. Trigger a task (system: 'start')
 
 ```bash
-ros2 service call /start_task std_srvs/srv/Trigger
+ros2 service call /percussion/task_manager/start_task percussion_interfaces/srv/StartTask "{mode: FIXING}"
+```
+or 
+```bash
+ros2 service call /percussion/task_manager/start_task percussion_interfaces/srv/StartTask "{mode: LOOSENING}"
 ```
 
 ---
@@ -103,10 +107,12 @@ Three nodes are started by the launch file, along with two static TF publishers 
 | `capture_service_node` | `percussion_perception` | Opens RealSense, detects ArUco markers, returns poses in gripper frame |
 | `task_manager_node` | `percussion_task_manager` | Orchestrator state machine: calls perception then sends motion goal |
 | `percussion_motion_node` | `percussion_motion` | Executes motion primitives on the UR10e via RTDE |
+| `arduino_bridge_node` | `percussion_arduino_bridge`| Interfaces with arduino through serial communication and interacts with ROS through actions.  
 
-**Custom interfaces** (`percussion_interfaces`): `msg/Pose6D`, `msg/MarkerDetection`, `srv/TriggerCapture`, `action/ExecuteMotion`.
+**Custom interfaces** (`percussion_interfaces`): `msg/Pose6D`, `msg/MarkerDetection`, `srv/TriggerCapture`, `srv/StartTask`, `action/ExecuteMotion`, `action/ArduinoCommand`.
 
-**State machine** (`task_manager_node`): `IDLE → CAPTURING → POSE_ACQUIRED → MOVE_TO_MARKER → DONE / ERROR`
+**State machine** (`task_manager_node`): 
+`IDLE -> TASK_REQUESTED -> AT_HOME -> CAPTURING -> POSE_ACQUIRED -> MOVING_TO_WEDGELOCK -> AT_MARKER -> HAMMERING -> DONE -> RETURNING -> ERROR`
 
 ---
 
@@ -117,7 +123,7 @@ Three nodes are started by the launch file, along with two static TF publishers 
 ### Currently known issues
 
 - **Motion**:
- - inverse kinematics issues with loosening mode (multiple theoretical joint solutions, only 1 practical solution)
+ - ~~inverse kinematics issues with loosening mode (multiple theoretical joint~~ solutions, only 1 practical solution)
 
 - **Arduino Command**:
   - ~~Number of hits not being passed to arduino~~
@@ -149,10 +155,8 @@ Three nodes are started by the launch file, along with two static TF publishers 
 
 - **Tool control**:
  - Add inductive sensor readout/passthrough
+ - Cleanup C++ code
  - ...
-
-
-- **interfaces**: Possibly simplify Pose6D and MarkerDetection into 1 Pose message with extra fields. (header?)
 
       
 
