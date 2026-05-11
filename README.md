@@ -140,7 +140,13 @@ Three nodes are started by the launch file, along with two static TF publishers 
 ### Features to add
 
 - **Task manager**: 
-  - Error Handling (geen inductief, gee marker, ...)
+  - Error Handling:
+    - No Marker in view -> need to move to new home position
+    - No camera / no robot -> Error, allow for reconnect attempt
+    - No inductive detected -> Error, move to home pose OR safety stop
+    - Force timeout (contact timeout) -> error with marker detection/movement
+    - 
+
   - Pause motion sequence to request inductive sensor (ArduinoCommand)
   - publish "SystemState" topic with:
     - TaskState

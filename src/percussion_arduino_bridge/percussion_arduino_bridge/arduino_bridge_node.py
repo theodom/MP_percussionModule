@@ -69,7 +69,7 @@ class ArduinoBridgeNode(Node):
                         self.get_logger().info(f'Arduino: {msg_type} - {state} - {message}')
                         if state == 'DONE':
                             result.success = True
-                            result.message = 'Command completed'
+                            result.message = message
                             goal_handle.succeed()
                             break
                         if state == 'ERROR':
@@ -78,7 +78,7 @@ class ArduinoBridgeNode(Node):
                             goal_handle.abort()
                             break
                 else:
-                    time.sleep(0.01)
+                    time.sleep(0.1)
             else:
                 # Timeout
                 result.success = False

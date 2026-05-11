@@ -17,7 +17,6 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/TriggerCapture.srv"
   "srv/StartTask.srv"
   "action/ExecuteMotion.action"
-  "action/Hammer.action"
   "action/ArduinoCommand.action"
   DEPENDENCIES geometry_msgs
 )

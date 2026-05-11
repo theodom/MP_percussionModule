@@ -36,6 +36,9 @@ def _fixing_sequence(marker_pose: List) -> List[dict]:
             'direction': [0.020, 0.0, 0.0, 0.0, 0.0, 0.0],
         },
         {
+            'motion_type': 'PAUSE',
+        },
+        {
             'motion_type':    'RELATIVE_MOVE',
             'relative_pose': [0, 0.15, -0.05, 0, 0.0, 0.0],
         },

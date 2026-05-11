@@ -52,6 +52,7 @@ class TaskManagerNode(Node):
         self._on_sequence_done = None
         self._sequence: List[dict] = []
         self._mode = None
+        self._pause_handler = None
 
         self.publish_state(self._current_state)
         self.get_logger().info('Task manager node started.')
@@ -76,15 +77,18 @@ class TaskManagerNode(Node):
             case TaskState.CAPTURING:
                 pass
             case TaskState.POSE_ACQUIRED:
-                # faked_list = [0.00630962,  0.06311957,  0.40705869, -1.72622068,  2.50957927,  0.20299939]
-                # self._selected_marker = Pose6D()
-                # self._selected_marker.x  = faked_list[0]
-                # self._selected_marker.y  = faked_list[1]
-                # self._selected_marker.z  = faked_list[2]
-                # self._selected_marker.rx = faked_list[3]
-                # self._selected_marker.ry = faked_list[4]
-                # self._selected_marker.rz = faked_list[5]
-                # self.get_logger().info(f"marker: {self._selected_marker}")
+
+                #--- Add a fixed marker position for at home testing 
+                faked_list = [0.00630962,  0.06311957,  0.40705869, -1.72622068,  2.50957927,  0.20299939]
+                self._selected_marker = Pose6D()
+                self._selected_marker.x  = faked_list[0]
+                self._selected_marker.y  = faked_list[1]
+                self._selected_marker.z  = faked_list[2]
+                self._selected_marker.rx = faked_list[3]
+                self._selected_marker.ry = faked_list[4]
+                self._selected_marker.rz = faked_list[5]
+                self.get_logger().info(f"marker: {self._selected_marker}")
+                # #----------------------------------------------------
                 if self._selected_marker is None:
                     self.get_logger().error('POSE_ACQUIRED but no marker available')
                     self.publish_state(TaskState.ERROR)
@@ -94,6 +98,7 @@ class TaskManagerNode(Node):
                     self.publish_state(TaskState.ERROR)
                     return
                 marker_list = [self._selected_marker.x, self._selected_marker.y, self._selected_marker.z, self._selected_marker.rx, self._selected_marker.ry, self._selected_marker.rz]
+                self._pause_handler = lambda step,  resume: self._read_inductive(2, resume, TaskState.ERROR)
                 self._sequence = self._mode['build_sequence'](marker_list)
                 self._on_sequence_done = lambda: self.publish_state(TaskState.AT_MARKER)
                 self._execute_next_step()
@@ -209,6 +214,18 @@ class TaskManagerNode(Node):
             return True
 
         step = self._sequence.pop(0)
+
+        if step['motion_type'] == 'PAUSE':
+            self.get_logger().info(
+                f'Sequence paused ({len(self._sequence)} steps remaining)'
+            )
+            if self._pause_handler:
+                self._pause_handler(step, self._execute_next_step)
+            else:
+                self.get_logger().info(f"Continuing sequence immediately.")
+                self._execute_next_step()
+            return False
+
         self.get_logger().info(
             f'Step: {step["motion_type"]} ({len(self._sequence) + 1} steps remaining)'
         )
@@ -290,7 +307,7 @@ class TaskManagerNode(Node):
                 return
             if result.success:
                 if callable(on_success):
-                    on_success()
+                    on_success(result.message)
                 else:
                     self.publish_state(on_success)
             else:
@@ -301,6 +318,35 @@ class TaskManagerNode(Node):
                     self.publish_state(on_failure)
 
         self._arduino_client.send_goal_async(goal).add_done_callback(_on_goal_response)
+
+    def _read_inductive(self, sensor: int, on_success, on_failure) -> None:
+        """Read inductive sensor and invoke on_success/on_failure based on value."""
+        def _check_sensor(msg: str):
+            try:
+                # Parse response: "IND_VALUES|DONE|<val_1>;<val_2>"
+                values = [int(v) for v in msg.split(';')]
+                if values[sensor - 1] == 1:
+                    self.get_logger().info(f"state is 1")
+                    if callable(on_success):
+                        on_success()
+                    else:
+                        self.publish_state(on_success)
+                else:
+                    self.get_logger().info(f"state is 0")
+                    if callable(on_failure):
+                        on_failure()
+                    else:
+                        self.publish_state(on_failure)
+            except Exception as e:
+                self.get_logger().error(f'Failed to parse IND_VALUES: {e}')
+                if callable(on_failure):
+                    on_failure()
+                else:
+                    self.publish_state(on_failure)
+
+        self._send_arduino_command('IND_VALUES', '0', 'A',
+                                   on_success=_check_sensor,
+                                   on_failure=on_failure) 
 
 
 def main(args=None) -> None:

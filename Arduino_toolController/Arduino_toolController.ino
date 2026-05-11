@@ -1,7 +1,7 @@
-#define EM D2
-#define fan D3
-#define inductive_1 D9
-#define inductive_2 D10
+#define EM 2
+#define fan 3
+#define inductive_1 9
+#define inductive_2 10
 
 
 #include "lowLevelControl.h"
@@ -14,22 +14,15 @@ int cooldownStart;
 void setup() {
 
   // Inductive sensors are connected 3.3V -> sensor -> input.
-  pinMode(inductive_1,INPUT_PULLDOWN);
-  pinMode(inductive_2, INPUT_PULLDOWN);
+  pinMode(inductive_1,INPUT_PULLUP);
+  pinMode(inductive_2, INPUT_PULLUP);
 
   // Digital outputs
   pinMode(EM, OUTPUT);
   pinMode(fan, OUTPUT);
   analogWrite(EM, 255);
   Serial.begin(115200);
-  // while (!Serial.available());
-
-
-  analogWrite(fan, 200);
-  delay(1000);
-  analogWrite(fan, 100);
-  delay(1000);
-  analogWrite(fan, 255);
+  while (!Serial.available());
   Serial.println("setup finished.");
 }
 
@@ -75,6 +68,7 @@ void loop() {
       analogWrite(fan, 0);
       msg_out.state = "DONE";
       msg_out.type = "HAMMER_REQ";
+      msg_out.msg = "Hammer action completed";
       actionState = -1;
       int hammerLength = request.data.toInt();
       hammerCycle(hammerLength);
@@ -86,10 +80,10 @@ void loop() {
     case IND_VALUES:
       msg_out.type = "IND_VALUES";
       msg_out.state = "DONE";
-      msg_str = "(" + String(ind_a) +  ";" +  String(ind_b) + ")";
+      msg_str = String(ind_a) +  ";" +  String(ind_b) ;
       msg_out.msg = msg_str;
       writeROSSerial(msg_out);
-      break;
+    break;
     default:
       actionState = -1;
       break;
