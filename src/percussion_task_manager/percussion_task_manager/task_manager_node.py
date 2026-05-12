@@ -6,10 +6,9 @@ import rclpy
 from rclpy.node import Node
 from rclpy.client import Client
 from rclpy.action import ActionClient
-from std_msgs.msg import String
 from percussion_interfaces.srv import TriggerCapture, StartTask
 from percussion_interfaces.action import ExecuteMotion, ArduinoCommand
-from percussion_interfaces.msg import Pose6D
+from percussion_interfaces.msg import Pose6D, SystemState
 from .task_modes import MODES
 
 
@@ -40,19 +39,29 @@ class TaskManagerNode(Node):
 
         # Services/Topics
         self._start_srv     = self.create_service(StartTask, 'start_task', self.start_task_callback)
-        self._state_pub     = self.create_publisher(String, 'state', 10)
-        self._state_sub     = self.create_subscription(String, 'state', self._on_state_changed, 10)
+        self._state_pub     = self.create_publisher(SystemState, 'state', 10)
+        self._state_sub     = self.create_subscription(SystemState, 'state', self._on_state_changed, 10)
         self._capture_client: Client = self.create_client(TriggerCapture, '/percussion/perception/trigger_capture')
         self._motion_client = ActionClient(self, ExecuteMotion, '/percussion/motion/execute_motion')
         self._arduino_client = ActionClient(self, ArduinoCommand, '/percussion/arduino_bridge/arduino_command')
 
+        # Timers
+        self._timer = self.create_timer(1.0, self._publish_system_state)
+
         self._selected_marker: Optional[Pose6D] = None
         self._current_state = TaskState.IDLE
+        self._last_processed_state: str = ''
         self._pending_capture_call = None
         self._on_sequence_done = None
         self._sequence: List[dict] = []
         self._mode = None
         self._pause_handler = None
+
+        # SystemState tracking fields
+        self._inductive_states: List[int] = []
+        self._latest_tcp_pose: Optional[Pose6D] = None
+        self._error_message: str = ''
+        self._detected_marker_id: int = -1
 
         self.publish_state(self._current_state)
         self.get_logger().info('Task manager node started.')
@@ -62,8 +71,16 @@ class TaskManagerNode(Node):
     # State
     # ------------------------------------------------------------------
 
-    def _on_state_changed(self, _msg: String) -> None:
-        state = _msg.data
+    def _on_state_changed(self, msg: SystemState) -> None:
+        new_state_value = msg.task_state
+
+        # Only execute state machine logic if TaskState actually changed since
+        # the last time the callback ran (periodic 1Hz publishes have same value)
+        if new_state_value == self._last_processed_state:
+            return
+        self._last_processed_state = new_state_value
+
+        state = new_state_value
 
         match state:
             case TaskState.TASK_REQUESTED:
@@ -115,6 +132,10 @@ class TaskManagerNode(Node):
                 self._sequence = self._mode['build_return_sequence']()
                 self._on_sequence_done = lambda: self.publish_state(TaskState.IDLE)
                 self._execute_next_step()
+            case TaskState.IDLE:
+                self._error_message = ''
+                self._inductive_states = []
+                self._detected_marker_id = -1
             case _:
                 pass
 
@@ -124,10 +145,18 @@ class TaskManagerNode(Node):
 
     def publish_state(self, state: TaskState) -> None:
         self._current_state = state
-        msg = String()
-        msg.data = state.value
-        self._state_pub.publish(msg)
+        self._publish_system_state()
         self.get_logger().info(f'State -> {state.value}')
+
+    def _publish_system_state(self) -> None:
+        msg = SystemState()
+        msg.task_state = self._current_state.value
+        msg.task_mode = self._mode.get('name', '') if self._mode else ''
+        msg.inductive_states = self._inductive_states
+        msg.tcp_pose = self._latest_tcp_pose if self._latest_tcp_pose else Pose6D()
+        msg.error_message = self._error_message
+        msg.detected_marker_id = self._detected_marker_id
+        self._state_pub.publish(msg)
 
     # ------------------------------------------------------------------
     # /start_task service
@@ -169,21 +198,25 @@ class TaskManagerNode(Node):
         try:
             result: Optional[TriggerCapture.Response] = future.result()
         except Exception as exc:
+            self._error_message = str(exc)
             self.publish_state(TaskState.ERROR)
             self.get_logger().error(f'Capture service call failed: {exc}')
             return
 
         if result is None:
+            self._error_message = 'Capture service returned no result'
             self.publish_state(TaskState.ERROR)
             self.get_logger().error('Capture service returned no result.')
             return
 
         if not result.success:
+            self._error_message = result.message
             self.publish_state(TaskState.ERROR)
             self.get_logger().warning(f'Capture failed: {result.message}')
             return
 
         if len(result.detections) == 0:
+            self._error_message = 'No markers detected'
             self.publish_state(TaskState.IDLE)
             self.get_logger().warning('No markers detected.')
             return
@@ -201,6 +234,7 @@ class TaskManagerNode(Node):
         )
 
         self._selected_marker = selected.pose
+        self._detected_marker_id = selected.marker_id
         self.publish_state(TaskState.POSE_ACQUIRED)
 
     # ------------------------------------------------------------------
@@ -234,6 +268,7 @@ class TaskManagerNode(Node):
 
     def _send_motion_goal(self, step: dict) -> None:
         if not self._motion_client.server_is_ready():
+            self._error_message = 'Motion action server not available'
             self.get_logger().error('Motion action server not available.')
             self.publish_state(TaskState.ERROR)
             return
@@ -257,15 +292,19 @@ class TaskManagerNode(Node):
             result = future.result().result
         except Exception as exc:
             self.get_logger().error(f'Motion action failed (server may have crashed): {exc}')
+            self._error_message = str(exc)
             self._sequence.clear()
             self._on_sequence_done = None
             self.publish_state(TaskState.ERROR)
             return
         if result.success:
             self.get_logger().info('Step complete.')
+            if result.final_tcp_pose:
+                self._latest_tcp_pose = result.final_tcp_pose
             self._execute_next_step()
         else:
             self.get_logger().error(f'Step failed: {result.message}')
+            self._error_message = result.message
             self._sequence.clear()
             self._on_sequence_done = None
             self.publish_state(TaskState.ERROR)
@@ -281,6 +320,7 @@ class TaskManagerNode(Node):
         on_success / on_failure: TaskState to publish, or callable to invoke.
         """
         if not self._arduino_client.server_is_ready():
+            self._error_message = 'Arduino action server not available'
             self.get_logger().error('Arduino action server not available.')
             self.publish_state(TaskState.ERROR)
             return
@@ -293,6 +333,7 @@ class TaskManagerNode(Node):
         def _on_goal_response(future):
             handle = future.result()
             if not handle.accepted:
+                self._error_message = f'{msg_type} goal rejected'
                 self.get_logger().error(f'{msg_type} goal rejected.')
                 self.publish_state(TaskState.ERROR)
                 return
@@ -303,6 +344,7 @@ class TaskManagerNode(Node):
                 result = future.result().result
             except Exception as exc:
                 self.get_logger().error(f'{msg_type} action failed: {exc}')
+                self._error_message = str(exc)
                 self.publish_state(TaskState.ERROR)
                 return
             if result.success:
@@ -312,6 +354,7 @@ class TaskManagerNode(Node):
                     self.publish_state(on_success)
             else:
                 self.get_logger().error(f'{msg_type} failed: {result.message}')
+                self._error_message = result.message
                 if callable(on_failure):
                     on_failure()
                 else:
@@ -325,6 +368,7 @@ class TaskManagerNode(Node):
             try:
                 # Parse response: "IND_VALUES|DONE|<val_1>;<val_2>"
                 values = [int(v) for v in msg.split(';')]
+                self._inductive_states = values
                 if values[sensor - 1] == 1:
                     self.get_logger().info(f"state is 1")
                     if callable(on_success):

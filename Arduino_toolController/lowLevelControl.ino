@@ -62,7 +62,7 @@ int hammerCycle(int cycleLength) {
         messageToParse feedback;
         feedback.type = "HAMMER_REQ";
         feedback.state = "IN_PROGRESS";
-        feedback.msg = i;
+        feedback.msg = String(i);
         writeROSSerial(feedback);
       }
   EMState = true;

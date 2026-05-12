@@ -14,6 +14,7 @@ find_package(builtin_interfaces REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/MarkerDetection.msg"
   "msg/Pose6D.msg"
+  "msg/SystemState.msg"
   "srv/TriggerCapture.srv"
   "srv/StartTask.srv"
   "action/ExecuteMotion.action"

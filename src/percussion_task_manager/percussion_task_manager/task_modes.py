@@ -32,11 +32,11 @@ def _fixing_sequence(marker_pose: List) -> List[dict]:
             'approach_offset': [0.05, 0.0, 0.0, 0.0, 0.0, 0.0],
         },
         {
-            'motion_type':    'MOVE_TO_CONTACT', # Touch Marker facing
-            'direction': [0.020, 0.0, 0.0, 0.0, 0.0, 0.0],
+            'motion_type': 'PAUSE',
         },
         {
-            'motion_type': 'PAUSE',
+            'motion_type':    'MOVE_TO_CONTACT', # Touch Marker facing
+            'direction': [0.020, 0.0, 0.0, 0.0, 0.0, 0.0],
         },
         {
             'motion_type':    'RELATIVE_MOVE',
@@ -214,12 +214,14 @@ def _loosening_return() -> List[dict]:
 
 MODES = {
     'FIXING': {
+        'name': 'FIXING',
         'build_home_sequence':   _fixing_home,
         'build_sequence':        _fixing_sequence,
         'build_return_sequence': _fixing_return,
         'arduino': {'msg_type': 'HAMMER_REQ', 'data': '8', 'msg_info': 'a'},
     },
     'LOOSENING': {
+        'name': 'LOOSENING',
         'build_home_sequence':   _loosening_home,
         'build_sequence':        _loosening_sequence,
         'build_return_sequence': _loosening_return,

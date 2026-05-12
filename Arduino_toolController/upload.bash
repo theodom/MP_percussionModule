@@ -7,4 +7,4 @@ FQBN="arduino:esp32:nano_nora"
 PORT="/dev/ttyACM0"
 
 arduino-cli compile --fqbn "$FQBN" "$SKETCH_DIR"
-arduino-cli upload  --fqbn "$FQBN" --port "$PORT" "$SKETCH_DIR"
+arduino-cli upload  --fqbn "$FQBN" --port "$PORT" "$SKETCH_DIR"-
