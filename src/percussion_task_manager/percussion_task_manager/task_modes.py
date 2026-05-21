@@ -32,11 +32,11 @@ def _fixing_sequence(marker_pose: List) -> List[dict]:
             'approach_offset': [0.05, 0.0, 0.0, 0.0, 0.0, 0.0],
         },
         {
-            'motion_type': 'PAUSE',
-        },
-        {
             'motion_type':    'MOVE_TO_CONTACT', # Touch Marker facing
             'direction': [0.020, 0.0, 0.0, 0.0, 0.0, 0.0],
+        },
+        {
+            'motion_type': 'PAUSE',
         },
         {
             'motion_type':    'RELATIVE_MOVE',

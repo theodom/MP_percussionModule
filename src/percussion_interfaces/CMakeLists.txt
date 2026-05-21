@@ -17,6 +17,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/SystemState.msg"
   "srv/TriggerCapture.srv"
   "srv/StartTask.srv"
+  "srv/Reconnect.srv"
   "action/ExecuteMotion.action"
   "action/ArduinoCommand.action"
   DEPENDENCIES geometry_msgs

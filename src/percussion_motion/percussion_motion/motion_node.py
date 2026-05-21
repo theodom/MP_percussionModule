@@ -46,6 +46,7 @@ from std_msgs.msg import String
 
 from percussion_interfaces.action import ExecuteMotion
 from percussion_interfaces.msg import Pose6D
+from percussion_interfaces.srv import Reconnect
 
 from rtde_control import RTDEControlInterface as RTDEControl
 from rtde_receive import RTDEReceiveInterface as RTDEReceive
@@ -100,7 +101,7 @@ class MotionNode(Node):
         self.declare_parameter('contact_force',    1.0)
         self.declare_parameter('contact_timeout',  5.0)
 
-        robot_ip          = self.get_parameter('robot_ip').get_parameter_value().string_value
+        self._robot_ip    = self.get_parameter('robot_ip').get_parameter_value().string_value
         self._home_pose   = list(self.get_parameter('home_pose').get_parameter_value().double_array_value)
         self._def_vel     = self.get_parameter('default_velocity').get_parameter_value().double_value
         self._def_acc     = self.get_parameter('default_accel').get_parameter_value().double_value
@@ -112,6 +113,8 @@ class MotionNode(Node):
 
         # --- Action server (register before blocking RTDE connect) ---
         self._rtde_ready = False
+        self._rtde_c = None
+        self._rtde_r = None
         cb_group = ReentrantCallbackGroup()
         self._action_server = ActionServer(
             self,
@@ -123,21 +126,74 @@ class MotionNode(Node):
             callback_group=cb_group,
         )
 
+        # --- Reconnect service (lets task manager re-establish RTDE on failure) ---
+        self._reconnect_srv = self.create_service(
+            Reconnect, 'reconnect', self._reconnect_callback,
+            callback_group=cb_group,
+        )
+
         # --- RTDE connection (blocking) ---
+        self._connect_rtde()
+
+        if self._rtde_ready:
+            self._publish_state('IDLE')
+            self.get_logger().info('Percussion motion node ready.')
+        else:
+            self._publish_state('ERROR')
+            self.get_logger().error(
+                'Motion node started without RTDE; waiting for /reconnect call.'
+            )
+
+    # ------------------------------------------------------------------
+    # RTDE connection management
+    # ------------------------------------------------------------------
+
+    def _connect_rtde(self) -> bool:
+        """(Re)establish RTDE control + receive interfaces. Returns True on success."""
         self._publish_state('CONNECTING')
-        self.get_logger().info(f'Connecting to robot at {robot_ip} …')
+        self.get_logger().info(f'Connecting to robot at {self._robot_ip} …')
         try:
-            self._rtde_c = RTDEControl(robot_ip)
-            self._rtde_r = RTDEReceive(robot_ip)
+            self._rtde_c = RTDEControl(self._robot_ip)
+            self._rtde_r = RTDEReceive(self._robot_ip)
         except Exception as e:
             self._rtde_ready = False
-            self.get_logger().info(f'Failed to connect to robot: {e}')
-            self._state_pub("ERROR")
+            self._rtde_c = None
+            self._rtde_r = None
+            self.get_logger().error(f'Failed to connect to robot: {e}')
+            return False
         self._rtde_ready = True
         self.get_logger().info('RTDE connection established.')
+        return True
 
-        self._publish_state('IDLE')
-        self.get_logger().info('Percussion motion node ready.')
+    def _disconnect_rtde(self) -> None:
+        """Best-effort close of any existing RTDE handles."""
+        for handle_name in ('_rtde_c', '_rtde_r'):
+            handle = getattr(self, handle_name, None)
+            if handle is None:
+                continue
+            try:
+                handle.disconnect()
+            except Exception as exc:
+                self.get_logger().warn(f'{handle_name}.disconnect() raised: {exc}')
+            setattr(self, handle_name, None)
+        self._rtde_ready = False
+
+    def _reconnect_callback(self, request: Reconnect.Request,
+                            response: Reconnect.Response) -> Reconnect.Response:
+        """Service handler — drops the existing RTDE sockets and re-opens them."""
+        self.get_logger().warn('Reconnect requested — closing RTDE sockets.')
+        self._disconnect_rtde()
+        if self._connect_rtde():
+            self._publish_state('IDLE')
+            response.success = True
+            response.message = 'RTDE reconnect succeeded'
+            self.get_logger().info(response.message)
+        else:
+            self._publish_state('ERROR')
+            response.success = False
+            response.message = f'RTDE reconnect to {self._robot_ip} failed'
+            self.get_logger().error(response.message)
+        return response
 
     # ------------------------------------------------------------------
     # Action callbacks
@@ -353,7 +409,8 @@ def main(args=None) -> None:
     finally:
         node.get_logger().info('Shutting down — stopping robot script.')
         try:
-            node._rtde_c.stopScript()
+            if node._rtde_c is not None:
+                node._rtde_c.stopScript()
         except Exception:
             pass
         node.destroy_node()

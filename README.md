@@ -147,8 +147,8 @@ Three nodes are started by the launch file, along with two static TF publishers 
     - Force timeout (contact timeout) -> error with marker detection/movement
     - 
 
-  - Pause motion sequence to request inductive sensor (ArduinoCommand)
-  - publish "SystemState" topic with:
+  - ~~Pause motion sequence to request inductive sensor (ArduinoCommand)~~
+  - ~~publish "SystemState" topic with:~~
     - TaskState
     - Task Mode
     - Inductive states
@@ -160,7 +160,7 @@ Three nodes are started by the launch file, along with two static TF publishers 
       - Better error handling for robot connection / reconnect automatically
 
 - **Tool control**:
- - Add inductive sensor readout/passthrough
+ - ~~Add inductive sensor readout/passthrough~~
  - Cleanup C++ code
  - ...
 

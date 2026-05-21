@@ -10,6 +10,7 @@ from percussion_interfaces.srv import TriggerCapture, StartTask
 from percussion_interfaces.action import ExecuteMotion, ArduinoCommand
 from percussion_interfaces.msg import Pose6D, SystemState
 from .task_modes import MODES
+from .error_handler import ErrorHandler
 
 
 class TaskState(str, Enum):
@@ -50,18 +51,23 @@ class TaskManagerNode(Node):
 
         self._selected_marker: Optional[Pose6D] = None
         self._current_state = TaskState.IDLE
+        self._previous_state: str = ''         # last non-ERROR state, used by the error handler to resume
         self._last_processed_state: str = ''
         self._pending_capture_call = None
         self._on_sequence_done = None
         self._sequence: List[dict] = []
         self._mode = None
         self._pause_handler = None
+        self._no_marker_retries: int = 0       # inline "retry once" budget for empty capture results
 
         # SystemState tracking fields
         self._inductive_states: List[int] = []
         self._latest_tcp_pose: Optional[Pose6D] = None
         self._error_message: str = ''
         self._detected_marker_id: int = -1
+
+        # Structured error handler (classifies error_message + dispatches recovery)
+        self._error_handler = ErrorHandler(self)
 
         self.publish_state(self._current_state)
         self.get_logger().info('Task manager node started.')
@@ -95,27 +101,31 @@ class TaskManagerNode(Node):
                 pass
             case TaskState.POSE_ACQUIRED:
 
-                #--- Add a fixed marker position for at home testing 
-                faked_list = [0.00630962,  0.06311957,  0.40705869, -1.72622068,  2.50957927,  0.20299939]
-                self._selected_marker = Pose6D()
-                self._selected_marker.x  = faked_list[0]
-                self._selected_marker.y  = faked_list[1]
-                self._selected_marker.z  = faked_list[2]
-                self._selected_marker.rx = faked_list[3]
-                self._selected_marker.ry = faked_list[4]
-                self._selected_marker.rz = faked_list[5]
-                self.get_logger().info(f"marker: {self._selected_marker}")
-                # #----------------------------------------------------
+                # #--- Add a fixed marker position for at home testing 
+                # faked_list = [0.00630962,  0.06311957,  0.40705869, -1.72622068,  2.50957927,  0.20299939]
+                # self._selected_marker = Pose6D()
+                # self._selected_marker.x  = faked_list[0]
+                # self._selected_marker.y  = faked_list[1]
+                # self._selected_marker.z  = faked_list[2]
+                # self._selected_marker.rx = faked_list[3]
+                # self._selected_marker.ry = faked_list[4]
+                # self._selected_marker.rz = faked_list[5]
+                # self.get_logger().info(f"marker: {self._selected_marker}")
+                # # #----------------------------------------------------
                 if self._selected_marker is None:
-                    self.get_logger().error('POSE_ACQUIRED but no marker available')
+                    self._error_message = "POSE_ACQUIRED but no Marker available"
+                    self.get_logger().error(self._error_message)
                     self.publish_state(TaskState.ERROR)
                     return
                 if self._mode is None:
-                    self.get_logger().error('POSE_ACQUIRED but no task mode selected')
+                    self._error_message = 'POSE_ACQUIRED but no task mode selected'
+                    self.get_logger().error(self._error_message)
                     self.publish_state(TaskState.ERROR)
                     return
                 marker_list = [self._selected_marker.x, self._selected_marker.y, self._selected_marker.z, self._selected_marker.rx, self._selected_marker.ry, self._selected_marker.rz]
-                self._pause_handler = lambda step,  resume: self._read_inductive(2, resume, TaskState.ERROR)
+                self._pause_handler = lambda step, resume: self._read_inductive(
+                    2, resume, self._raise_inductive_error
+                )
                 self._sequence = self._mode['build_sequence'](marker_list)
                 self._on_sequence_done = lambda: self.publish_state(TaskState.AT_MARKER)
                 self._execute_next_step()
@@ -136,6 +146,16 @@ class TaskManagerNode(Node):
                 self._error_message = ''
                 self._inductive_states = []
                 self._detected_marker_id = -1
+                self._no_marker_retries = 0
+                self._error_handler.reset_retries()
+            case TaskState.ERROR:
+                self._error_handler.handle_error(
+                    self._error_message,
+                    context={
+                        'previous_state': self._previous_state,
+                        'mode': self._mode.get('name') if self._mode else None,
+                    },
+                )
             case _:
                 pass
 
@@ -144,9 +164,20 @@ class TaskManagerNode(Node):
 
 
     def publish_state(self, state: TaskState) -> None:
+        # Track the last non-ERROR state so the error handler can resume after
+        # a transient fault by re-publishing the state that was in flight.
+        if self._current_state != TaskState.ERROR:
+            self._previous_state = self._current_state.value
         self._current_state = state
         self._publish_system_state()
         self.get_logger().info(f'State -> {state.value}')
+
+    def _raise_inductive_error(self) -> None:
+        """Pause-handler failure path: tag the error message so the structured
+        handler can classify it as INDUCTIVE_FAULT, then transition to ERROR."""
+        self._error_message = 'INDUCTIVE sensor 2 not detected'
+        self.get_logger().error(self._error_message)
+        self.publish_state(TaskState.ERROR)
 
     def _publish_system_state(self) -> None:
         msg = SystemState()
@@ -198,27 +229,42 @@ class TaskManagerNode(Node):
         try:
             result: Optional[TriggerCapture.Response] = future.result()
         except Exception as exc:
-            self._error_message = str(exc)
+            self._error_message = "CAPTURE ERROR - Capture service call failed " + str(exc)
+
             self.publish_state(TaskState.ERROR)
-            self.get_logger().error(f'Capture service call failed: {exc}')
+            self.get_logger().error(self._error_message)
             return
 
         if result is None:
             self._error_message = 'Capture service returned no result'
             self.publish_state(TaskState.ERROR)
-            self.get_logger().error('Capture service returned no result.')
+            self.get_logger().error(self._error_message)
             return
 
         if not result.success:
-            self._error_message = result.message
+            self._error_message = "CAPTURE RESULT == FAILED: " + result.message
             self.publish_state(TaskState.ERROR)
-            self.get_logger().warning(f'Capture failed: {result.message}')
+            self.get_logger().warning(self._error_message)
             return
 
         if len(result.detections) == 0:
-            self._error_message = 'No markers detected'
-            self.publish_state(TaskState.IDLE)
-            self.get_logger().warning('No markers detected.')
+            # Retry once via the mode's home sequence before escalating to ERROR.
+            # The mode's home is a known-safe pose with good marker visibility.
+            if self._mode is not None and self._no_marker_retries < 1:
+                self._no_marker_retries += 1
+                self.get_logger().warning(
+                    'No markers detected — re-running home sequence and retrying capture '
+                    f'(attempt {self._no_marker_retries}/1).'
+                )
+                self._sequence = self._mode['build_home_sequence']()
+                self._pause_handler = None
+                self._on_sequence_done = self.run_capture_service
+                self._execute_next_step()
+                return
+
+            self._error_message = 'MARKER NOT FOUND in view'
+            self.publish_state(TaskState.ERROR)
+            self.get_logger().warning(self._error_message)
             return
 
         for det in result.detections:
@@ -269,7 +315,7 @@ class TaskManagerNode(Node):
     def _send_motion_goal(self, step: dict) -> None:
         if not self._motion_client.server_is_ready():
             self._error_message = 'Motion action server not available'
-            self.get_logger().error('Motion action server not available.')
+            self.get_logger().error(self._error_message)
             self.publish_state(TaskState.ERROR)
             return
 
@@ -281,6 +327,7 @@ class TaskManagerNode(Node):
             handle = future.result()
             if not handle.accepted:
                 # self.get_logger().error('Motion goal rejected by motion node.')
+                self._error_message = "Motion not accepted"
                 self.publish_state(TaskState.ERROR)
                 return
             handle.get_result_async().add_done_callback(self._on_motion_result)
@@ -292,7 +339,7 @@ class TaskManagerNode(Node):
             result = future.result().result
         except Exception as exc:
             self.get_logger().error(f'Motion action failed (server may have crashed): {exc}')
-            self._error_message = str(exc)
+            self._error_message = f'MOTION server exception: {exc}'
             self._sequence.clear()
             self._on_sequence_done = None
             self.publish_state(TaskState.ERROR)
@@ -303,11 +350,11 @@ class TaskManagerNode(Node):
                 self._latest_tcp_pose = result.final_tcp_pose
             self._execute_next_step()
         else:
-            self.get_logger().error(f'Step failed: {result.message}')
-            self._error_message = result.message
+            self._error_message = "MOTION STEP FAILED: " + result.message
+            self.publish_state(TaskState.ERROR)
+            self.get_logger().error(self._error_message)
             self._sequence.clear()
             self._on_sequence_done = None
-            self.publish_state(TaskState.ERROR)
 
     # ------------------------------------------------------------------
     # Arduino command action
@@ -320,8 +367,8 @@ class TaskManagerNode(Node):
         on_success / on_failure: TaskState to publish, or callable to invoke.
         """
         if not self._arduino_client.server_is_ready():
-            self._error_message = 'Arduino action server not available'
-            self.get_logger().error('Arduino action server not available.')
+            self._error_message = 'ARDUINO action server not available'
+            self.get_logger().error(self._error_message)
             self.publish_state(TaskState.ERROR)
             return
 
@@ -333,8 +380,8 @@ class TaskManagerNode(Node):
         def _on_goal_response(future):
             handle = future.result()
             if not handle.accepted:
-                self._error_message = f'{msg_type} goal rejected'
-                self.get_logger().error(f'{msg_type} goal rejected.')
+                self._error_message = f'ARDUINO: {msg_type} goal rejected'
+                self.get_logger().error(self._error_message)
                 self.publish_state(TaskState.ERROR)
                 return
             handle.get_result_async().add_done_callback(_on_result)
@@ -343,8 +390,8 @@ class TaskManagerNode(Node):
             try:
                 result = future.result().result
             except Exception as exc:
-                self.get_logger().error(f'{msg_type} action failed: {exc}')
-                self._error_message = str(exc)
+                self._error_message = f"ARDUINO: {msg_type} action failed: " + str(exc)
+                self.get_logger().error(self._error_message)
                 self.publish_state(TaskState.ERROR)
                 return
             if result.success:
@@ -353,8 +400,8 @@ class TaskManagerNode(Node):
                 else:
                     self.publish_state(on_success)
             else:
-                self.get_logger().error(f'{msg_type} failed: {result.message}')
-                self._error_message = result.message
+                self._error_message = f'ARDUINO: {msg_type} failed: {result.message}'
+                self.get_logger().error(self._error_message)
                 if callable(on_failure):
                     on_failure()
                 else:

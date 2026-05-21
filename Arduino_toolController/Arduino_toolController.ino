@@ -22,7 +22,6 @@ void setup() {
   pinMode(fan, OUTPUT);
   analogWrite(EM, 255);
   Serial.begin(115200);
-  while (!Serial.available());
   Serial.println("setup finished.");
 }
 
@@ -37,9 +36,9 @@ void loop() {
     }
   }
   int ind_a = digitalRead(inductive_1);
-  // Serial.println("Inductive 2:");
+  //Serial.println("Inductive 2:");
   int ind_b = digitalRead(inductive_2);
-  // Serial.println(ind_b);
+  //Serial.println(ind_b);
   
   parsedMessage request;
   request = readROSSerial();

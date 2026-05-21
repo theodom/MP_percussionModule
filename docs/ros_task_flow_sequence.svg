@@ -1,581 +1,240 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg
-   width="676.85431"
-   viewBox="0 0 676.85431 588.81769"
-   role="img"
-   version="1.1"
-   id="svg153"
-   sodipodi:docname="ros_task_flow_sequence (1).svg"
-   inkscape:export-filename="ros_task_flow_sequence.png"
-   inkscape:export-xdpi="960"
-   inkscape:export-ydpi="960"
-   height="588.81769"
-   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <sodipodi:namedview
-     id="namedview155"
-     pagecolor="#ffffff"
-     bordercolor="#000000"
-     borderopacity="0.25"
-     inkscape:showpageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1"
-     showgrid="false"
-     inkscape:zoom="1.2102564"
-     inkscape:cx="271.84322"
-     inkscape:cy="259.86229"
-     inkscape:window-width="1850"
-     inkscape:window-height="1131"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="svg153" />
-  <title
-     id="title2">ROS 2 Task Flow Sequence Diagram</title>
-  <desc
-     id="desc4">Simplified sequence diagram with approach collapsed into one motion step and optional inductive sensor check shown.</desc>
-  <defs
-     id="defs11">
-    <marker
-       id="arrow"
-       viewBox="0 0 10 10"
-       refX="8"
-       refY="5"
-       markerWidth="6"
-       markerHeight="6"
-       orient="auto-start-reverse">
-      <path
-         d="M 2,1 8,5 2,9"
-         fill="none"
-         stroke="context-stroke"
-         stroke-width="1.5"
-         stroke-linecap="round"
-         stroke-linejoin="round"
-         id="path6" />
-    </marker>
-    <style
-       id="style9">
-    text { font-family: sans-serif; fill: #222; }
-    .th  { font-size: 14px; font-weight: 500; }
-    .ts  { font-size: 12px; font-weight: 400; fill: #555; }
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 50 1900 970" font-family="&#39;Helvetica Neue&#39;, Helvetica, Arial, sans-serif">
+  
 
-    /* Header colours */
-    .c-gray   rect { fill: #F1EFE8; stroke: #888780; }
-    .c-gray   text { fill: #444441; }
-    .c-purple rect { fill: #EEEDFE; stroke: #534AB7; }
-    .c-purple text { fill: #3C3489; }
-    .c-teal   rect { fill: #E1F5EE; stroke: #0F6E56; }
-    .c-teal   text { fill: #085041; }
-    .c-blue   rect { fill: #E6F1FB; stroke: #185FA5; }
-    .c-blue   text { fill: #0C447C; }
-    .c-coral  rect { fill: #FAECE7; stroke: #993C1D; }
-    .c-coral  text { fill: #712B13; }
-
-    .lifeline { stroke: #b4b2a9; stroke-width: 1; stroke-dasharray: 4 4; }
-    .arr      { stroke: #5f5e5a; stroke-width: 1.2; fill: none; }
-    .ret      { stroke: #b4b2a9; stroke-width: 1;   fill: none; stroke-dasharray: 4 3; }
-    .opt      { stroke: #b4b2a9; stroke-width: 1;   fill: none; stroke-dasharray: 5 4; }
-    .opt-lbl  { font-size: 12px; fill: #888780; font-family: sans-serif; }
-  </style>
+  <defs>
+    <marker id="ah-black" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1a1a1a"></path></marker>
+    <marker id="ah-grey" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7d7670"></path></marker>
+    <marker id="ah-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0f6e56"></path></marker>
+    <marker id="ah-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#534ab7"></path></marker>
+    <marker id="ah-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#854f0b"></path></marker>
+    <marker id="ah-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#993c1d"></path></marker>
   </defs>
-  <!-- LIFELINES -->
-  <rect
-     style="fill:#ffffff;fill-opacity:1;stroke:#5a5a5a"
-     id="rect1086"
-     width="675.85431"
-     height="587.81769"
-     x="0.5"
-     y="0.5"
-     rx="3.5254531" />
-  <line
-     class="lifeline"
-     x1="79.777016"
-     y1="60.705441"
-     x2="79.777016"
-     y2="750.70544"
-     id="line13" />
-  <line
-     class="lifeline"
-     x1="209.77701"
-     y1="60.705441"
-     x2="209.77701"
-     y2="750.70544"
-     id="line15" />
-  <line
-     class="lifeline"
-     x1="339.77701"
-     y1="60.705441"
-     x2="339.77701"
-     y2="750.70544"
-     id="line17" />
-  <line
-     class="lifeline"
-     x1="469.77701"
-     y1="60.705441"
-     x2="469.77701"
-     y2="750.70544"
-     id="line19" />
-  <line
-     class="lifeline"
-     x1="599.77704"
-     y1="60.705441"
-     x2="599.77704"
-     y2="750.70544"
-     id="line21" />
-  <!-- HEADER BOXES -->
-  <g
-     class="c-gray"
-     id="g27"
-     transform="translate(-0.22298729,-1.2945577)">
-    <rect
-       x="24"
-       y="18"
-       width="112"
-       height="44"
-       rx="6"
-       stroke-width="0.5"
-       id="rect23" />
-    <text
-       class="th"
-       x="80"
-       y="40"
-       text-anchor="middle"
-       dominant-baseline="central"
-       id="text25">task_manager</text>
+
+  <rect x="16" y="62" width="1868" height="920" rx="18" ry="18" fill="none" stroke="#a8a094" stroke-width="1.2" stroke-dasharray="6 5"></rect>
+  <text x="36" y="82" font-size="12" fill="#8a8278" font-weight="500">ROS 2 system</text>
+
+  
+
+  
+  <g>
+    <rect x="40" y="100" width="140" height="48" rx="11" ry="11" fill="#f1efe8" stroke="#888780" stroke-width="1.2"></rect>
+    <text x="110" y="124" text-anchor="middle" font-size="13" fill="#2a2a28">User / external</text>
+    <text x="110" y="140" text-anchor="middle" font-size="10" fill="#6a6a64">CLI · launcher</text>
+    <line x1="110" y1="148" x2="110" y2="890" stroke="#888780" stroke-width="1" stroke-dasharray="3 4"></line>
   </g>
-  <g
-     class="c-purple"
-     id="g35"
-     transform="translate(-0.22298729,-1.2945577)">
-    <rect
-       x="154"
-       y="18"
-       width="112"
-       height="44"
-       rx="6"
-       stroke-width="0.5"
-       id="rect29" />
-    <text
-       class="th"
-       x="210"
-       y="33"
-       text-anchor="middle"
-       dominant-baseline="central"
-       id="text31">percussion</text>
-    <text
-       class="th"
-       x="210"
-       y="51"
-       text-anchor="middle"
-       dominant-baseline="central"
-       id="text33">_motion</text>
+
+  
+  <g>
+    <rect x="370" y="98" width="180" height="52" rx="12" ry="12" fill="#f1efe8" stroke="#888780" stroke-width="1.4"></rect>
+    <text x="460" y="121" text-anchor="middle" font-size="14" fill="#2a2a28">task_manager</text>
+    <text x="460" y="138" text-anchor="middle" font-size="10" fill="#3a3a36">orchestrator · FSM</text>
+    <line x1="460" y1="150" x2="460" y2="890" stroke="#888780" stroke-width="1.2" stroke-dasharray="3 4"></line>
   </g>
-  <g
-     class="c-teal"
-     id="g41"
-     transform="translate(-0.22298729,-1.2945577)">
-    <rect
-       x="284"
-       y="18"
-       width="112"
-       height="44"
-       rx="6"
-       stroke-width="0.5"
-       id="rect37" />
-    <text
-       class="th"
-       x="340"
-       y="40"
-       text-anchor="middle"
-       dominant-baseline="central"
-       id="text39">Perception</text>
+
+  
+  <g>
+    <rect x="760" y="98" width="180" height="52" rx="12" ry="12" fill="#e1f5ee" stroke="#0f6e56" stroke-width="1.4"></rect>
+    <text x="850" y="121" text-anchor="middle" font-size="14" fill="#085041">perception</text>
+    <text x="850" y="138" text-anchor="middle" font-size="10" fill="#0f6e56">ArUco · RealSense D405</text>
+    <line x1="850" y1="150" x2="850" y2="900" stroke="#0f6e56" stroke-width="1.2" stroke-dasharray="3 4"></line>
   </g>
-  <g
-     class="c-blue"
-     id="g49"
-     transform="translate(-0.22298729,-1.2945577)">
-    <rect
-       x="414"
-       y="18"
-       width="112"
-       height="44"
-       rx="6"
-       stroke-width="0.5"
-       id="rect43" />
-    <text
-       class="th"
-       x="470"
-       y="33"
-       text-anchor="middle"
-       dominant-baseline="central"
-       id="text45">tool</text>
-    <text
-       class="th"
-       x="470"
-       y="51"
-       text-anchor="middle"
-       dominant-baseline="central"
-       id="text47">_controller</text>
+
+  
+  <g>
+    <rect x="1140" y="98" width="180" height="52" rx="12" ry="12" fill="#eeedfe" stroke="#534ab7" stroke-width="1.4"></rect>
+    <text x="1230" y="121" text-anchor="middle" font-size="14" fill="#3c3489">percussion_motion</text>
+    <text x="1230" y="138" text-anchor="middle" font-size="10" fill="#534ab7">RTDE · UR10e</text>
+    <line x1="1230" y1="150" x2="1230" y2="900" stroke="#534ab7" stroke-width="1.2" stroke-dasharray="3 4"></line>
   </g>
-  <g
-     class="c-coral"
-     id="g57"
-     transform="translate(-0.22298729,-1.2945577)">
-    <rect
-       x="544"
-       y="18"
-       width="112"
-       height="44"
-       rx="6"
-       stroke-width="0.5"
-       id="rect51" />
-    <text
-       class="th"
-       x="600"
-       y="33"
-       text-anchor="middle"
-       dominant-baseline="central"
-       id="text53">Arduino</text>
-    <text
-       class="th"
-       x="600"
-       y="51"
-       text-anchor="middle"
-       dominant-baseline="central"
-       id="text55">Nano</text>
+
+  
+  <g>
+    <rect x="1530" y="98" width="180" height="52" rx="12" ry="12" fill="#faeeda" stroke="#854f0b" stroke-width="1.4"></rect>
+    <text x="1620" y="121" text-anchor="middle" font-size="14" fill="#633806">arduino_bridge</text>
+    <text x="1620" y="138" text-anchor="middle" font-size="10" fill="#854f0b">serial · Arduino Nano</text>
+    <line x1="1620" y1="150" x2="1620" y2="900" stroke="#854f0b" stroke-width="1.2" stroke-dasharray="3 4"></line>
   </g>
-  <!-- USER REQUEST -->
-  <g
-     class="c-gray"
-     id="g65"
-     transform="translate(-0.22298729,-1.2945577)">
-    <rect
-       x="32"
-       y="80"
-       width="96"
-       height="38"
-       rx="6"
-       stroke-width="0.5"
-       id="rect59" />
-    <text
-       class="th"
-       x="80"
-       y="95"
-       text-anchor="middle"
-       dominant-baseline="central"
-       id="text61">User request</text>
-    <text
-       class="ts"
-       x="80"
-       y="109"
-       text-anchor="middle"
-       dominant-baseline="central"
-       id="text63">task trigger</text>
+
+  
+
+  
+  
+  
+
+  
+  <g>
+    <line x1="110" y1="186" x2="460" y2="186" stroke="#1a1a1a" stroke-width="1.6" marker-end="url(#ah-black)"></line>
+    <text x="285" y="180" text-anchor="middle" font-size="12" font-weight="600" fill="#2a2620">/start_task  ·  Srv</text>
   </g>
-  <!-- ROW 1: Move to scan pose -->
-  <line
-     class="arr"
-     x1="79.777016"
-     y1="146.70544"
-     x2="199.77701"
-     y2="146.70544"
-     marker-end="url(#arrow)"
-     id="line67" />
-  <text
-     class="ts"
-     x="137.77701"
-     y="141.70544"
-     text-anchor="middle"
-     id="text69">Act: ExecuteMotion</text>
-  <g
-     class="c-purple"
-     id="g77"
-     transform="translate(-0.22298729,-1.2945577)">
-    <rect
-       x="154"
-       y="158"
-       width="112"
-       height="46"
-       rx="8"
-       stroke-width="0.5"
-       id="rect71" />
-    <text
-       class="th"
-       x="210"
-       y="177"
-       text-anchor="middle"
-       dominant-baseline="central"
-       id="text73">Move to scan pose</text>
-    <text
-       class="ts"
-       x="210"
-       y="193"
-       text-anchor="middle"
-       dominant-baseline="central"
-       id="text75">Predefined joint config</text>
+
+  
+  <g>
+    <rect x="465" y="201" width="150" height="18" rx="9" ry="9" fill="#f1efe8" stroke="#888780" stroke-width="0.8"></rect>
+    <text x="540" y="214" text-anchor="middle" font-size="10.5" font-weight="600" fill="#3a3a36">&gt; TASK_REQUESTED</text>
   </g>
-  <line
-     class="ret"
-     x1="209.77701"
-     y1="210.70544"
-     x2="89.777016"
-     y2="210.70544"
-     marker-end="url(#arrow)"
-     id="line79" />
-  <text
-     class="ts"
-     x="147.77701"
-     y="206.70544"
-     text-anchor="middle"
-     id="text81">Motion done</text>
-  <!-- ROW 2: TriggerCapture -->
-  <line
-     class="arr"
-     x1="79.777016"
-     y1="238.70544"
-     x2="329.77701"
-     y2="238.70544"
-     marker-end="url(#arrow)"
-     id="line83" />
-  <text
-     class="ts"
-     x="201.77701"
-     y="233.70544"
-     text-anchor="middle"
-     id="text85">Srv: TriggerCapture</text>
-  <g
-     class="c-teal"
-     id="g93"
-     transform="translate(-0.22298729,-1.2945577)">
-    <rect
-       x="284"
-       y="250"
-       width="112"
-       height="46"
-       rx="8"
-       stroke-width="0.5"
-       id="rect87" />
-    <text
-       class="th"
-       x="340"
-       y="269"
-       text-anchor="middle"
-       dominant-baseline="central"
-       id="text89">Capture + detect</text>
-    <text
-       class="ts"
-       x="340"
-       y="285"
-       text-anchor="middle"
-       dominant-baseline="central"
-       id="text91">ArUco → 6-DOF pose</text>
+
+  
+  <g>
+    <line x1="460" y1="244" x2="1230" y2="244" stroke="#534ab7" stroke-width="1.6" marker-end="url(#ah-purple)"></line>
+    <text x="845" y="238" text-anchor="middle" font-size="12" font-weight="600" fill="#3c3489">/execute_motion  ·  Act</text>
+    <text x="845" y="256" text-anchor="middle" font-size="9.5" font-style="italic" fill="#534ab7">build_home_sequence</text>
   </g>
-  <line
-     class="ret"
-     x1="339.77701"
-     y1="302.70544"
-     x2="89.777016"
-     y2="302.70544"
-     marker-end="url(#arrow)"
-     id="line95" />
-  <text
-     class="ts"
-     x="211.77701"
-     y="297.70544"
-     text-anchor="middle"
-     id="text97">/marker_pose</text>
-  <!-- ROW 3: Approach sequence -->
-  <line
-     class="arr"
-     x1="79.777016"
-     y1="328.70544"
-     x2="199.77701"
-     y2="328.70544"
-     marker-end="url(#arrow)"
-     id="line99" />
-  <text
-     class="ts"
-     x="137.77701"
-     y="323.70544"
-     text-anchor="middle"
-     id="text101">Act: ExecuteMotion</text>
-  <g
-     class="c-purple"
-     id="g111"
-     transform="translate(-0.22298729,-1.2945577)">
-    <rect
-       x="154"
-       y="340"
-       width="112"
-       height="58"
-       rx="8"
-       stroke-width="0.5"
-       id="rect103" />
-    <text
-       class="th"
-       x="210"
-       y="362"
-       text-anchor="middle"
-       dominant-baseline="central"
-       id="text105">Approach sequence</text>
-    <text
-       class="ts"
-       x="210"
-       y="380"
-       text-anchor="middle"
-       dominant-baseline="central"
-       id="text107">Ref → side → top</text>
-    <text
-       class="ts"
-       x="210"
-       y="394"
-       text-anchor="middle"
-       dominant-baseline="central"
-       id="text109">F/T contact search</text>
+
+  
+  <g>
+    <line x1="1230" y1="282" x2="460" y2="282" stroke="#7d7670" stroke-width="1.2" stroke-dasharray="5 4" marker-end="url(#ah-grey)"></line>
+    <text x="845" y="276" text-anchor="middle" font-size="11" fill="#5a544a">ExecuteMotion.Result</text>
   </g>
-  <!-- Optional inductive sensor -->
-  <line
-     class="opt"
-     x1="265.77701"
-     y1="368.70544"
-     x2="459.77701"
-     y2="368.70544"
-     marker-end="url(#arrow)"
-     id="line113" />
-  <text
-     class="opt-lbl"
-     x="361.77701"
-     y="358.70544"
-     text-anchor="middle"
-     id="text115">[opt] /inductive_sensor</text>
-  <line
-     class="opt"
-     x1="459.77701"
-     y1="386.70544"
-     x2="265.77701"
-     y2="386.70544"
-     marker-end="url(#arrow)"
-     id="line117" />
-  <text
-     class="opt-lbl"
-     x="361.77701"
-     y="398.70544"
-     text-anchor="middle"
-     id="text119">[opt] contact valid?</text>
-  <line
-     class="ret"
-     x1="209.77701"
-     y1="404.70544"
-     x2="89.777016"
-     y2="404.70544"
-     marker-end="url(#arrow)"
-     id="line121" />
-  <text
-     class="ts"
-     x="147.77701"
-     y="400.70544"
-     text-anchor="middle"
-     id="text123">Position known</text>
-  <!-- ROW 4: StartHammer -->
-  <line
-     class="arr"
-     x1="79.777016"
-     y1="432.70544"
-     x2="589.77704"
-     y2="432.70544"
-     marker-end="url(#arrow)"
-     id="line125" />
-  <text
-     class="ts"
-     x="335.77701"
-     y="427.70544"
-     text-anchor="middle"
-     id="text127">Srv: StartHammer</text>
-  <g
-     class="c-coral"
-     id="g135"
-     transform="translate(-0.22298729,-1.2945577)">
-    <rect
-       x="544"
-       y="444"
-       width="112"
-       height="46"
-       rx="8"
-       stroke-width="0.5"
-       id="rect129" />
-    <text
-       class="th"
-       x="600"
-       y="463"
-       text-anchor="middle"
-       dominant-baseline="central"
-       id="text131">Hammer FSM</text>
-    <text
-       class="ts"
-       x="600"
-       y="479"
-       text-anchor="middle"
-       dominant-baseline="central"
-       id="text133">Low-level control</text>
+
+  
+  <g>
+    <rect x="465" y="297" width="120" height="18" rx="9" ry="9" fill="#f1efe8" stroke="#888780" stroke-width="0.8"></rect>
+    <text x="525" y="310" text-anchor="middle" font-size="10.5" font-weight="600" fill="#3a3a36">&gt; AT_HOME</text>
   </g>
-  <line
-     class="ret"
-     x1="599.77704"
-     y1="496.70544"
-     x2="89.777016"
-     y2="496.70544"
-     marker-end="url(#arrow)"
-     id="line137" />
-  <text
-     class="ts"
-     x="339.77701"
-     y="491.70544"
-     text-anchor="middle"
-     id="text139">HammerDone / Err</text>
-  <!-- ROW 5: Return to home -->
-  <line
-     class="arr"
-     x1="79.777016"
-     y1="522.70544"
-     x2="199.77701"
-     y2="522.70544"
-     marker-end="url(#arrow)"
-     id="line141" />
-  <text
-     class="ts"
-     x="137.77701"
-     y="517.70544"
-     text-anchor="middle"
-     id="text143">Act: ExecuteMotion</text>
-  <g
-     class="c-gray"
-     id="g151"
-     transform="translate(-0.22298729,-1.2945577)">
-    <rect
-       x="154"
-       y="534"
-       width="112"
-       height="46"
-       rx="8"
-       stroke-width="0.5"
-       id="rect145" />
-    <text
-       class="th"
-       x="210"
-       y="553"
-       text-anchor="middle"
-       dominant-baseline="central"
-       id="text147">Return to home</text>
-    <text
-       class="ts"
-       x="210"
-       y="569"
-       text-anchor="middle"
-       dominant-baseline="central"
-       id="text149">Task complete</text>
+
+  
+  <g>
+    <line x1="460" y1="340" x2="850" y2="340" stroke="#0f6e56" stroke-width="1.6" marker-end="url(#ah-green)"></line>
+    <text x="655" y="344" text-anchor="middle" font-size="12" font-weight="600" fill="#085041">/trigger_capture  ·  Srv</text>
   </g>
-</svg>
+
+  
+  <g>
+    <line x1="850" y1="378" x2="460" y2="378" stroke="#7d7670" stroke-width="1.2" stroke-dasharray="5 4" marker-end="url(#ah-grey)"></line>
+    <text x="655" y="372" text-anchor="middle" font-size="11" fill="#5a544a">TriggerCapture.Response  ·  MarkerDetection[]</text>
+  </g>
+
+  
+  <g>
+    <rect x="465" y="392" width="180" height="32" rx="11" ry="11" fill="#f1efe8" stroke="#888780" stroke-width="0.8"></rect>
+    <text x="555" y="405" text-anchor="middle" font-size="10.5" font-weight="600" fill="#3a3a36">&gt; CAPTURING</text>
+    <text x="555" y="419" text-anchor="middle" font-size="10.5" font-weight="600" fill="#3a3a36">&gt; POSE_ACQUIRED</text>
+  </g>
+
+  
+  <g>
+    <line x1="460" y1="448" x2="1230" y2="448" stroke="#534ab7" stroke-width="1.6" marker-end="url(#ah-purple)"></line>
+    <text x="845" y="442" text-anchor="middle" font-size="12" font-weight="600" fill="#3c3489">/execute_motion  ·  Act</text>
+    <text x="845" y="460" text-anchor="middle" font-size="9.5" font-style="italic" fill="#534ab7">build_sequence(marker_pose)</text>
+  </g>
+
+  
+  <g>
+    <rect x="465" y="473" width="180" height="18" rx="9" ry="9" fill="#f1efe8" stroke="#888780" stroke-width="0.8"></rect>
+    <text x="555" y="486" text-anchor="middle" font-size="10.5" font-weight="600" fill="#3a3a36">&gt; MOVING_TO_WEDGELOCK</text>
+  </g>
+
+  
+  <g>
+    <rect x="810" y="505" width="280" height="24" rx="7" ry="7" fill="none" stroke="#888780" stroke-width="1.2"></rect>
+    <text x="950" y="521" text-anchor="middle" font-size="11" font-style="italic" fill="#3a3a36">— motion sequence paused —</text>
+  </g>
+
+  
+  <g>
+    <line x1="460" y1="552" x2="1620" y2="552" stroke="#854f0b" stroke-width="1.6" marker-end="url(#ah-orange)"></line>
+    <text x="1040" y="546" text-anchor="middle" font-size="12" font-weight="600" fill="#633806">/arduino_command  ·  Act</text>
+    <text x="1040" y="564" text-anchor="middle" font-size="9.5" font-style="italic" fill="#854f0b">read inductive sensor  ·  msg_type = &#34;IND_VALUES&#34;</text>
+  </g>
+
+  
+  <g>
+    <line x1="1620" y1="586" x2="460" y2="586" stroke="#7d7670" stroke-width="1.2" stroke-dasharray="5 4" marker-end="url(#ah-grey)"></line>
+    <text x="1040" y="580" text-anchor="middle" font-size="11" fill="#5a544a">ArduinoCommand.Result</text>
+  </g>
+
+  
+  
+  <g>
+    <line x1="1230" y1="644" x2="460" y2="644" stroke="#7d7670" stroke-width="1.2" stroke-dasharray="5 4" marker-end="url(#ah-grey)"></line>
+    <text x="845" y="638" text-anchor="middle" font-size="11" fill="#5a544a">ExecuteMotion.Result   ·   sequence complete</text>
+  </g>
+
+  
+  <g>
+    <rect x="465" y="657" width="180" height="32" rx="11" ry="11" fill="#f1efe8" stroke="#888780" stroke-width="0.8"></rect>
+    <text x="555" y="670" text-anchor="middle" font-size="10.5" font-weight="600" fill="#3a3a36">&gt; AT_MARKER</text>
+    <text x="555" y="684" text-anchor="middle" font-size="10.5" font-weight="600" fill="#3a3a36">&gt; HAMMERING</text>
+  </g>
+
+  
+  <g>
+    <line x1="460" y1="710" x2="1620" y2="710" stroke="#854f0b" stroke-width="1.6" marker-end="url(#ah-orange)"></line>
+    <text x="1040" y="704" text-anchor="middle" font-size="12" font-weight="600" fill="#633806">/arduino_command  ·  Act</text>
+    <text x="1040" y="722" text-anchor="middle" font-size="9.5" font-style="italic" fill="#854f0b">execute hammering  ·  msg_type = &#34;HAMMER_REQ&#34;</text>
+  </g>
+
+  
+  <g>
+    <line x1="1620" y1="744" x2="460" y2="744" stroke="#7d7670" stroke-width="1.2" stroke-dasharray="5 4" marker-end="url(#ah-grey)"></line>
+    <text x="1040" y="738" text-anchor="middle" font-size="11" fill="#5a544a">ArduinoCommand.Result   ·   feedback during cycle</text>
+  </g>
+
+  
+  <g>
+    <rect x="465" y="757" width="180" height="32" rx="11" ry="11" fill="#f1efe8" stroke="#888780" stroke-width="0.8"></rect>
+    <text x="555" y="770" text-anchor="middle" font-size="10.5" font-weight="600" fill="#3a3a36">&gt; DONE</text>
+    <text x="555" y="784" text-anchor="middle" font-size="10.5" font-weight="600" fill="#3a3a36">&gt; RETURNING</text>
+  </g>
+
+  
+  <g>
+    <line x1="460" y1="810" x2="1230" y2="810" stroke="#534ab7" stroke-width="1.6" marker-end="url(#ah-purple)"></line>
+    <text x="845" y="804" text-anchor="middle" font-size="12" font-weight="600" fill="#3c3489">/execute_motion  ·  Act</text>
+    <text x="845" y="822" text-anchor="middle" font-size="9.5" font-style="italic" fill="#534ab7">build_return_sequence  ·  back to home pose</text>
+  </g>
+
+  
+  <g>
+    <line x1="1230" y1="845" x2="460" y2="845" stroke="#7d7670" stroke-width="1.2" stroke-dasharray="5 4" marker-end="url(#ah-grey)"></line>
+    <text x="845" y="839" text-anchor="middle" font-size="11" fill="#5a544a">ExecuteMotion.Result</text>
+  </g>
+
+  
+  <g>
+    <rect x="465" y="857" width="100" height="18" rx="9" ry="9" fill="#f1efe8" stroke="#888780" stroke-width="0.8"></rect>
+    <text x="515" y="870" text-anchor="middle" font-size="10.5" font-weight="600" fill="#3a3a36">&gt; IDLE</text>
+  </g>
+
+  
+  <g>
+    <line x1="850" y1="900" x2="850" y2="918" stroke="#993c1d" stroke-width="1.4" marker-end="url(#ah-red)" marker-start="url(#ah-red)"></line>
+    <rect x="760" y="918" width="180" height="44" rx="11" ry="11" fill="#faece7" stroke="#993c1d" stroke-width="1.2"></rect>
+    <text x="850" y="938" text-anchor="middle" font-size="13" fill="#712b13">RealSense D405</text>
+    <text x="850" y="954" text-anchor="middle" font-size="10" fill="#993c1d">USB · 1280×720 · RGB + depth</text>
+
+    <line x1="1230" y1="900" x2="1230" y2="918" stroke="#993c1d" stroke-width="1.4" marker-end="url(#ah-red)" marker-start="url(#ah-red)"></line>
+    <rect x="1140" y="918" width="180" height="44" rx="11" ry="11" fill="#faece7" stroke="#993c1d" stroke-width="1.2"></rect>
+    <text x="1230" y="938" text-anchor="middle" font-size="13" fill="#712b13">UR10e robot arm</text>
+    <text x="1230" y="954" text-anchor="middle" font-size="10" fill="#993c1d">ethernet · RTDE force / pose fb</text>
+
+    <line x1="1620" y1="900" x2="1620" y2="918" stroke="#993c1d" stroke-width="1.4" marker-end="url(#ah-red)" marker-start="url(#ah-red)"></line>
+    <rect x="1530" y="918" width="180" height="44" rx="11" ry="11" fill="#faece7" stroke="#993c1d" stroke-width="1.2"></rect>
+    <text x="1620" y="938" text-anchor="middle" font-size="13" fill="#712b13">Arduino Nano</text>
+    <text x="1620" y="954" text-anchor="middle" font-size="10" fill="#993c1d">serial / USB · FSM · GPIO</text>
+
+  
+  <g transform="translate(540, 1000)">
+    <g transform="translate(0, 0)">
+      <line x1="0" y1="0" x2="44" y2="0" stroke="#1a1a1a" stroke-width="1.6" marker-end="url(#ah-black)"></line>
+      <text x="54" y="4" font-size="10.5" fill="#2a2a28">service / action call</text>
+    </g>
+    <g transform="translate(190, 0)">
+      <line x1="0" y1="0" x2="44" y2="0" stroke="#7d7670" stroke-width="1.2" stroke-dasharray="5 4" marker-end="url(#ah-grey)"></line>
+      <text x="54" y="4" font-size="10.5" fill="#2a2a28">response / feedback</text>
+    </g>
+    <g transform="translate(390, 0)">
+      <line x1="0" y1="0" x2="44" y2="0" stroke="#993c1d" stroke-width="1.2" marker-end="url(#ah-red)" marker-start="url(#ah-red)"></line>
+      <text x="54" y="4" font-size="10.5" fill="#2a2a28">hardware I/O</text>
+    </g>
+    <g transform="translate(540, 0)">
+      <rect x="0" y="-8" width="44" height="16" rx="8" ry="8" fill="#f1efe8" stroke="#888780" stroke-width="0.8"></rect>
+      <text x="54" y="4" font-size="10.5" fill="#2a2a28">task_manager state</text>
+    </g>
+    <g transform="translate(730, 0)">
+      <rect x="0" y="-10" width="44" height="20" rx="6" ry="6" fill="#faece7" stroke="#993c1d" stroke-width="1"></rect>
+      <text x="54" y="4" font-size="10.5" fill="#2a2a28">hardware device</text>
+    </g>
+  </g>
+</g></svg>

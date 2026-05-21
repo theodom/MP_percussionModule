@@ -11,7 +11,7 @@ n = len(sys.argv)
 if n >= 2:
     port = sys.argv[1]
 else:
-    port = '/dev/ttyACM0'
+    port = '/dev/ttyACM2'
 
 print("Port: {}".format(port))
 
