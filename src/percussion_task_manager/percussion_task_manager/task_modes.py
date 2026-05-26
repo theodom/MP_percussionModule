@@ -102,10 +102,10 @@ def _fixing_sequence(marker_pose: List) -> List[dict]:
 def _fixing_return() -> List[dict]:
     """3-step return sequence for FIXING mode."""
     return [
-        {
-            'motion_type':    'RELATIVE_MOVE',
-            'relative_pose': [-0.10, 0.05, -0.10, 0.0, 0.0, 0.0],
-        },
+        # {
+            # 'motion_type':    'RELATIVE_MOVE',
+            # 'relative_pose': [-0.10, 0.05, -0.10, 0.0, 0.0, 0.0],
+        # },
         #_fixing_home(),
         {
             'motion_type':  'JOINT_MOVE',
@@ -137,7 +137,7 @@ def _loosening_home() -> List[dict]:
         },
         {
             'motion_type':     'JOINT_MOVE',
-            'goal_Q': [1.4644263982772827, -0.7090473932078858, -1.802927017211914, -0.6575923723033448, -0.3903558889972132, 0.079482],
+            'goal_Q': [1.3644263982772827, -0.7090473932078858, -1.802927017211914, -0.6575923723033448, -0.3903558889972132, 0.079482],
         }
     ]
 

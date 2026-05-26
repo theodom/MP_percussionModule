@@ -43,6 +43,7 @@ from rclpy.action import ActionServer, CancelResponse, GoalResponse
 from rclpy.action.server import ServerGoalHandle
 from rclpy.callback_groups import ReentrantCallbackGroup
 from std_msgs.msg import String
+from geometry_msgs.msg import WrenchStamped
 
 from percussion_interfaces.action import ExecuteMotion
 from percussion_interfaces.msg import Pose6D
@@ -110,6 +111,10 @@ class MotionNode(Node):
 
         # --- State publisher ---
         self._state_pub = self.create_publisher(String, 'state', 10)
+
+        # --- TCP force publisher (50 Hz observability stream) ---
+        self._tcp_force_pub = self.create_publisher(WrenchStamped, 'tcp_force', 10)
+        self._tcp_force_timer = self.create_timer(1.0 / 50.0, self._publish_tcp_force)
 
         # --- Action server (register before blocking RTDE connect) ---
         self._rtde_ready = False
@@ -393,6 +398,24 @@ class MotionNode(Node):
         msg = String()
         msg.data = state
         self._state_pub.publish(msg)
+
+    def _publish_tcp_force(self) -> None:
+        if not self._rtde_ready or self._rtde_r is None:
+            return
+        try:
+            force = motions._current_tcp_force(self._rtde_r)
+        except Exception:
+            return
+        msg = WrenchStamped()
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.frame_id = 'base_link'
+        msg.wrench.force.x  = force[0]
+        msg.wrench.force.y  = force[1]
+        msg.wrench.force.z  = force[2]
+        msg.wrench.torque.x = force[3]
+        msg.wrench.torque.y = force[4]
+        msg.wrench.torque.z = force[5]
+        self._tcp_force_pub.publish(msg)
 
 
 # ---------------------------------------------------------------------------

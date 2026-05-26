@@ -49,6 +49,10 @@ def _current_tcp(rtde_r: RTDEReceive) -> List[float]:
     return list(rtde_r.getActualTCPPose())
 
 
+def _current_tcp_force(rtde_r: RTDEReceive) -> List[float]:
+    return list(rtde_r.getActualTCPForce())
+
+
 def apply_offset(
     rtde_c: RTDEControl,
     current_tcp: List[float],
@@ -259,7 +263,7 @@ def move_until_force(
     pose_rel = [i * 0.01 for i in pose_rel_big]
     try:
         while True:
-            tcp_force = list(rtde_r.getActualTCPForce())
+            tcp_force = _current_tcp_force(rtde_r)
             force_in_dir = float(np.dot(tcp_force[:3], d))
 
             if abs(force_in_dir) >= force_threshold:
