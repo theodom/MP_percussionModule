@@ -2,6 +2,10 @@ from typing import List
 from percussion_interfaces.msg import Pose6D
 
 
+# Afstanden
+
+
+
 def _make_pose6d(x=0.0, y=0.0, z=0.0, rx=0.0, ry=0.0, rz=0.0) -> Pose6D:
     p = Pose6D()
     p.x, p.y, p.z = x, y, z
@@ -60,11 +64,11 @@ def _fixing_sequence(marker_pose: List) -> List[dict]:
         },
         {
             'motion_type':    'RELATIVE_MOVE',
-            'relative_pose': [0.0320, 0.0, 0.11, 0.0, 0.0, 0.0],
+            'relative_pose': [0.0333, 0.0, 0.13, 0.0, 0.0, 0.0],
         },
         {
             'motion_type':    'MOVE_TO_CONTACT', # Touch bar facing
-            'direction': [0.0, -0.00707, -0.00707, 0.0, 0.0, 0.0],
+            'direction': [0.0, -0.00404, -0.00404, 0.0, 0.0, 0.0],
         },
         {
             'motion_type':    'RELATIVE_MOVE',
@@ -84,12 +88,12 @@ def _fixing_sequence(marker_pose: List) -> List[dict]:
         },
         {
             'motion_type':    'RELATIVE_MOVE',
-            'relative_pose': [0.0, -0.00, 0.015, 0.0, 0.0, 0.0],
+            'relative_pose': [0.0, -0.00, 0.010, 0.0, 0.0, 0.0],
         },
         {
             'motion_type': 'MOVE_TO_FORCE',
-            'direction': [0.0, -0.05, 0.0, 0.0, 0.0, 0.0],
-            'force_threshold': 15.0,
+            'direction': [0.0, -0.04, 0.0, 0.0, 0.0, 0.0],
+            'force_threshold': 12.0,
         },
         # {
             # 'motion_type':    'RELATIVE_MOVE',
@@ -167,7 +171,7 @@ def _loosening_sequence(marker_pose: Pose6D) -> List[dict]:
         },
         {
             'motion_type':    'RELATIVE_MOVE', # Move in position for 2nd contact 
-            'relative_pose': [-0.120, 0.0,  0.0, 0.0, 0.0, 0.0],
+            'relative_pose': [-0.125, 0.0,  0.0, 0.0, 0.0, 0.0],
         },
         {
             'motion_type': 'MOVE_TO_CONTACT', # Touh bottom up
@@ -179,19 +183,19 @@ def _loosening_sequence(marker_pose: Pose6D) -> List[dict]:
         },
         {
             'motion_type': 'RELATIVE_MOVE', # Move closer to pole
-            'relative_pose': [-0.026, 0.0, 0.200, 0.0, 0.0, 0.0],
+            'relative_pose': [-0.035, 0.0, 0.150, 0.0, 0.0, 0.0],
         },
         {
             'motion_type': 'MOVE_TO_CONTACT', # Touch pole facing
             'direction': [0.0, -0.00707, -0.00707, 0.0, 0.0, 0.0],
         },
         {
-            'motion_type': 'RELATIVE_MOVE',
-            'relative_pose': [0.0, -0.030, -0.0105, 0.0, 0.0, 0.0],
+            'motion_type': 'RELATIVE_MOVE', # Move closer to wedgelock
+            'relative_pose': [0.0, -0.030, -0.0115, 0.0, 0.0, 0.0],
         },
         {
-            'motion_type': 'MOVE_TO_FORCE',
-            'direction': [0.0, -0.05, 0.0, 0.0, 0.0, 0.0],
+            'motion_type': 'MOVE_TO_FORCE', # pre tension
+            'direction': [0.0, -0.1, 0.0, 0.0, 0.0, 0.0],
             'force_threshold': 15.0,
         },
     ]

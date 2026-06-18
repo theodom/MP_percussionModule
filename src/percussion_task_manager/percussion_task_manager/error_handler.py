@@ -257,6 +257,8 @@ class ErrorHandler:
         self._node._sequence = []
         self._node._on_sequence_done = None
         self._node._pause_handler = None
+        from .task_manager_node import TaskState
+        self._node.publish_state(TaskState.IDLE)
         return True
 
     def _return_to_idle(self) -> bool:

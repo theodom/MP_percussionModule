@@ -1,0 +1,349 @@
+theo@theo-mbp:~$ ros2 launch percussion_task_manager task_system.launch.py arduino_port:=/dev/ttyACM1
+[INFO] [launch]: All log files can be found below /home/theo/.ros/log/2026-06-04-14-55-12-278083-theo-mbp-62092
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [task_manager_node-1]: process started with pid [62095]
+[INFO] [perception_node-2]: process started with pid [62096]
+[INFO] [motion_node-3]: process started with pid [62097]
+[INFO] [arduino_bridge_node-4]: process started with pid [62098]
+[INFO] [static_transform_publisher-5]: process started with pid [62099]
+[INFO] [static_transform_publisher-6]: process started with pid [62100]
+[static_transform_publisher-6] [WARN] [1780577712.400948067] []: Old-style arguments are deprecated; see --help for new-style arguments
+[static_transform_publisher-5] [WARN] [1780577712.401133614] []: Old-style arguments are deprecated; see --help for new-style arguments
+[static_transform_publisher-5] [INFO] [1780577712.425686890] [percussion.tool0_to_camera_broadcaster]: Spinning until stopped - publishing transform
+[static_transform_publisher-5] translation: ('0.000000', '-0.127750', '0.044510')
+[static_transform_publisher-5] rotation: ('0.000000', '0.000000', '1.000000', '0.000796')
+[static_transform_publisher-5] from 'tool0' to 'camera_frame'
+[static_transform_publisher-6] [INFO] [1780577712.425999992] [percussion.world_to_base_link_broadcaster]: Spinning until stopped - publishing transform
+[static_transform_publisher-6] translation: ('0.000000', '0.000000', '0.000000')
+[static_transform_publisher-6] rotation: ('0.382683', '0.000000', '0.000000', '0.923880')
+[static_transform_publisher-6] from 'world' to 'base_link'
+[arduino_bridge_node-4] [INFO] [1780577713.060139134] [percussion.arduino_bridge.node]: ArduinoCommand action server started
+[task_manager_node-1] [INFO] [1780577713.120879148] [percussion.task_manager.node]: State -> IDLE
+[perception_node-2] [INFO] [1780577713.120945735] [percussion.perception.node]: Capture service node ready.
+[task_manager_node-1] [INFO] [1780577713.121388465] [percussion.task_manager.node]: Task manager node started.
+[motion_node-3] [INFO] [1780577713.239961945] [percussion.motion.node]: Connecting to robot at 169.254.0.22 …
+[motion_node-3] [INFO] [1780577713.917035172] [percussion.motion.node]: RTDE connection established.
+[motion_node-3] [INFO] [1780577713.917732647] [percussion.motion.node]: Percussion motion node ready.
+[task_manager_node-1] [INFO] [1780577804.798581648] [percussion.task_manager.node]: State -> TASK_REQUESTED
+[task_manager_node-1] [INFO] [1780577804.799164707] [percussion.task_manager.node]: MODE: FIXING
+[task_manager_node-1] [INFO] [1780577804.800583995] [percussion.task_manager.node]: Step: JOINT_MOVE (1 steps remaining)
+[motion_node-3] [INFO] [1780577804.802839449] [percussion.motion.node]: Accepting goal: JOINT_MOVE
+[motion_node-3] [INFO] [1780577804.808448483] [percussion.motion.node]: Executing motion: JOINT_MOVE
+[motion_node-3] [INFO] [1780577804.810418646] [percussion.motion.node]:   [JOINT_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780577804.817472674] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780577804.818265655] [percussion.task_manager.node]: State -> AT_HOME
+[task_manager_node-1] [INFO] [1780577804.819565190] [percussion.task_manager.node]: State -> CAPTURING
+[perception_node-2] [INFO] [1780577804.820229634] [percussion.perception.node]: Received capture request: timeout=0
+[perception_node-2] [INFO] [1780577807.441442137] [percussion.perception.node]: marker: [-0.05597766  0.06030296  0.63601408  2.15295477  2.06000269  0.61647891]
+[perception_node-2] [INFO] [1780577807.442526507] [percussion.perception.node]: marker: [ 0.47399799  0.03064288  1.13031359 -2.91137425  0.13752033 -0.54220909]
+[task_manager_node-1] [INFO] [1780577807.534937536] [percussion.task_manager.node]: Detected marker:  id=3 : x=0.0560, y=0.0674, z=0.5915
+[task_manager_node-1] [INFO] [1780577807.535505051] [percussion.task_manager.node]: Detected marker:  id=2 : x=-0.4740, y=0.0971, z=1.0858
+[task_manager_node-1] [INFO] [1780577807.536095994] [percussion.task_manager.node]: Selected marker: id=3 : x=0.0560, y=0.0674, z=0.5915
+[task_manager_node-1] [INFO] [1780577807.536713162] [percussion.task_manager.node]: State -> POSE_ACQUIRED
+[task_manager_node-1] [INFO] [1780577807.537776249] [percussion.task_manager.node]: Step: MOVE_TO_MARKER (16 steps remaining)
+[motion_node-3] [INFO] [1780577807.539185887] [percussion.motion.node]: Accepting goal: MOVE_TO_MARKER
+[motion_node-3] [INFO] [1780577807.541020748] [percussion.motion.node]: Executing motion: MOVE_TO_MARKER
+[motion_node-3] [INFO] [1780577807.549110886] [percussion.motion.node]:   [MOVE_TO_MARKER] phase: MOVING_TO_MARKER
+[motion_node-3] [INFO] [1780577810.511146927] [percussion.motion.node]:   [MOVE_TO_MARKER] phase: MARKER_REACHED
+[task_manager_node-1] [INFO] [1780577810.517738716] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780577810.519627240] [percussion.task_manager.node]: Step: MOVE_TO_CONTACT (15 steps remaining)
+[motion_node-3] [INFO] [1780577810.523437588] [percussion.motion.node]: Accepting goal: MOVE_TO_CONTACT
+[motion_node-3] [INFO] [1780577810.527157725] [percussion.motion.node]: Executing motion: MOVE_TO_CONTACT
+[motion_node-3] [INFO] [1780577810.529485151] [percussion.motion.node]: Moving to contact in direction: [0.02, 0.0, 0.0, 0.0, 0.0, 0.0]
+[motion_node-3] [INFO] [1780577810.531670937] [percussion.motion.node]:   [MOVE_TO_CONTACT] phase: SEARCHING_CONTACT
+[motion_node-3] [INFO] [1780577813.711122721] [percussion.motion.node]:   [MOVE_TO_CONTACT] phase: CONTACT_MADE
+[task_manager_node-1] [INFO] [1780577813.717799649] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780577813.719888755] [percussion.task_manager.node]: Sequence paused (13 steps remaining)
+[arduino_bridge_node-4] [INFO] [1780577814.025482809] [percussion.arduino_bridge.node]: Arduino: IND_VALUES - DONE - 1;1
+[task_manager_node-1] [INFO] [1780577814.030338421] [percussion.task_manager.node]: state is 1
+[task_manager_node-1] [INFO] [1780577814.031808678] [percussion.task_manager.node]: Step: RELATIVE_MOVE (13 steps remaining)
+[motion_node-3] [INFO] [1780577814.035050828] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780577814.038991375] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780577814.041061288] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780577815.454238047] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780577815.456216947] [percussion.task_manager.node]: Step: RELATIVE_MOVE (12 steps remaining)
+[motion_node-3] [INFO] [1780577815.460531991] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780577815.464541785] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780577815.466685105] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780577819.676112907] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780577819.676637244] [percussion.task_manager.node]: Step: RELATIVE_MOVE (11 steps remaining)
+[motion_node-3] [INFO] [1780577819.677947135] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780577819.679242357] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780577819.679793519] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780577820.905628504] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780577820.907335663] [percussion.task_manager.node]: Step: MOVE_TO_CONTACT (10 steps remaining)
+[motion_node-3] [INFO] [1780577820.910492595] [percussion.motion.node]: Accepting goal: MOVE_TO_CONTACT
+[motion_node-3] [INFO] [1780577820.913059258] [percussion.motion.node]: Executing motion: MOVE_TO_CONTACT
+[motion_node-3] [INFO] [1780577820.913710543] [percussion.motion.node]: Moving to contact in direction: [0.0, 0.00707, -0.00707, 0.0, 0.0, 0.0]
+[motion_node-3] [INFO] [1780577820.914203316] [percussion.motion.node]:   [MOVE_TO_CONTACT] phase: SEARCHING_CONTACT
+[motion_node-3] [INFO] [1780577821.577707244] [percussion.motion.node]:   [MOVE_TO_CONTACT] phase: CONTACT_MADE
+[task_manager_node-1] [INFO] [1780577821.583080900] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780577821.584667970] [percussion.task_manager.node]: Step: RELATIVE_MOVE (9 steps remaining)
+[motion_node-3] [INFO] [1780577821.587963646] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780577821.591177078] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780577821.593076058] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780577822.450118217] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780577822.451744793] [percussion.task_manager.node]: Step: RELATIVE_MOVE (8 steps remaining)
+[motion_node-3] [INFO] [1780577822.455399062] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780577822.459369881] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780577822.461664929] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780577823.948105698] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780577823.950151398] [percussion.task_manager.node]: Step: MOVE_TO_CONTACT (7 steps remaining)
+[motion_node-3] [INFO] [1780577823.953888364] [percussion.motion.node]: Accepting goal: MOVE_TO_CONTACT
+[motion_node-3] [INFO] [1780577823.957808941] [percussion.motion.node]: Executing motion: MOVE_TO_CONTACT
+[motion_node-3] [INFO] [1780577823.960444358] [percussion.motion.node]: Moving to contact in direction: [0.0, -0.00404, -0.00404, 0.0, 0.0, 0.0]
+[motion_node-3] [INFO] [1780577823.962474541] [percussion.motion.node]:   [MOVE_TO_CONTACT] phase: SEARCHING_CONTACT
+[motion_node-3] [INFO] [1780577827.687674058] [percussion.motion.node]:   [MOVE_TO_CONTACT] phase: CONTACT_MADE
+[task_manager_node-1] [INFO] [1780577827.694008599] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780577827.695702311] [percussion.task_manager.node]: Step: RELATIVE_MOVE (6 steps remaining)
+[motion_node-3] [INFO] [1780577827.699354977] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780577827.702792776] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780577827.704965710] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780577828.781985537] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780577828.783740937] [percussion.task_manager.node]: Step: RELATIVE_MOVE (5 steps remaining)
+[motion_node-3] [INFO] [1780577828.787798845] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780577828.792224046] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780577828.794706009] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780577829.479498449] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780577829.480082247] [percussion.task_manager.node]: Step: RELATIVE_MOVE (4 steps remaining)
+[motion_node-3] [INFO] [1780577829.481324916] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780577829.482542636] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780577829.483131640] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780577830.410414832] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780577830.411043490] [percussion.task_manager.node]: Step: RELATIVE_MOVE (3 steps remaining)
+[motion_node-3] [INFO] [1780577830.414221971] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780577830.419232816] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780577830.422331966] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780577830.746971177] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780577830.748699541] [percussion.task_manager.node]: Step: RELATIVE_MOVE (2 steps remaining)
+[motion_node-3] [INFO] [1780577830.752992475] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780577830.758591625] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780577830.762087511] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780577831.212007740] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780577831.213815916] [percussion.task_manager.node]: Step: MOVE_TO_FORCE (1 steps remaining)
+[motion_node-3] [INFO] [1780577831.218052732] [percussion.motion.node]: Accepting goal: MOVE_TO_FORCE
+[motion_node-3] [INFO] [1780577831.224485358] [percussion.motion.node]: Executing motion: MOVE_TO_FORCE
+[motion_node-3] [INFO] [1780577831.228088504] [percussion.motion.node]:   [MOVE_TO_FORCE] phase: MOVING
+[task_manager_node-1] [INFO] [1780577834.795611947] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780577834.796153302] [percussion.task_manager.node]: State -> AT_MARKER
+[task_manager_node-1] [INFO] [1780577834.796893312] [percussion.task_manager.node]: State -> HAMMERING
+[arduino_bridge_node-4] [INFO] [1780577835.705401703] [percussion.arduino_bridge.node]: Arduino: HAMMER_REQ - IN_PROGRESS - 0
+[arduino_bridge_node-4] [INFO] [1780577836.208848568] [percussion.arduino_bridge.node]: Arduino: HAMMER_REQ - IN_PROGRESS - 1
+[arduino_bridge_node-4] [INFO] [1780577836.813592925] [percussion.arduino_bridge.node]: Arduino: HAMMER_REQ - IN_PROGRESS - 2
+[arduino_bridge_node-4] [INFO] [1780577837.417869395] [percussion.arduino_bridge.node]: Arduino: HAMMER_REQ - IN_PROGRESS - 3
+[arduino_bridge_node-4] [INFO] [1780577838.019684329] [percussion.arduino_bridge.node]: Arduino: HAMMER_REQ - IN_PROGRESS - 4
+[arduino_bridge_node-4] [INFO] [1780577838.623730030] [percussion.arduino_bridge.node]: Arduino: HAMMER_REQ - IN_PROGRESS - 5
+[arduino_bridge_node-4] [INFO] [1780577839.228328231] [percussion.arduino_bridge.node]: Arduino: HAMMER_REQ - IN_PROGRESS - 6
+[arduino_bridge_node-4] [INFO] [1780577839.830462535] [percussion.arduino_bridge.node]: Arduino: HAMMER_REQ - IN_PROGRESS - 7
+[arduino_bridge_node-4] [INFO] [1780577839.831520024] [percussion.arduino_bridge.node]: Arduino: HAMMER_REQ - DONE - Hammer action completed
+[task_manager_node-1] [INFO] [1780577839.834779412] [percussion.task_manager.node]: State -> DONE
+[task_manager_node-1] [INFO] [1780577839.835512001] [percussion.task_manager.node]: State -> RETURNING
+[task_manager_node-1] [INFO] [1780577839.836249772] [percussion.task_manager.node]: Step: JOINT_MOVE (1 steps remaining)
+[motion_node-3] [INFO] [1780577839.837682938] [percussion.motion.node]: Accepting goal: JOINT_MOVE
+[motion_node-3] [INFO] [1780577839.838660063] [percussion.motion.node]: Executing motion: JOINT_MOVE
+[motion_node-3] [INFO] [1780577839.839345360] [percussion.motion.node]:   [JOINT_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780577842.651193691] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780577842.652799615] [percussion.task_manager.node]: State -> IDLE
+[task_manager_node-1] [INFO] [1780577980.972468953] [percussion.task_manager.node]: State -> TASK_REQUESTED
+[task_manager_node-1] [INFO] [1780577980.973766580] [percussion.task_manager.node]: MODE: LOOSENING
+[task_manager_node-1] [INFO] [1780577980.976497606] [percussion.task_manager.node]: Step: JOINT_MOVE (2 steps remaining)
+[motion_node-3] [INFO] [1780577980.980506958] [percussion.motion.node]: Accepting goal: JOINT_MOVE
+[motion_node-3] [INFO] [1780577980.985330653] [percussion.motion.node]: Executing motion: JOINT_MOVE
+[motion_node-3] [INFO] [1780577980.989971346] [percussion.motion.node]:   [JOINT_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780577987.833818123] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780577987.836741428] [percussion.task_manager.node]: Step: JOINT_MOVE (1 steps remaining)
+[motion_node-3] [INFO] [1780577987.841163533] [percussion.motion.node]: Accepting goal: JOINT_MOVE
+[motion_node-3] [INFO] [1780577987.846868766] [percussion.motion.node]: Executing motion: JOINT_MOVE
+[motion_node-3] [INFO] [1780577987.850354263] [percussion.motion.node]:   [JOINT_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780577992.173344846] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780577992.175860731] [percussion.task_manager.node]: State -> AT_HOME
+[task_manager_node-1] [INFO] [1780577992.180721609] [percussion.task_manager.node]: State -> CAPTURING
+[perception_node-2] [INFO] [1780577992.181112721] [percussion.perception.node]: Received capture request: timeout=0
+[perception_node-2] [INFO] [1780578008.734089651] [percussion.perception.node]: marker: [ 0.08915356  0.14528864  0.63580628 -1.08547009 -2.2842272   0.35751874]
+[task_manager_node-1] [INFO] [1780578008.792403356] [percussion.task_manager.node]: Detected marker:  id=0 : x=-0.0892, y=-0.0175, z=0.5913
+[task_manager_node-1] [INFO] [1780578008.793115962] [percussion.task_manager.node]: Selected marker: id=0 : x=-0.0892, y=-0.0175, z=0.5913
+[task_manager_node-1] [INFO] [1780578008.793608032] [percussion.task_manager.node]: State -> POSE_ACQUIRED
+[task_manager_node-1] [INFO] [1780578008.794670676] [percussion.task_manager.node]: Step: MOVE_TO_MARKER (11 steps remaining)
+[motion_node-3] [INFO] [1780578008.796231118] [percussion.motion.node]: Accepting goal: MOVE_TO_MARKER
+[motion_node-3] [INFO] [1780578008.797737907] [percussion.motion.node]: Executing motion: MOVE_TO_MARKER
+[motion_node-3] [INFO] [1780578008.805212174] [percussion.motion.node]:   [MOVE_TO_MARKER] phase: MOVING_TO_MARKER
+[motion_node-3] [INFO] [1780578011.873356189] [percussion.motion.node]:   [MOVE_TO_MARKER] phase: MARKER_REACHED
+[task_manager_node-1] [INFO] [1780578011.877079783] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578011.878199440] [percussion.task_manager.node]: Step: MOVE_TO_CONTACT (10 steps remaining)
+[motion_node-3] [INFO] [1780578011.879561422] [percussion.motion.node]: Accepting goal: MOVE_TO_CONTACT
+[motion_node-3] [INFO] [1780578011.882063837] [percussion.motion.node]: Executing motion: MOVE_TO_CONTACT
+[motion_node-3] [INFO] [1780578011.884291600] [percussion.motion.node]: Moving to contact in direction: [0.02, 0.0, 0.0, 0.0, 0.0, 0.0]
+[motion_node-3] [INFO] [1780578011.886635135] [percussion.motion.node]:   [MOVE_TO_CONTACT] phase: SEARCHING_CONTACT
+[motion_node-3] [INFO] [1780578013.153753964] [percussion.motion.node]:   [MOVE_TO_CONTACT] phase: CONTACT_MADE
+[task_manager_node-1] [INFO] [1780578013.156752294] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578013.157354481] [percussion.task_manager.node]: Step: RELATIVE_MOVE (9 steps remaining)
+[motion_node-3] [INFO] [1780578013.158971091] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578013.163708584] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578013.166749014] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780578015.264339617] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578015.265206598] [percussion.task_manager.node]: Step: RELATIVE_MOVE (8 steps remaining)
+[motion_node-3] [INFO] [1780578015.266551532] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578015.268123897] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578015.270240958] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780578018.681988075] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578018.684275484] [percussion.task_manager.node]: Step: RELATIVE_MOVE (7 steps remaining)
+[motion_node-3] [INFO] [1780578018.688571487] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578018.692292216] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578018.694330873] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780578020.355774439] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578020.358349474] [percussion.task_manager.node]: Step: MOVE_TO_CONTACT (6 steps remaining)
+[motion_node-3] [INFO] [1780578020.362869377] [percussion.motion.node]: Accepting goal: MOVE_TO_CONTACT
+[motion_node-3] [INFO] [1780578020.366878565] [percussion.motion.node]: Executing motion: MOVE_TO_CONTACT
+[motion_node-3] [INFO] [1780578020.369386668] [percussion.motion.node]: Moving to contact in direction: [0.0, -0.02, 0.02, 0.0, 0.0, 0.0]
+[motion_node-3] [INFO] [1780578020.371374894] [percussion.motion.node]:   [MOVE_TO_CONTACT] phase: SEARCHING_CONTACT
+[motion_node-3] [INFO] [1780578023.022949329] [percussion.motion.node]:   [MOVE_TO_CONTACT] phase: CONTACT_MADE
+[task_manager_node-1] [INFO] [1780578023.026570439] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578023.027787460] [percussion.task_manager.node]: Step: RELATIVE_MOVE (5 steps remaining)
+[motion_node-3] [INFO] [1780578023.029107187] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578023.030016034] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578023.030512955] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780578024.889667466] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578024.890762592] [percussion.task_manager.node]: Step: RELATIVE_MOVE (4 steps remaining)
+[motion_node-3] [INFO] [1780578024.894325311] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578024.897820293] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578024.899680204] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780578026.158424737] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578026.160360995] [percussion.task_manager.node]: Step: MOVE_TO_CONTACT (3 steps remaining)
+[motion_node-3] [INFO] [1780578026.163686123] [percussion.motion.node]: Accepting goal: MOVE_TO_CONTACT
+[motion_node-3] [INFO] [1780578026.167134443] [percussion.motion.node]: Executing motion: MOVE_TO_CONTACT
+[motion_node-3] [INFO] [1780578026.169292070] [percussion.motion.node]: Moving to contact in direction: [0.0, -0.00707, -0.00707, 0.0, 0.0, 0.0]
+[motion_node-3] [INFO] [1780578026.171390278] [percussion.motion.node]:   [MOVE_TO_CONTACT] phase: SEARCHING_CONTACT
+[motion_node-3] [INFO] [1780578032.084693031] [percussion.motion.node]:   [MOVE_TO_CONTACT] phase: CONTACT_MADE
+[task_manager_node-1] [INFO] [1780578032.091389342] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578032.093004459] [percussion.task_manager.node]: Step: RELATIVE_MOVE (2 steps remaining)
+[motion_node-3] [INFO] [1780578032.096258811] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578032.099370587] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578032.101015139] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780578032.920893181] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578032.923193395] [percussion.task_manager.node]: Step: MOVE_TO_FORCE (1 steps remaining)
+[motion_node-3] [INFO] [1780578032.926957689] [percussion.motion.node]: Accepting goal: MOVE_TO_FORCE
+[motion_node-3] [INFO] [1780578032.931239764] [percussion.motion.node]: Executing motion: MOVE_TO_FORCE
+[motion_node-3] [INFO] [1780578032.933654464] [percussion.motion.node]:   [MOVE_TO_FORCE] phase: MOVING
+[task_manager_node-1] [INFO] [1780578038.189565517] [percussion.task_manager.node]: State -> ERROR
+[task_manager_node-1] [ERROR] [1780578038.191740330] [percussion.task_manager.node]: MOTION STEP FAILED: Force timeout.
+[task_manager_node-1] [ERROR] [1780578038.196113368] [percussion.task_manager.node]: [ErrorHandler] message='MOTION STEP FAILED: Force timeout.' category=MOTION_TIMEOUT action=MOVE_HOME_AND_RETRY attempt=1/2 context={'previous_state': 'POSE_ACQUIRED', 'mode': 'LOOSENING'}
+[task_manager_node-1] [WARN] [1780578038.198181261] [percussion.task_manager.node]: [ErrorHandler] MOVE_HOME_AND_RETRY — running LOOSENING return sequence, then re-capturing.
+[task_manager_node-1] [INFO] [1780578038.199976984] [percussion.task_manager.node]: Step: RELATIVE_MOVE (2 steps remaining)
+[motion_node-3] [INFO] [1780578038.204508749] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578038.209781510] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578038.213104858] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780578039.722763324] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578039.725729161] [percussion.task_manager.node]: Step: JOINT_MOVE (1 steps remaining)
+[motion_node-3] [INFO] [1780578039.729627270] [percussion.motion.node]: Accepting goal: JOINT_MOVE
+[motion_node-3] [INFO] [1780578039.734391381] [percussion.motion.node]: Executing motion: JOINT_MOVE
+[motion_node-3] [INFO] [1780578039.737113782] [percussion.motion.node]:   [JOINT_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780578044.162601760] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578044.164324286] [percussion.task_manager.node]: State -> TASK_REQUESTED
+[task_manager_node-1] [INFO] [1780578044.166846866] [percussion.task_manager.node]: Step: JOINT_MOVE (2 steps remaining)
+[motion_node-3] [INFO] [1780578044.170554592] [percussion.motion.node]: Accepting goal: JOINT_MOVE
+[motion_node-3] [INFO] [1780578044.175257823] [percussion.motion.node]: Executing motion: JOINT_MOVE
+[motion_node-3] [INFO] [1780578044.177994801] [percussion.motion.node]:   [JOINT_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780578044.191411653] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578044.193187075] [percussion.task_manager.node]: Step: JOINT_MOVE (1 steps remaining)
+[motion_node-3] [INFO] [1780578044.196683878] [percussion.motion.node]: Accepting goal: JOINT_MOVE
+[motion_node-3] [INFO] [1780578044.200169029] [percussion.motion.node]: Executing motion: JOINT_MOVE
+[motion_node-3] [INFO] [1780578044.202838355] [percussion.motion.node]:   [JOINT_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780578048.525294000] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578048.526871474] [percussion.task_manager.node]: State -> AT_HOME
+[task_manager_node-1] [INFO] [1780578048.529971180] [percussion.task_manager.node]: State -> CAPTURING
+[perception_node-2] [INFO] [1780578048.530536590] [percussion.perception.node]: Received capture request: timeout=0
+[task_manager_node-1] [INFO] [1780578063.667599649] [percussion.task_manager.node]: State -> ERROR
+[task_manager_node-1] [WARN] [1780578063.668643582] [percussion.task_manager.node]: CAPTURE RESULT == FAILED: Failed connecting camera: No device connected
+[task_manager_node-1] [ERROR] [1780578063.670469852] [percussion.task_manager.node]: [ErrorHandler] message='CAPTURE RESULT == FAILED: Failed connecting camera: No device connected' category=CAMERA_FAULT action=RECONNECT_AND_RETRY attempt=1/2 context={'previous_state': 'CAPTURING', 'mode': 'LOOSENING'}
+[task_manager_node-1] [INFO] [1780578063.672005770] [percussion.task_manager.node]: [ErrorHandler] Waiting 10s before retry …
+[task_manager_node-1] [WARN] [1780578073.674699732] [percussion.task_manager.node]: [ErrorHandler] RETRY_CAPTURE — re-running capture service.
+[task_manager_node-1] [INFO] [1780578073.677277990] [percussion.task_manager.node]: State -> CAPTURING
+[perception_node-2] [INFO] [1780578073.677840188] [percussion.perception.node]: Received capture request: timeout=0
+[perception_node-2] [INFO] [1780578086.182754379] [percussion.perception.node]: marker: [ 0.08977687  0.14801137  0.64546614 -1.11760049 -2.30254749  0.3268197 ]
+[task_manager_node-1] [INFO] [1780578086.254967051] [percussion.task_manager.node]: Detected marker:  id=0 : x=-0.0898, y=-0.0203, z=0.6010
+[task_manager_node-1] [INFO] [1780578086.257785653] [percussion.task_manager.node]: Selected marker: id=0 : x=-0.0898, y=-0.0203, z=0.6010
+[task_manager_node-1] [INFO] [1780578086.260295354] [percussion.task_manager.node]: State -> POSE_ACQUIRED
+[task_manager_node-1] [INFO] [1780578086.264222706] [percussion.task_manager.node]: Step: MOVE_TO_MARKER (11 steps remaining)
+[motion_node-3] [INFO] [1780578086.268431665] [percussion.motion.node]: Accepting goal: MOVE_TO_MARKER
+[motion_node-3] [INFO] [1780578086.272959837] [percussion.motion.node]: Executing motion: MOVE_TO_MARKER
+[motion_node-3] [INFO] [1780578086.279738870] [percussion.motion.node]:   [MOVE_TO_MARKER] phase: MOVING_TO_MARKER
+[motion_node-3] [INFO] [1780578089.376557557] [percussion.motion.node]:   [MOVE_TO_MARKER] phase: MARKER_REACHED
+[task_manager_node-1] [INFO] [1780578089.383730277] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578089.386195462] [percussion.task_manager.node]: Step: MOVE_TO_CONTACT (10 steps remaining)
+[motion_node-3] [INFO] [1780578089.390373740] [percussion.motion.node]: Accepting goal: MOVE_TO_CONTACT
+[motion_node-3] [INFO] [1780578089.393949627] [percussion.motion.node]: Executing motion: MOVE_TO_CONTACT
+[motion_node-3] [INFO] [1780578089.396671029] [percussion.motion.node]: Moving to contact in direction: [0.02, 0.0, 0.0, 0.0, 0.0, 0.0]
+[motion_node-3] [INFO] [1780578089.398677291] [percussion.motion.node]:   [MOVE_TO_CONTACT] phase: SEARCHING_CONTACT
+[motion_node-3] [INFO] [1780578090.122122732] [percussion.motion.node]:   [MOVE_TO_CONTACT] phase: CONTACT_MADE
+[task_manager_node-1] [INFO] [1780578090.128742814] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578090.131083759] [percussion.task_manager.node]: Step: RELATIVE_MOVE (9 steps remaining)
+[motion_node-3] [INFO] [1780578090.134899482] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578090.138135174] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578090.139806398] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780578092.249878094] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578092.252392173] [percussion.task_manager.node]: Step: RELATIVE_MOVE (8 steps remaining)
+[motion_node-3] [INFO] [1780578092.256902249] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578092.261117829] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578092.263454278] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780578095.683207156] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578095.685394238] [percussion.task_manager.node]: Step: RELATIVE_MOVE (7 steps remaining)
+[motion_node-3] [INFO] [1780578095.689125108] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578095.693179359] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578095.695648593] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780578097.360867964] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578097.362548819] [percussion.task_manager.node]: Step: MOVE_TO_CONTACT (6 steps remaining)
+[motion_node-3] [INFO] [1780578097.366172596] [percussion.motion.node]: Accepting goal: MOVE_TO_CONTACT
+[motion_node-3] [INFO] [1780578097.369816493] [percussion.motion.node]: Executing motion: MOVE_TO_CONTACT
+[motion_node-3] [INFO] [1780578097.372245155] [percussion.motion.node]: Moving to contact in direction: [0.0, -0.02, 0.02, 0.0, 0.0, 0.0]
+[motion_node-3] [INFO] [1780578097.374087627] [percussion.motion.node]:   [MOVE_TO_CONTACT] phase: SEARCHING_CONTACT
+[motion_node-3] [INFO] [1780578099.818214144] [percussion.motion.node]:   [MOVE_TO_CONTACT] phase: CONTACT_MADE
+[task_manager_node-1] [INFO] [1780578099.827152610] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578099.829507805] [percussion.task_manager.node]: Step: RELATIVE_MOVE (5 steps remaining)
+[motion_node-3] [INFO] [1780578099.835956881] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578099.841184948] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578099.844184870] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780578101.684165132] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578101.685812763] [percussion.task_manager.node]: Step: RELATIVE_MOVE (4 steps remaining)
+[motion_node-3] [INFO] [1780578101.689457127] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578101.693502448] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578101.695587794] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780578102.953566846] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578102.955991753] [percussion.task_manager.node]: Step: MOVE_TO_CONTACT (3 steps remaining)
+[motion_node-3] [INFO] [1780578102.959764882] [percussion.motion.node]: Accepting goal: MOVE_TO_CONTACT
+[motion_node-3] [INFO] [1780578102.963754460] [percussion.motion.node]: Executing motion: MOVE_TO_CONTACT
+[motion_node-3] [INFO] [1780578102.966395731] [percussion.motion.node]: Moving to contact in direction: [0.0, -0.00707, -0.00707, 0.0, 0.0, 0.0]
+[motion_node-3] [INFO] [1780578102.968339158] [percussion.motion.node]:   [MOVE_TO_CONTACT] phase: SEARCHING_CONTACT
+[motion_node-3] [INFO] [1780578108.738369578] [percussion.motion.node]:   [MOVE_TO_CONTACT] phase: CONTACT_MADE
+[task_manager_node-1] [INFO] [1780578108.747581738] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578108.749875238] [percussion.task_manager.node]: Step: RELATIVE_MOVE (2 steps remaining)
+[motion_node-3] [INFO] [1780578108.753958976] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578108.757992270] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578108.760383943] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780578109.581322442] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578109.583035766] [percussion.task_manager.node]: Step: MOVE_TO_FORCE (1 steps remaining)
+[motion_node-3] [INFO] [1780578109.586789589] [percussion.motion.node]: Accepting goal: MOVE_TO_FORCE
+[motion_node-3] [INFO] [1780578109.591066858] [percussion.motion.node]: Executing motion: MOVE_TO_FORCE
+[motion_node-3] [INFO] [1780578109.593580774] [percussion.motion.node]:   [MOVE_TO_FORCE] phase: MOVING
+[task_manager_node-1] [INFO] [1780578113.619863069] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578113.620370669] [percussion.task_manager.node]: State -> AT_MARKER
+[task_manager_node-1] [INFO] [1780578113.621132142] [percussion.task_manager.node]: State -> HAMMERING
+[arduino_bridge_node-4] [INFO] [1780578114.430263092] [percussion.arduino_bridge.node]: Arduino: HAMMER_REQ - IN_PROGRESS - 0
+[arduino_bridge_node-4] [INFO] [1780578115.034471177] [percussion.arduino_bridge.node]: Arduino: HAMMER_REQ - IN_PROGRESS - 1
+[arduino_bridge_node-4] [INFO] [1780578115.638606443] [percussion.arduino_bridge.node]: Arduino: HAMMER_REQ - IN_PROGRESS - 2
+[arduino_bridge_node-4] [INFO] [1780578116.242864114] [percussion.arduino_bridge.node]: Arduino: HAMMER_REQ - IN_PROGRESS - 3
+[arduino_bridge_node-4] [INFO] [1780578116.846952920] [percussion.arduino_bridge.node]: Arduino: HAMMER_REQ - IN_PROGRESS - 4
+[arduino_bridge_node-4] [INFO] [1780578116.850091192] [percussion.arduino_bridge.node]: Arduino: HAMMER_REQ - DONE - Hammer action completed
+[task_manager_node-1] [INFO] [1780578116.858376273] [percussion.task_manager.node]: State -> DONE
+[task_manager_node-1] [INFO] [1780578116.861888586] [percussion.task_manager.node]: State -> RETURNING
+[task_manager_node-1] [INFO] [1780578116.865532114] [percussion.task_manager.node]: Step: RELATIVE_MOVE (2 steps remaining)
+[motion_node-3] [INFO] [1780578116.869360566] [percussion.motion.node]: Accepting goal: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578116.873795064] [percussion.motion.node]: Executing motion: RELATIVE_MOVE
+[motion_node-3] [INFO] [1780578116.876715871] [percussion.motion.node]:   [RELATIVE_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780578118.383461069] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578118.385697559] [percussion.task_manager.node]: Step: JOINT_MOVE (1 steps remaining)
+[motion_node-3] [INFO] [1780578118.389537704] [percussion.motion.node]: Accepting goal: JOINT_MOVE
+[motion_node-3] [INFO] [1780578118.393603166] [percussion.motion.node]: Executing motion: JOINT_MOVE
+[motion_node-3] [INFO] [1780578118.396217145] [percussion.motion.node]:   [JOINT_MOVE] phase: MOVING
+[task_manager_node-1] [INFO] [1780578122.827092862] [percussion.task_manager.node]: Step complete.
+[task_manager_node-1] [INFO] [1780578122.829690038] [percussion.task_manager.node]: State -> IDLE
+

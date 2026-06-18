@@ -58,7 +58,7 @@ int hammerCycle(int cycleLength) {
         //Opspannen
         EMState = true;
         analogWrite(EM, 255);
-        delay(300);
+        delay(500);
         messageToParse feedback;
         feedback.type = "HAMMER_REQ";
         feedback.state = "IN_PROGRESS";

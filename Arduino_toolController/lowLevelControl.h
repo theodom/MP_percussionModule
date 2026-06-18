@@ -4,10 +4,8 @@
 #include <Arduino.h>
 
 enum IN_MSG_TYPE {
-  RETRACT_EM,  // Enable electromagnet to retract hammer
   HAMMER_REQ,  // Request hammer action
   IND_VALUES,  // ROS requests the inductive sensor values
-  FAN_TEST,
 };
 
 enum OUT_MSG_TYPE {
